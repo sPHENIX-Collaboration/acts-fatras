@@ -6,12 +6,14 @@
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERGAUSSIANMIXTURE_H 1
 
 // FATRAS 
-#include "FATRAS/IRandomNumbers.h"
-#include "FATRAS/IMultipleScatteringSampler.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IMultipleScatteringSampler.h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
 #include "ACTS/Material/MaterialProperties.h"
+// STD
+#include <memory>
 
 namespace Fatras {
  
@@ -29,10 +31,15 @@ namespace Fatras {
       /** Config 
       Configuration object for this MultipleScatteringSampler*/
       struct Config {
-          std::shared_ptr<Acts::IRandomNumbers>  randomNumbers;   /** Random Generator service  */
-          bool                                     log_include;   /** boolean switch to include log term  */
-          bool                            optGaussianMixtureG4;   /** modifies the Fruehwirth/Regler model to fit with G4 */
-
+          std::shared_ptr<IRandomNumbers>  randomNumbers;   /** Random Generator service  */
+          bool                               log_include;   /** boolean switch to include log term  */
+          bool                      optGaussianMixtureG4;   /** modifies the Fruehwirth/Regler model to fit with G4 */
+          
+          Config() :
+            randomNumbers(nullptr),
+            log_include(true),
+            optGaussianMixtureG4(true)
+          {}
       };
       
       /** AlgTool like constructor */
@@ -98,9 +105,10 @@ namespace Fatras {
       /** projection factor to scale the projected angle out of the plane */
       static double         s_projectionFactor;      
 
-     
     };
- 
+    
+    /** Return the configuration object */    
+    inline MultipleScatteringSamplerGaussianMixture::Config MultipleScatteringSamplerGaussianMixture::getConfiguration() const { return m_config; }
  
 } // end of namespace
 

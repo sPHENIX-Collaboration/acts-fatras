@@ -6,13 +6,15 @@
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H 1
  
 // ACTS include
-#include "ACTS/Extrapolation/MaterialInteraction.h"
-#include "ACTS/Utiltities/Definitions.h"
-#include "ACTS/Utiltities/ParticleHypothesis.h"
+#include "ACTS/Utilities/Definitions.h"
 #include "ACTS/Material/MaterialProperties.h"
+#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/Extrapolation/detail/MaterialInteraction.h"
 // FATRAS include
-#include "FATRAS/IRandomNumbers.h"
-#include "FATRAS/IMultipleScatteringSampler.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IMultipleScatteringSampler.h"
+// STD
+#include <memory>
 
 namespace Fatras {
   
@@ -40,7 +42,7 @@ namespace Fatras {
         std::shared_ptr<IRandomNumbers>    randomNumbers;   //!< the Random number service
         bool                                 log_include; //!< include the log term
 
-        Config()
+        Config() :
           randomNumbers(nullptr),
           log_include(true)
         {}
@@ -71,7 +73,7 @@ namespace Fatras {
 
     private:
       /** the formulas for multiple scattering evaluation */
-      static Acts::MaterialInteraction  s_interactionFormulae;     
+      Acts::MaterialInteraction         m_interactionFormulae;     
       
       /** struct of Particle Masses */
       static Acts::ParticleMasses       s_particleMasses;

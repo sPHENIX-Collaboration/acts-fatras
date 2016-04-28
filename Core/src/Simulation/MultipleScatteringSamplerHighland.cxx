@@ -3,11 +3,9 @@
 ///////////////////////////////////////////////////////////////////
 
 // FATRAS includes
-#include "FATRAS/MultipleScatteringSamplerHighland.h"
+#include "FATRAS/Simulation/MultipleScatteringSamplerHighland.h"
 // ACTS includes
 #include "ACTS/EventData/ParticleProperties.h"
-
-DECLARE_TOOL_FACTORY(Fatras::MultipleScatteringSamplerHighland)
 
 // static particle masses
 Acts::ParticleMasses Fatras::MultipleScatteringSamplerHighland::s_particleMasses;
@@ -33,7 +31,7 @@ Fatras::MultipleScatteringSamplerHighland::~MultipleScatteringSamplerHighland()
 {}
 
 
-void Fatras::destructor::seConfiguration(const Fatras::destructor::Config& msConfig ) 
+void Fatras::MultipleScatteringSamplerHighland::setConfiguration(const Fatras::MultipleScatteringSamplerHighland::Config& msConfig ) 
 {
     //!< @TODO update to configuration checking
    m_config = msConfig;   
@@ -89,6 +87,6 @@ double Fatras::MultipleScatteringSamplerHighland::simTheta(const Acts::MaterialP
     }
   }
  
-  return s_projectionFactor*sqrt(sigma2)*randomNumbers->draw(Fatras::GaussZiggurat);
+  return s_projectionFactor*sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
  
 }

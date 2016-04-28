@@ -6,7 +6,7 @@
 #define ACTS_FATRASINTERFACES_IMULTIPLESCATTERINGSAMPLER_H 1
 
 // ACTS include
-#include "ACTS/Utilties/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleHypothesis.h"
 
 namespace Acts {
     class MaterialProperties;

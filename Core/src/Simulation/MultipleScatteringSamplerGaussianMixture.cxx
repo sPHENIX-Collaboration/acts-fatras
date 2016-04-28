@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // class header include
-#include "FATRAS/MultipleScatteringSamplerGaussianMixture.h"
+#include "FATRAS/Simulation/MultipleScatteringSamplerGaussianMixture.h"
 // ACTS include
 #include "ACTS/EventData/ParticleProperties.h"
 
@@ -42,7 +42,7 @@ Fatras::MultipleScatteringSamplerGaussianMixture::MultipleScatteringSamplerGauss
 Fatras::MultipleScatteringSamplerGaussianMixture::~MultipleScatteringSamplerGaussianMixture()
 {}
 
-void Fatras::MultipleScatteringSamplerGaussianMixture::seConfiguration(const Fatras::MultipleScatteringSamplerGaussianMixture::Config& msConfig ) 
+void Fatras::MultipleScatteringSamplerGaussianMixture::setConfiguration(const Fatras::MultipleScatteringSamplerGaussianMixture::Config& msConfig ) 
 {
     //!< @TODO update to configuration checking
    m_config = msConfig;   
@@ -108,7 +108,7 @@ double Fatras::MultipleScatteringSamplerGaussianMixture::simTheta(const Acts::Ma
   // G4 optimised / native double Gaussian model
   if (!m_config.optGaussianMixtureG4) sigma2 = 225.*dprime/(p*p);
   // throw the random number core/tail
-  if ( m_config.randomNumbers->draw(Acts::Flat) < epsilon) {
+  if ( m_config.randomNumbers->draw(Fatras::Flat) < epsilon) {
     sigma2 *= (1.-(1.-epsilon)*sigma1square)/epsilon;
   }
  

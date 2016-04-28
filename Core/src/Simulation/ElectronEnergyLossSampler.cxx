@@ -3,10 +3,11 @@
 ///////////////////////////////////////////////////////////////////
 
 // class header include
-#include "FATRAS/ElectronEnergyLossSampler.h"
-#include "FATRAS/EnergyLoss.h"
+#include "FATRAS/Simulation/ElectronEnergyLossSampler.h"
+#include "FATRAS/Simulation/EnergyLoss.h"
 // EventData module
 #include "ACTS/EventData/ParticleProperties.h"
+#include "ACTS/Utilities/MsgMacros.h"
 
 // static partilce masses
 Acts::ParticleMasses Fatras::ElectronEnergyLossSampler::s_particleMasses;
@@ -28,14 +29,14 @@ void Fatras::ElectronEnergyLossSampler::setConfiguration(const Fatras::ElectronE
    m_config = elConfig;   
 }
 
-Fatras:EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::MaterialProperties& materialProperties,
+Fatras::EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::MaterialProperties& materialProperties,
 							                                     double pInitial,
 							                                     double pathCorrection,
 							                                     Acts::PropDirection direction,
 							                                     Acts::ParticleHypothesis) const
 {  
     // start with a default energy loss
-  Acts::EnergyLoss sampledEloss;
+  EnergyLoss sampledEloss;
   
   double pathLength = pathCorrection*materialProperties.thicknessInX0();
   
@@ -82,7 +83,7 @@ Fatras:EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::Mat
   // "A Gaussian-mixture approximation of the Bethe–Heitler model of electron energy loss by bremsstrahlung"
   // R. Frühwirth
   
-  double u = m_config.randomNumbers->draw(Acts::Gamma, pathLength/log(2.), 1.);
+  double u = m_config.randomNumbers->draw(Fatras::Gamma, pathLength/log(2.), 1.);
   double z = exp( -1. * u );
   double deltaE(0.);
   if ( direction == Acts::alongMomentum )
@@ -99,7 +100,7 @@ Fatras:EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::Mat
   // The sign depends on the given propagation direction 
   sampledEloss.update(-1.*direction*simulatedDeltaE, energyLossSigma, 0., 0., false);
   
-  MSG_VERBOSE( "[electron Eloss] created random deltaP as : " << sampledEloss->deltaE() );
+  MSG_VERBOSE( "[electron Eloss] created random deltaP as : " << sampledEloss.deltaE() );
   
   return sampledEloss;
      

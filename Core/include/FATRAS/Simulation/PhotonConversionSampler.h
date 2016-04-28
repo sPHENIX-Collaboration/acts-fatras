@@ -8,14 +8,15 @@
 // ACTS includes
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
-#include "FATRAS/PdgToParticleHypothesis..h"
 
 // FATRAS includes
-#include "FATRAS/IRandomNumbers.h"
-#include "FATRAS/IPhotonConversionSampler.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IPhotonConversionSampler.h"
+#include "FATRAS/Simulation/detail/PdgToParticleHypothesis.h"
 
 // STL
 #include <algorithm>
+#include <memory>
 
 
 namespace Acts {
@@ -43,22 +44,22 @@ namespace Fatras {
         Configuration struct for this PhotonConversionSampler */
       struct Config {
           /** Random Generator service  */
-          std::shared_ptr<IRandomNumbers>  randomNumbers;  
+          std::shared_ptr<IRandomNumbers>    randomNumbers;  
           int                                processCode;
           double                             minChildEnergy;
           double                             childEnergyScaleFactor;
           
           Config() :
             randomNumbers(nullptr), 
-            processCode(1)
-            minChildEnergy(50.)
+            processCode(1),
+            minChildEnergy(50.),
             childEnergyScaleFactor(1.)
           {}
           
       };  
     
       /** Constructor */
-      PhotonConversionSampler(const std::string&,const std::string&,const IInterface*);
+      PhotonConversionSampler(const Config& pcConfig);
           
       /** Destructor */    
       ~PhotonConversionSampler();
@@ -71,23 +72,24 @@ namespace Fatras {
 	  					                                const Acts::Vector3D& momentum) const final;
     
       /** Set configuration method */
-      void setConfiguration(const Config& eeConfig);
+      void setConfiguration(const Config& pcConfig);
     
       /** Get configuration method */
       Config getConfiguration() const;                                 
     
     protected:
       
+        /** Method to calculate the fracton of energy for the child */
       double childEnergyFraction(double gammaMom) const;
       
-      Vector3D childDirection(const Acts::Vector3D& gammaMom, double childE) const;
+      Acts::Vector3D childDirection(const Acts::Vector3D& gammaMom, double childE) const;
       
-      std::vector<Acts::InteractionVertex> getChilds( double time, 
-                                                      const Acts::Vector3D& vertex,
-                                                      const Acts::Vector3D& photonMomentum,
-                                                      double childEnergy, 
-                                                      const Acts::Vector3D& childDirection,
-                                                      Acts::ParticleHypothesis childType) const;
+      std::vector<Acts::InteractionVertex> getChildren( double time, 
+                                                        const Acts::Vector3D& vertex,
+                                                        const Acts::Vector3D& photonMomentum,
+                                                        double childEnergy, 
+                                                        const Acts::Vector3D& childDirection,
+                                                        Acts::ParticleHypothesis childType) const;
       /** helper functions for the Phi1/phi2 */
       double phi1(double delta) const;
       
@@ -98,7 +100,7 @@ namespace Fatras {
       Config                                     m_config;
       
       /** statics for interaction */
-      static ParticleMasses                      s_particleMasses;
+      static Acts::ParticleMasses                s_particleMasses;
       static PdgToParticleHypothesis             s_pdgToHypo;
       static double                              s_alpha;
       static double                              s_oneOverThree;

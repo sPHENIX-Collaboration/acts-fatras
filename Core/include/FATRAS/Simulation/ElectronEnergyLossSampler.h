@@ -5,22 +5,18 @@
 #ifndef ACTS_FATRSTOOLS_ELECTRONENERGYLOSSSAMPLER_H
 #define ACTS_FATRSTOOLS_ELECTRONENERGYLOSSSAMPLER_H 1
 
-// Gaudi
-#include "GaudiKernel/ServiceHandle.h"
-// Core module
-#include "CoreInterfaces/AlgToolBase.h"
-#include "CoreInterfaces/IRandomNumbers.h"
-#include "Algebra/AlgebraDefinitions.h"
-// EventData module
-#include "EventDataUtils/ParticleHypothesis.h"
-// Extrapolation module
-#include "ExtrapolationUtils/MaterialInteraction.h"
-// Geometry module
-#include "Material/MaterialProperties.h"
-// Fatras module
-#include "FatrasInterfaces/IEnergyLossSampler.h"
+// FATRAS include
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IEnergyLossSampler.h"
+// ACTS include
+#include "ACTS/Utilities/Definitions.h"
+#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/Extrapolation/detail/MaterialInteraction.h"
+#include "ACTS/Material/MaterialProperties.h"
+// STD
+#include <memory>
 
-namespace Acts{
+namespace Fatras {
   
   class EnergyLoss;
 
@@ -34,54 +30,62 @@ namespace Acts{
    * @author Noemi Calace       <Noemi.Calace@cern.ch>
    */
 
-  class ElectronEnergyLossSampler : public AlgToolBase, virtual public IEnergyLossSampler {
+  class ElectronEnergyLossSampler : virtual public IEnergyLossSampler {
    
   public:
-   
+    /** @struct Config 
+      Configuration config for the EnergyLossSampler
+      */
+    struct Config {
+        /** Random Generator service  */
+        std::shared_ptr<IRandomNumbers>      randomNumbers;  
+        /** the one free parameter to scale */
+        double                               scaleFactor;
+        
+        Config() :
+          randomNumbers(nullptr),
+          scaleFactor(1.)
+        {}
+        
+    };      
+ 
     /** Constructor with AlgTool parameters */
-    ElectronEnergyLossSampler( const std::string&, const std::string&, const IInterface* );
+    ElectronEnergyLossSampler(const Config& elConfig);
    
     /** Destructor */
     ~ElectronEnergyLossSampler();
     
-    /** AlgTool interface methods */
-    static const InterfaceID& interfaceID() { return IID_IEnergyLossSampler; }
-       
-    /** AlgTool initialise method */
-    StatusCode initialize() final;
-   
-    /** AlgTool finalise method */
-    StatusCode finalize() final;
-    
     /** IEnergyLossSampler public method to compute dEdX */
     double dEdX( const Acts::MaterialProperties& materialProperties,
-		 double momentum,
-		 Acts::ParticleHypothesis particleHypothesis = Acts::pion ) const final;
+		         double momentum,
+		         Acts::ParticleHypothesis particleHypothesis = Acts::pion ) const final;
    
     /** IEnergyLossSampler public method to compute the mean and variance of the energy loss */
-    Acts::EnergyLoss* energyLoss( const Acts::MaterialProperties& mat,
-				  double momentum,
-				  double pathcorrection,
-				  Acts::PropDirection dir=Acts::alongMomentum,
-				  Acts::ParticleHypothesis particle=Acts::pion) const final;
+    Fatras::EnergyLoss energyLoss( const Acts::MaterialProperties& mat,
+				                   double momentum,
+				                   double pathcorrection,
+				                   Acts::PropDirection dir=Acts::alongMomentum,
+				                   Acts::ParticleHypothesis particle=Acts::pion) const final;
    
-       
+    /** Set configuration method */
+    void setConfiguration(const Config& eeConfig);
+ 
+    /** Get configuration method */
+    Config getConfiguration() const;                                 
+ 
+  protected:
+    Config            m_config; //!< configuration object            
+ 
   private:
       
     /** Private method to compute the Bethe-Heitler PDF */
     std::vector<double> betheHeitlerPDF( double pathLength ) const;
 
-    /** Random Generator service  */
-    ServiceHandle<Acts::IRandomNumbers>      randomNumbers;  
-    
-    /** the one free parameter to scale */
-    double                                     m_scaleFactor;
-    
     /** the formulas for energy loss evaluation */
-    MaterialInteraction                        m_interactionFormulae;     
+    Acts::MaterialInteraction                  m_interactionFormulae;     
     
     /** struct of Particle masses  */
-    static ParticleMasses                      s_particleMasses; 
+    static Acts::ParticleMasses                s_particleMasses; 
     
     /** KOverA factor in Bethe-Bloch equation [MeV*cm2/gram] */
     static double                              s_ka_BetheBloch;          
@@ -90,6 +94,8 @@ namespace Acts{
 inline double ElectronEnergyLossSampler::dEdX(const Acts::MaterialProperties&, double, Acts::ParticleHypothesis) const
 { return 0; }
 
+/** Return the configuration object */    
+inline ElectronEnergyLossSampler::Config ElectronEnergyLossSampler::getConfiguration() const { return m_config; }
 
 } 
 #endif //  ACTS_FATRSTOOLS_ELECTRONENERGYLOSSSAMPLER_H

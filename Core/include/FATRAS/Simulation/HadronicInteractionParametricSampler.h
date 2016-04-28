@@ -41,7 +41,7 @@ namespace Fatras {
         bool                                    cutChain;               //!< 
         
         Config() :
-          randomNumber(nullptr),
+          randomNumbers(nullptr),
           processCode(1),
           minimumHadOutEnergy(100),
           cutChain(true)
