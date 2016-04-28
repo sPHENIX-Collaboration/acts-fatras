@@ -4,8 +4,9 @@
 
 // FATRAS
 #include "FATRAS/Simulation/HadronicInteractionParametricSampler.h"
-// ACTS
-#include "ACTS/Utilities/ParticleProperties.h"
+// ACTS includes
+#include "ACTS/EventData/ParticleProperties.h"
+#include "ACTS/Utilities/MsgMacros.h"
 
 //static particle masses
 Acts::ParticleMasses Fatras::HadronicInteractionParametricSampler::s_particleMasses;
@@ -67,8 +68,8 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   }
   
   for (;;) {
-    randx = 30. * randomNumbers->draw(Fatras::Flat);
-    randy = 1.  * randomNumbers->draw(Fatras::Flat);
+    randx = 30. * m_config.randomNumbers->draw(Fatras::Flat);
+    randy = 1.  * m_config.randomNumbers->draw(Fatras::Flat);
     arg = exp(-0.5*( (randx-p1)/p2 + exp(-(randx-p1)/p2) ) );
     if (randy < arg && randx>3 && randx<multiplicity_max) break;
   }
@@ -142,7 +143,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   }
   
   for (int i=0; i<Npart; i++) {
-    chargedist  = randomNumbers->draw(Fatras::Flat);
+    chargedist  = m_config.randomNumbers->draw(Fatras::Flat);
     if (chargedist<pif) {
       charge[i]=0.;
       childType[i]=Acts::pi0;
@@ -210,10 +211,10 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
 
   // sample first particle energy fraction and random momentum direction
   double eps = 2./Npart;
-  double rnd  = randomNumbers->draw(Fatras::Flat);
+  double rnd  = m_config.randomNumbers->draw(Fatras::Flat);
   mom[0] = 0.5*pow(eps,rnd);          
-  th[0]  = acos( 2*randomNumbers->draw(Fatras::Flat)-1.);
-  ph[0]  = 2*M_PI*randomNumbers->draw(Fatras::Flat);
+  th[0]  = acos( 2*m_config.randomNumbers->draw(Fatras::Flat)-1.);
+  ph[0]  = 2*M_PI*m_config.randomNumbers->draw(Fatras::Flat);
   
   // toss particles around in a way which preserves the total momentum (0.,0.,0.) at this point
   //!>@TODO shoot first particle along the impact direction preferentially
@@ -224,18 +225,18 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   double theta = 0.; double phi = 0.; 
   for (int i=1; i<Npart-2; i++) {
     eps = 1./(Npart-i); 
-    mom[i] = ( eps + randomNumbers->draw(Fatras::Flat)*(1-eps))*(1-ptot); 
+    mom[i] = ( eps + m_config.randomNumbers->draw(Fatras::Flat)*(1-eps))*(1-ptot); 
     if (ptemp.mag()<1-ptot) {
       while ( fabs(ptemp.mag()-mom[i])>1-ptot-mom[i] ){
-    mom[i] =  ( eps + randomNumbers->draw(Fatras::Flat)*(1-eps))*(1-ptot);      
+    mom[i] =  ( eps + m_config.randomNumbers->draw(Fatras::Flat)*(1-eps))*(1-ptot);      
       }
     }
     // max p remaining
     double p_rem=1-ptot-mom[i];
     double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
-    double rnd  = randomNumbers->draw(Fatras::Flat);
+    double rnd  = m_config.randomNumbers->draw(Fatras::Flat);
     theta = acos( (cthmax+1.)*rnd-1.);          
-    phi = 2*M_PI*randomNumbers->draw(Fatras::Flat);
+    phi = 2*M_PI*m_config.randomNumbers->draw(Fatras::Flat);
     Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
     // create the rotation
     //!>@TODO Check if this is right
@@ -243,7 +244,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
     rotation = Acts::AngleAxis3D(ptemp.phi()  , Acts::Vector3D::UnitZ())* 
                Acts::AngleAxis3D(ptemp.theta(), Acts::Vector3D::UnitY());
     // create the transform
-    Acts::Transform3D transform(rotation, Vector3D(0., 0., 0.));
+    Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
     Acts::Vector3D dnew = transform*test;
     th[i]=dnew.theta();    
     ph[i]=dnew.phi();          
@@ -252,17 +253,17 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   }
   
   eps = 0.5; 
-  mom[Npart-2] = pow(eps,randomNumbers->draw(Fatras::Flat))*(1-ptot);
+  mom[Npart-2] = pow(eps,m_config.randomNumbers->draw(Fatras::Flat))*(1-ptot);
   mom[Npart-1] = 1-ptot-mom[Npart-2];
   
   if (ptemp.mag()<1-ptot) {
     while (mom[Npart-1]+mom[Npart-2]<ptemp.mag()) { 
-      mom[Npart-2] = pow(eps,randomNumbers->draw(Fatras::Flat))*(1-ptot);
+      mom[Npart-2] = pow(eps,m_config.randomNumbers->draw(Fatras::Flat))*(1-ptot);
       mom[Npart-1] = 1-ptot-mom[Npart-2];
     }
   }
   if (ptemp.mag()<fabs(mom[Npart-1]-mom[Npart-2]) ) {
-    double diff = ptemp.mag()*randomNumbers->draw(Fatras::Flat);
+    double diff = ptemp.mag()*m_config.randomNumbers->draw(Fatras::Flat);
     double sum = mom[Npart-1]-mom[Npart-2];
     mom[Npart-2]=0.5*(sum+diff);  
     mom[Npart-1]=0.5*(sum-diff);  
@@ -271,7 +272,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   if (fabs(cth)>1.) cth = (cth>0.) ? 1. : -1.;
   
   theta = acos(cth);
-  phi = 2*M_PI*randomNumbers->draw(Fatras::Flat);
+  phi = 2*M_PI*m_config.randomNumbers->draw(Fatras::Flat);
   Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
   // create the rotation
   //!>@TODO Check if this is right
@@ -279,7 +280,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   rotation = Acts::AngleAxis3D(ptemp.phi()  , Acts::Vector3D::UnitZ())* 
              Acts::AngleAxis3D(ptemp.theta(), Acts::Vector3D::UnitY());
   // create the transform
-  Acts::Transform3D transform(rotation, Vector3D(0., 0., 0.));
+  Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
   Acts::Vector3D dnew = transform*test;
   th[Npart-2]=dnew.theta();    
   ph[Npart-2]=dnew.phi();    
@@ -326,26 +327,26 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
 //   } 
 
   // Add children to the vector of children
-  std::vector<ParticleProperties> pOutgoing;
-  unsigned short                  numChildren = 0;
+  std::vector<Acts::ParticleProperties> pOutgoing;
+  unsigned short                        numChildren = 0;
   
   for (int i=0; i<Npart; i++) {
-    if (pdgid[i]<10000) {
-      /*!>@TODO Getting the momentum from the boost */
-      Acts::Vector3D childP = Acts::Vector3D(childBoost[i].x(),childBoost[i].y(),childBoost[i].z());
+      if (pdgid[i]<10000) {
+          /*!>@TODO Getting the momentum from the boost */
+          Acts::Vector3D childP = Acts::Vector3D(childBoost[i].x(),childBoost[i].y(),childBoost[i].z());
       
-      if (childP.mag()> m_config.minimumHadOutEnergy) {
-	// create the particle and increase the number of children
-	pOutgoing.push_back(Acts::ParticleProperties(childP, s_pdgToHypo.convert(childType[i], charge[i], false)));
-	numChildren++;
-      }     
-      // increase the number of generated particles
-      gen_part++;
-    }
+          if (childP.mag()> m_config.minimumHadOutEnergy) {
+              // create the particle and increase the number of children
+              pOutgoing.push_back(Acts::ParticleProperties(childP, s_pdgToHypo.convert(childType[i], charge[i], false)));
+              numChildren++;
+          }     
+          // increase the number of generated particles
+          gen_part++;
+      }
   } // particle loop
   
   if (pOutgoing.size()>0)
-    children.push_back(Acts::InteractionVertex(vertex, time, m_config.processCode, pOutgoing));
+      children.push_back(Acts::InteractionVertex(vertex, time, m_config.processCode, pOutgoing));
   
   MSG_VERBOSE( "[ had ] it was kinematically possible to create " << gen_part << " shower particles and " << numChildren << " particles have been collected ");
     

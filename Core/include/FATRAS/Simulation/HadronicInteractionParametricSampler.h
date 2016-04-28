@@ -8,7 +8,7 @@
 // FATRAS
 #include "FATRAS/Common/IRandomNumbers.h"
 #include "FATRAS/Simulation/IHadronicInteractionSampler.h"
-#include "FATRAS/Simulation/detail/PdgToParticleHypothesis..h"
+#include "FATRAS/Simulation/detail/PdgToParticleHypothesis.h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
@@ -37,10 +37,10 @@ namespace Fatras {
      Configuration of this Samples*/
     struct Config {  
         
-        ServiceHandle<Acts::IRandomNumbers>     randomNumbers;          //!< Random Generator service */
-        int                                     processCode;            //!< process code */
-        double                                  minimumHadOutEnergy;    //!< hadronic interaction setting */
-        bool                                    cutChain;               //!< 
+        std::shared_ptr<IRandomNumbers>   randomNumbers;          //!< Random Generator service */
+        int                               processCode;            //!< process code */
+        double                            minimumHadOutEnergy;    //!< hadronic interaction setting */
+        bool                              cutChain;               //!< 
         
         Config() :
           randomNumbers(nullptr),
@@ -64,7 +64,16 @@ namespace Fatras {
 							                                   const Acts::Vector3D& position, 
 							                                   const Acts::Vector3D& momentum,
 							                                   Acts::ParticleHypothesis particle=Acts::pion) const final;
- 
+    
+     /** Set configuration method */
+     void setConfiguration(const Config& eeConfig);
+   
+     /** Get configuration method */
+     Config getConfiguration() const;                                 
+   
+   protected:
+     Config            m_config; //!< configuration object                      
+         
    private:
      /** collect secondaries for layer material update */
      std::vector<Acts::InteractionVertex> getHadState( double time, double p,
@@ -74,7 +83,7 @@ namespace Fatras {
 						       
 
      /** struct of Particle Masses */
-     static ParticleMasses                   s_particleMasses;
+     static Acts::ParticleMasses             s_particleMasses;
      static PdgToParticleHypothesis          s_pdgToHypo;
            
    };

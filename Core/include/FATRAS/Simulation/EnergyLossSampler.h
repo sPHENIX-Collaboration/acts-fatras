@@ -67,7 +67,6 @@ namespace Fatras {
     
     protected:
       Config            m_config; //!< configuration object                      
-      
          
     private:
       /** apply dEdX according to Bethe-Bloch */
