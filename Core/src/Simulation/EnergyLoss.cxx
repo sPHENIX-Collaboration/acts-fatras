@@ -2,13 +2,16 @@
 // EnergyLoss.cxx, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-#include "FATRAS/EnergyLoss.h"
+// FATRAS includes
+#include "FATRAS/Simulation/EnergyLoss.h"
+// output
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <limits>
 
-Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
-                             double sMinusDeltaE, double sPlusDeltaE)  :
+Fatras::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
+                               double sMinusDeltaE, double sPlusDeltaE)  :
   m_deltaE(deltaE),
   m_sigmaDeltaE(sigmaDeltaE),
   m_sigmaMinusDeltaE(sMinusDeltaE>0.0?sMinusDeltaE:sigmaDeltaE),
@@ -20,10 +23,10 @@ Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
   m_length(-std::numeric_limits<double>::min())
 { }
 
-Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
-                             double sMinusDeltaE, double sPlusDeltaE, 
-                             double mean_ioni, double sig_ioni,
-                             double mean_rad, double sig_rad, double length)  :
+Fatras::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
+                               double sMinusDeltaE, double sPlusDeltaE, 
+                               double mean_ioni, double sig_ioni,
+                               double mean_rad, double sig_rad, double length)  :
   m_deltaE(deltaE),
   m_sigmaDeltaE(sigmaDeltaE),
   m_sigmaMinusDeltaE(sMinusDeltaE),
@@ -35,9 +38,9 @@ Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
   m_length(length)
 { }
 
-Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
-                            double mean_ioni, double sig_ioni,
-                double mean_rad, double sig_rad)  :
+Fatras::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
+                               double mean_ioni, double sig_ioni,
+                               double mean_rad, double sig_rad)  :
   m_deltaE(deltaE),
   m_sigmaDeltaE(sigmaDeltaE),
   m_sigmaMinusDeltaE(0.),
@@ -49,7 +52,7 @@ Acts::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
   m_length(-std::numeric_limits<double>::min())
 { }
 
-std::ostream& Acts::operator << ( std::ostream& sl, const Acts::EnergyLoss& eloss)
+std::ostream& Fatras::operator << ( std::ostream& sl, const Fatras::EnergyLoss& eloss)
 { 
   sl << "EnergyLoss :   ( delta(E), sigma(dE) ) = \t"
      << "("<< eloss.deltaE()<<", \t"<< eloss.sigmaDeltaE() << ")";

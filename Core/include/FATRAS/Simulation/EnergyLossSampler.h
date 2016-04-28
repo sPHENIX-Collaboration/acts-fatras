@@ -11,8 +11,8 @@
 #include "ACTS/Extrapolation/detail/MaterialInteraction.h"
 #include "ACTS/Material/MaterialProperties.h"
 // Fatras module
-#include "FATRAS/IEnergyLossSampler.h"
-#include "FATRAS/IRandomNumbers.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IEnergyLossSampler.h"
 // STD
 #include <memory>
 
@@ -42,7 +42,7 @@ namespace Fatras {
       };      
    
       /** Constructor with AlgTool parameters */
-      EnergyLossSampler(const Congif& elConfig);
+      EnergyLossSampler(const Config& elConfig);
       
       /** Destructor */
       ~EnergyLossSampler();
@@ -53,11 +53,11 @@ namespace Fatras {
 	  	           Acts::ParticleHypothesis particleHypothesis = Acts::pion ) const final;
       
       /** IEnergyLossSampler public method to compute the mean and variance of the energy loss */
-      Acts::EnergyLoss energyLoss( const Acts::MaterialProperties& mat,
-	  			                   double momentum,
-	  			                   double pathcorrection,
-	  			                   Acts::PropDirection dir=Acts::alongMomentum,
-	  			                   Acts::ParticleHypothesis particle=Acts::pion) const final;
+      EnergyLoss energyLoss( const Acts::MaterialProperties& mat,
+	  	                   double momentum,
+	  	                   double pathcorrection,
+	  	                   Acts::PropDirection dir=Acts::alongMomentum,
+	  	                   Acts::ParticleHypothesis particle=Acts::pion) const final;
     
       /** Set configuration method */
       void setConfiguration(const Config& eeConfig);

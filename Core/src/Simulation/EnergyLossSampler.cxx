@@ -6,25 +6,26 @@
 #include "ACTS/EventData/ParticleProperties.h"
 #include "ACTS/Utilities/MsgMacros.h"
 // FATRAS includes
-#include "FATRAS/EnergyLossSampler.h"
+#include "FATRAS/Simulation/EnergyLossSampler.h"
+#include "FATRAS/Simulation/EnergyLoss.h"
 
 // static partilce masses
 Acts::ParticleMasses Fatras::EnergyLossSampler::s_particleMasses;
 
 // statics doubles 
-double Acts::EnergyLossSampler::s_ka_BetheBloch = 30.7075;
+double Fatras::EnergyLossSampler::s_ka_BetheBloch = 30.7075;
 
 Fatras::EnergyLossSampler::EnergyLossSampler( const Fatras::EnergyLossSampler::Config& elConfig )
-: Fatras::IEnergyLossSampler(t,n,p),
+: Fatras::IEnergyLossSampler(),
   m_config()
 {
     setConfiguration(elConfig);
 }
 
-Acts::EnergyLossSampler::~EnergyLossSampler()
+Fatras::EnergyLossSampler::~EnergyLossSampler()
 {}
 
-void Fatras::EnergyLossSampler::seConfiguration(const Fatras::EnergyLossSampler::Config& elConfig ) 
+void Fatras::EnergyLossSampler::setConfiguration(const Fatras::EnergyLossSampler::Config& elConfig ) 
 {
     //!< @TODO update to configuration checking
    m_config = elConfig;   
@@ -49,7 +50,7 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialPr
   double kazL    = 0.;
   
   // Evaluate the energy loss and its sigma
-  double energyLoss = m_config.interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
+  double energyLoss = m_interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
   double simulatedDeltaE = fabs(energyLoss)+energyLossSigma*m_config.randomNumbers->draw(Fatras::Landau); 
  
   // giving the right sign to the energy loss
@@ -60,13 +61,13 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialPr
   double m     = s_particleMasses.mass[particleHypothesis];
   double E     = sqrt(momentum*momentum+m*m);
   
-  if (sampledEloss->deltaE()+E<m ) {    
+  if (sampledEloss.deltaE()+E<m ) {    
     // particle stopping - rest energy
-    float dRad_rest = m-E-sampledEloss->deltaE();
+    float dRad_rest = m-E-sampledEloss.deltaE();
     sampledEloss.update(0.,0.,dRad_rest,0.,false);   
   }
    
-  MSG_VERBOSE( "[eloss] created random deltaP as : " << sampledEloss->deltaE() );
+  MSG_VERBOSE( "[eloss] created random deltaP as : " << sampledEloss.deltaE() );
  
   return sampledEloss;
 
