@@ -6,7 +6,7 @@
 #define ACTS_FATRASINTERFACES_IENERGYLOSSSAMPLER_H 1
 
 // ACTS includes
-#include "ACTS/Utilities/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleHypothesis.h"
 #include "ACTS/Utilities/PropDirection.h"
 
 namespace Acts {

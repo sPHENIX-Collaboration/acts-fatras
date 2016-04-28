@@ -7,7 +7,7 @@
 
 // ACTS include
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/Utilities/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleHypothesis.h"
 #include "ACTS/Extrapolation/MaterialInteraction.h"
 #include "ACTS/Material/MaterialProperties.h"
 
@@ -37,7 +37,7 @@ namespace Fatras {
         */
       struct Config {
           /** Random Generator service  */
-          std::shared_ptr<IRandomNumbers>      m_rndGenSvc;  
+          std::shared_ptr<IRandomNumbers>      randomNumbers;  
       };      
    
       /** Constructor with AlgTool parameters */

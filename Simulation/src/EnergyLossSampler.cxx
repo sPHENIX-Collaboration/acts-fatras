@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // ACTS includes
-#include "ACTS/Utilities/ParticleProperties.h"
+#include "ACTS/EventData/ParticleProperties.h"
 #include "ACTS/Utilities/MsgMacros.h"
 // FATRAS includes
 #include "FATRAS/EnergyLossSampler.h"
@@ -24,19 +24,17 @@ Fatras::EnergyLossSampler::EnergyLossSampler( const Fatras::EnergyLossSampler::C
 Acts::EnergyLossSampler::~EnergyLossSampler()
 {}
 
-
-void Fatras::EnergyLossSampler::seConfiguration(const Fatras::EnergyLossSampler::Config& elConfig ) const 
+void Fatras::EnergyLossSampler::seConfiguration(const Fatras::EnergyLossSampler::Config& elConfig ) 
 {
     //!< @TODO update to configuration checking
    m_config = elConfig;   
 }
 
-
-Fatras::EnergyLoss  Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialProperties& materialProperties,
-						                                   double momentum,
-						                                   double pathCorrection,
-						                                   Acts::PropDirection direction,
-						                                   Acts::ParticleHypothesis particleHypothesis) const
+Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialProperties& materialProperties,
+					                                      double momentum,
+					                                      double pathCorrection,
+					                                      Acts::PropDirection direction,
+					                                      Acts::ParticleHypothesis particleHypothesis) const
 {
   Fatras::EnergyLoss sampledEloss(0., 0.);
   
@@ -51,8 +49,8 @@ Fatras::EnergyLoss  Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialP
   double kazL    = 0.;
   
   // Evaluate the energy loss and its sigma
-  double energyLoss = m_interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
-  double simulatedDeltaE = fabs(energyLoss)+energyLossSigma*m_rndGenSvc->draw(Acts::Landau); 
+  double energyLoss = m_config.interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
+  double simulatedDeltaE = fabs(energyLoss)+energyLossSigma*m_config.randomNumbers->draw(Fatras::Landau); 
  
   // giving the right sign to the energy loss
   // The sign depends on the given propagation direction 
@@ -131,6 +129,7 @@ double Fatras::EnergyLossSampler::dEdXBetheBloch(const Acts::MaterialProperties&
     double delta = 0.;
 
     /* ST replace with STEP-like coding  
+    @TODO check with Sharka 
     // high energy density effect --- will be ramped up linearly
     double eplasma = 28.816e-6 * sqrt(1000.*0.5);
     delta = 2.*log(eplasma/iPot) + log(eta2) - 0.5;
