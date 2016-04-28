@@ -8,12 +8,13 @@
 // ACTS include
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
-#include "ACTS/Extrapolation/MaterialInteraction.h"
+#include "ACTS/Extrapolation/detail/MaterialInteraction.h"
 #include "ACTS/Material/MaterialProperties.h"
-
 // Fatras module
 #include "FATRAS/IEnergyLossSampler.h"
 #include "FATRAS/IRandomNumbers.h"
+// STD
+#include <memory>
 
 namespace Fatras {
   

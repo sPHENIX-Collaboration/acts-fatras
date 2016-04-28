@@ -7,7 +7,7 @@
 
 // ACTS includes
 #include "ACTS/EventData/ParticleHypothesis.h"
-#include "ACTS/Utilities/PropDirection.h"
+#include "ACTS/Utilities/Definitions.h"
 
 namespace Acts {
     class MaterialProperties;

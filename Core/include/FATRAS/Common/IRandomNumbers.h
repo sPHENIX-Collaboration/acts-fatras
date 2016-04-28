@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////
-// IMagneticFieldSvc.h, ACTS project
+// IRandomNumbers.h, ACTS project
 ///////////////////////////////////////////////////////////////////
 
 #ifndef ACTS_CORE_IRANDOMNUMBERSVC_H
 #define ACTS_CORE_IRANDOMNUMBERSVC_H 1
 
-namespace Acts {
+namespace Fatras {
   
   /** @class IRandomNumberSvc
    * 
@@ -26,18 +26,18 @@ namespace Acts {
       Gamma         = 4
   };
   
-  class IRandomNumberSvc {
+  class IRandomNumbers {
     
   ///////////////////////////////////////////////////////////////////
   // Public methods:
   ///////////////////////////////////////////////////////////////////
   public:
     /** Virtual destructor */
-    virtual ~IRandomNumberSvc() {}
+    virtual ~IRandomNumbers() {}
       
     /** draw the random number 
      * with a specified distribution */
-    virtual double draw(Acts::Distribution, double k=1.0, double lambda=1.0) const = 0;
+    virtual double draw(Fatras::Distribution, double k=1.0, double lambda=1.0) const = 0;
       
   };
 }
