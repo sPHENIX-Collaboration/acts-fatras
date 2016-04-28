@@ -6,17 +6,23 @@
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERGENERALMIXTURE_H 1
  
 // FATRAS
-#include "FATRAS/IRandomNumbers.h"
-#include "FATRAS/IMultipleScatteringSampler.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IMultipleScatteringSampler.h"
 // ACTS
-#include "ACTS/UtilitiesDefinitions.h"
+#include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
 #include "ACTS/Material/MaterialProperties.h"
+// STD
+#include <memory>
 
 namespace Fatras {
   
    /** @class MultipleScatteringSamplerGeneralMixture
    *
+   *
+   * @TODO write documentation, move away from double* interface
+   *     
+   * @author Artem Basalaev     <Artem.Baralaev@cern.ch>     
    * @author Andreas Salzburger <Andreas.Salzburger@cern.ch>
    * @author Noemi Calace       <Noemi.Calace@cern.ch>
    * 
@@ -32,7 +38,7 @@ namespace Fatras {
         std::shared_ptr<IRandomNumbers>    randomNumbers;   //!< the Random number service
         bool                               log_include; //!< include the log term
       
-        Config()
+        Config() :
           randomNumbers(nullptr),
           log_include(true)
         {}
@@ -53,7 +59,7 @@ namespace Fatras {
                       Acts::ParticleHypothesis particle=Acts::pion) const final;
 
       /** Set configuration method */
-      void setConfiguration(const Config& eeConfig);
+      void setConfiguration(const Config& msConfig);
   
       /** Get configuration method */
       Config getConfiguration() const;                                 

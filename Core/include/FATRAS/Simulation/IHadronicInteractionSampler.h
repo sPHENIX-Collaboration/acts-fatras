@@ -35,7 +35,7 @@ namespace Fatras {
     virtual std::vector<Acts::InteractionVertex> doHadronicInteraction(double time, 
 								                                       const Acts::Vector3D& position, 
 								                                       const Acts::Vector3D& momentum, 
-								                                       Acts::ParticleHypothesis particle=Acts::pion) const = 0;
+								                                        Acts::ParticleHypothesis particle=Acts::pion) const = 0;
 
   };
 

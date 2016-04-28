@@ -249,7 +249,7 @@ std::vector<Acts::InteractionVertex> Fatras::MaterialInteractionEngine::interact
 
     double mass = m_particleMasses.mass[particle];   
     double fmin = mass/momentum.mag();     
-    double fr = 1.-pow(fmin,randomNumbers->draw(Acts::Flat));
+    double fr = 1.-pow(fmin,randomNumbers->draw(Fatras::Flat));
     
     std::vector<ParticleProperties> pOutgoing = { ParticleProperties(fr*momentum, 22),
                                                   ParticleProperties((1.-fr)*momentum, 22)};
@@ -300,7 +300,7 @@ void Fatras::MaterialInteractionEngine::multipleScatteringUpdate(const Acts::Tra
 
   } else {
     double thetaMs = simTheta;
-    double psi     = 2.*M_PI*randomNumbers->draw(Acts::Flat);
+    double psi     = 2.*M_PI*randomNumbers->draw(Fatras::Flat);
     // more complex but "more true"
     Acts::Vector3D newDirection(pars.momentum().unit());
     double x = -newDirection.y();
@@ -344,7 +344,7 @@ void Fatras::MaterialInteractionEngine::radiate( ActsVectorD<5> & parm ,
   
   while ( path < pathLim && p>m_minimumMomentum ) {
   
-    double rndx = randomNumbers->draw(Acts::Flat);
+    double rndx = randomNumbers->draw(Fatras::Flat);
   
     // sample visible fraction of the mother momentum taken according to 1/f 
   
@@ -360,7 +360,7 @@ void Fatras::MaterialInteractionEngine::radiate( ActsVectorD<5> & parm ,
   
     // resolve the case when there is not enough material left in the layer
     if ( path+dx > pathLim ) {
-      double rndp = randomNumbers->draw(Acts::Flat);
+      double rndp = randomNumbers->draw(Fatras::Flat);
       if (rndp > (pathLim-path)/dx){       
         (parm)[Acts::eQOP] = (parm)[Acts::eQOP]>0 ? 1/p : -1/p;
         mFr += (pathLim-path)/refX;
@@ -404,7 +404,7 @@ void Fatras::MaterialInteractionEngine::collectBremPhoton(Acts::ExCellCharged& e
   // (b)Following the Geant4 approximation from L. Urban -> encapsulate that later
   //      the azimutal angle
  
-  double psi    =  2.*M_PI*randomNumbers->draw(Acts::Flat);
+  double psi    =  2.*M_PI*randomNumbers->draw(Fatras::Flat);
  
   // the start of the equation
   double theta = 0.;
@@ -413,16 +413,16 @@ void Fatras::MaterialInteractionEngine::collectBremPhoton(Acts::ExCellCharged& e
   
   if (m_uniformHertzDipoleAngle) {
     // the simplest simulation
-    theta = m/E * randomNumbers->draw(Acts::Flat); 
+    theta = m/E * randomNumbers->draw(Fatras::Flat); 
   } else {
     // ----->
     theta = m/E;
     // follow
     double a = 0.625; // 5/8
  
-    double r1 = randomNumbers->draw(Acts::Flat);
-    double r2 = randomNumbers->draw(Acts::Flat);
-    double r3 = randomNumbers->draw(Acts::Flat);
+    double r1 = randomNumbers->draw(Fatras::Flat);
+    double r2 = randomNumbers->draw(Fatras::Flat);
+    double r3 = randomNumbers->draw(Fatras::Flat);
  
     double u =  -log(r2*r3)/a;
  

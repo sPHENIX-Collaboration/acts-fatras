@@ -6,12 +6,14 @@
 #define ACTS_FATRASTOOLS_HADRONICINTERACTIONPARAMETRICSAMPLER_H 1
 
 // FATRAS
-#include "FATRAS/IRandomNumbers.h"
-#include "FATRAS/IHadronicInteractionSampler.h"
-#include "FATRAS/PdgToParticleHypothesis..h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IHadronicInteractionSampler.h"
+#include "FATRAS/Simulation/detail/PdgToParticleHypothesis..h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/ParticleHypothesis.h"
+// STD
+#include <memory>
   
 namespace Fatras {
   

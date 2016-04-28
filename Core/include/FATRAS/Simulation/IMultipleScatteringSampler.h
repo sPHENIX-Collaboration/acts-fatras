@@ -13,7 +13,6 @@ namespace Acts {
 }
 
 namespace Fatras {
-  
  
   /** @class IMultipleScatteringSampler
    * 

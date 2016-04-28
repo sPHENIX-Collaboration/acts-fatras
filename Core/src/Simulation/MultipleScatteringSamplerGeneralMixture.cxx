@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // FATRAS include
-#include "FATRAS/MultipleScatteringSamplerGeneralMixture.h"
+#include "FATRAS/Simulation/MultipleScatteringSamplerGeneralMixture.h"
 // ACTS include
 #include "ACTS/EventData/ParticleProperties.h"
 
@@ -31,7 +31,7 @@ Fatras::MultipleScatteringSamplerGeneralMixture::~MultipleScatteringSamplerGener
 {}
 
 
-void Fatras::MultipleScatteringSamplerGeneralMixture::seConfiguration(const Fatras::MultipleScatteringSamplerGeneralMixture::Config& msConfig ) 
+void Fatras::MultipleScatteringSamplerGeneralMixture::setConfiguration(const Fatras::MultipleScatteringSamplerGeneralMixture::Config& msConfig ) 
 {
     //!< @TODO update to configuration checking
    m_config = msConfig;   
@@ -67,7 +67,7 @@ double Fatras::MultipleScatteringSamplerGeneralMixture::simTheta(const Acts::Mat
     //see Mixture models of multiple scattering: computation and simulation. - R.FrÃŒhwirth, M. Liendl. -
     //Computer Physics Communications 141 (2001) 230â246
     //----------------------------------------------------------------------------------------------//
-    double * scattering_params;
+    double * scattering_params; //!< @TODO seems to be a memory leak 
     // Decide which mixture is best
     if (dOverX0/(beta*beta)>0.6/pow(Z,0.6)){ //Gaussian
       // Gaussian mixture or pure Gaussian
@@ -157,8 +157,8 @@ double Fatras::MultipleScatteringSamplerGeneralMixture::simGaussmix(double* scat
   double var1 = scattering_params[1];
   double var2 = scattering_params[2];
   double epsi = scattering_params[3]; 
-  bool ind = m_config.randomNumbers->draw(Acts::Flat)>epsi;
-  double u=m_config.randomNumbers->draw(Acts::Flat);
+  bool ind = m_config.randomNumbers->draw(Fatras::Flat)>epsi;
+  double u=m_config.randomNumbers->draw(Fatras::Flat);
   if(ind)
   return sqrt(var1)*sqrt(-2*log(u))*sigma_tot;
   else
@@ -171,8 +171,8 @@ double Fatras::MultipleScatteringSamplerGeneralMixture::simSemigauss(double* sca
   double var1 = scattering_params[2];
   double epsi = scattering_params[3];
   double sigma_tot = scattering_params[4];
-  bool ind=m_config.randomNumbers->draw(Acts::Flat)>epsi;
-  double u=m_config.randomNumbers->draw(Acts::Flat);
+  bool ind=m_config.randomNumbers->draw(Fatras::Flat)>epsi;
+  double u=m_config.randomNumbers->draw(Fatras::Flat);
   if(ind)
   return sqrt(var1)*sqrt(-2*log(u))*sigma_tot;
   else
