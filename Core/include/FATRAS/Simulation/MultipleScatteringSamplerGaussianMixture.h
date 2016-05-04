@@ -10,7 +10,7 @@
 #include "FATRAS/Simulation/IMultipleScatteringSampler.h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Material/MaterialProperties.h"
 // STD
 #include <memory>
@@ -18,7 +18,8 @@
 namespace Fatras {
  
   /** @class MultipleScatteringSamplerGaussianMixture
-   * 
+   *
+   * ========= Gaussian mixture model Fruehwirth, Regler Nucl. Inst. Methods A 456(2001) =========     
    * @author Andreas Salzburger <Andreas.Salzburger@cern.ch>
    * @author Noemi Calace       <Noemi.Calace@cern.ch>
    * @author Artem Basalaev     <Artem.Baralaev@cern.ch>     
@@ -34,11 +35,29 @@ namespace Fatras {
           std::shared_ptr<IRandomNumbers>  randomNumbers;   /** Random Generator service  */
           bool                               log_include;   /** boolean switch to include log term  */
           bool                      optGaussianMixtureG4;   /** modifies the Fruehwirth/Regler model to fit with G4 */
+          double                    gausMixSigma1_a0;       /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixSigma1_a1;       /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixSigma1_a2;       /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_a0;      /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_a1;      /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_a2;      /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_b0;      /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_b1;      /** gaussian mixture paramters for sigma and epsion */
+          double                    gausMixEpsilon_b2;      /** gaussian mixture paramters for sigma and epsion */
           
           Config() :
             randomNumbers(nullptr),
             log_include(true),
-            optGaussianMixtureG4(true)
+            optGaussianMixtureG4(true),
+            gausMixSigma1_a0(8.471e-1),
+            gausMixSigma1_a1(3.347e-2),
+            gausMixSigma1_a2(-1.843e-3),
+            gausMixEpsilon_a0(4.841e-2),
+            gausMixEpsilon_a1(6.348e-3),
+            gausMixEpsilon_a2(6.096e-4),
+            gausMixEpsilon_b0(-1.908e-2),
+            gausMixEpsilon_b1(1.106e-1),
+            gausMixEpsilon_b2(-5.729e-3)
           {}
       };
       
@@ -54,7 +73,7 @@ namespace Fatras {
       double simTheta(const Acts::MaterialProperties& mat,
                       double p,
                       double pathcorrection,
-                      Acts::ParticleHypothesis particle=Acts::pion) const final;
+                      Acts::ParticleType particle=Acts::pion) const final;
 
       /** Set configuration method */
       void setConfiguration(const Config& eeConfig);
@@ -65,46 +84,6 @@ namespace Fatras {
   protected:
       Config            m_config; //!< configuration object     
      
-  private:
-      
-      /** struct of Particle Masses */
-      static Acts::ParticleMasses s_particleMasses;
-     
-      /** main factor of Rutherford-Scott formula */
-      static double               s_main_RutherfordScott;  
-      /** log factor of Rutherford-Scott formula */
-      static double               s_log_RutherfordScott;   
-                                  
-      /** main factor for Rossi-Greisen formula */
-      static double               s_main_RossiGreisen;     
-      /** main factor for Rossi-Greisen formula */
-      static double               s_log_RossiGreisen;      
-      
-      /** ========= Gaussian mixture model Fruehwirth, Regler Nucl. Inst. Methods A 456(2001) ========= */
-      /** Gaussian mixture model: Sigma parameter a0 */
-      static double         s_gausMixSigma1_a0;     
-      /** Gaussian mixture model: Sigma parameter a1 */
-      static double         s_gausMixSigma1_a1;     
-      /** Gaussian mixture model: Sigma parameter a2 */
-      static double         s_gausMixSigma1_a2;     
-      
-      /** Gaussian mixture model: Epsilon parameter a0 */
-      static double         s_gausMixEpsilon_a0;     
-      /** Gaussian mixture model: Epsilon parameter a1 */
-      static double         s_gausMixEpsilon_a1;     
-      /** Gaussian mixture model: Epsilon parameter a2 */
-      static double         s_gausMixEpsilon_a2;     
-     
-      /** Gaussian mixture model: Epsilon parameter b0 */
-      static double         s_gausMixEpsilon_b0;     
-      /** Gaussian mixture model: Epsilon parameter b1 */
-      static double         s_gausMixEpsilon_b1;     
-      /** Gaussian mixture model: Epsilon parameter b2 */
-      static double         s_gausMixEpsilon_b2;    
-       
-      /** projection factor to scale the projected angle out of the plane */
-      static double         s_projectionFactor;      
-
     };
     
     /** Return the configuration object */    

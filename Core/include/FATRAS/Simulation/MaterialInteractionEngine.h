@@ -8,17 +8,17 @@
 // ACTS include
 #include "ACTS/Extrapolation/IMaterialEffectsEngine.h"
 #include "ACTS/Extrapolation/ExtrapolationCell.h"
-#include "ACTS/Extrapolation/MaterialInteraction.h"
 #include "ACTS/Extrapolation/MaterialUpdateMode.h"
 #include "ACTS/Extrapolation/detail/ExtrapolationMacros.h"
-#include "ACTS/Utilities/PropDirection.h"
+#include "ACTS/Utilities/Definitions.h"
 #include "ACTS/EventData/TrackParameters.h"
 #include "ACTS/EventData/NeutralParameters.h"
 // FATRAS include
-#include "FATRAS/IEnergyLossSampler.h"
-#include "FATRAS/IMultipleScatteringSampler.h"
-#include "FATRAS/IPhotonConversionSampler.h"
-#include "FATRAS/IHadronicInteractionSampler.h"
+#include "FATRAS/Common/IRandomNumbers.h"
+#include "FATRAS/Simulation/IEnergyLossSampler.h"
+#include "FATRAS/Simulation/IMultipleScatteringSampler.h"
+#include "FATRAS/Simulation/IPhotonConversionSampler.h"
+#include "FATRAS/Simulation/IHadronicInteractionSampler.h"
  
 namespace Fatras {
   
@@ -32,6 +32,7 @@ namespace Fatras {
    * 
    * @author Andreas Salzburger <Andreas.Salzburger@cern.ch>
    * @author Noemi Calace       <Noemi.Calace@cern.ch>
+   * @uathor Sharka Todorova    <Sarka.Todorova@cern.ch>
    * 
    */
   class MaterialInteractionEngine : virtual public Acts::IMaterialEffectsEngine {
@@ -45,46 +46,46 @@ namespace Fatras {
 
           std::shared_ptr<IRandomNumbers>              randomNumbers;                    //!< Random Generator service 
                                                                                          
-          double                                       inParticleMinMomentum;            //!< incoming particle: min momentum
-          double                                       inParticleMinMomentumT;           //!< incoming particle: min transverse momentum (additional, optional)  
-          bool                                         inParticleKillBelowCut;           //!< incoming particle: boolean switch to kill it if it falls below, will throw SuccessUpdate 
+          double                                       particleMinMomentum;            //!< incoming particle: min momentum (if cut > 0.)
+          double                                       particleMinMomentumT;           //!< incoming particle: min transverse momentum (if cut > 0.)  
+          bool                                         particleKillBelowCut;           //!< incoming particle: kill it if it falls below, will throw SuccessUpdateKill 
                                                                                          
           std::shared_ptr<IEnergyLossSampler>          energyLossSampler;                //!< Sampler: IEnergyLossSampler for ionisation loss, no energy loss if not defined
                                                                                          
           std::shared_ptr<IEnergyLossSampler>          energyLossSamplerElectrons;       //!< Sampler: dedicated electron energy samples, use standard one if not defined
           bool                                         recordBremPhoton;                 //!< boolean switch to record the brem photons
-          double                                       outBremPhotonMinMomentum;         //!< outgoing: minimal momentum for a photon to be recorded
-          double                                       outBremPhotonMinMomentumT;        //!< outgoing: minimal transverse momentum for a photon (additional, optional)
+          double                                       outBremPhotonMinMomentum;         //!< outgoing: minimal momentum for a photon to be recorded (if cut > 0.)
+          double                                       outBremPhotonMinMomentumT;        //!< outgoing: minimal transverse momentum for a photon (if cut > 0.)
                                                                                          
           std::shared_ptr<IMultipleScatteringSampler>  multipleScatteringSampler;        //!< multiple scattering sampler
           std::shared_ptr<IPhotonConversionSampler>    conversionSampler;                //!< conversion sampler
-          double                                       outConversionProductMinMomentum;  //!< outgoing: minimum momentum for conversion product
-          double                                       outConversionProductMinMomentumT; //!< outgoing: minimum transvere momentum for conversion product (additional, optional)
+          double                                       outConversionProductMinMomentum;  //!< outgoing: minimum momentum for conversion product (if cut > 0.)
+          double                                       outConversionProductMinMomentumT; //!< outgoing: minimum transvere momentum for conversion product (if cut > 0.)
           
           std::shared_ptr<IHadronicInteractionSampler> hadronicInteractionSampler;       //!< hadronic interaction sampler 
-          double                                       outHadIntProductMinMomentum;      //!< outgoing: minimum momentum for HI products
-          double                                       outHadIntProductMinMomentumT;     //!< outgoint: minim transverse momentum for for HI products (additional, optional)
+          double                                       outHadIntProductMinMomentum;      //!< outgoing: minimum momentum for HI products (if cut > 0.)
+          double                                       outHadIntProductMinMomentumT;     //!< outgoint: minim transverse momentum for for HI products (if cut > 0.)
           
           std::string                                  prefix;                           //!< output prefix
           std::string                                  postfix;                          //!< output postfix
           
           Config() :
             randomNumbers(nullptr),                                                    
-            inParticleMinMomentum(50.),          
-            inParticleMinMomentumT(-1.),      
-            inParticleKillBelowCut(true),                                           
+            particleMinMomentum(-1.),          
+            particleMinMomentumT(50.),      
+            particleKillBelowCut(true),                                           
             energyLossSampler(nullptr),                                               
             energyLossSamplerElectrons(nullptr),      
             recordBremPhoton(true),                
-            outBremPhotonMinMomentum(50.),        
-            outBremPhotonMinMomentumT(-1.),                                       
+            outBremPhotonMinMomentum(-1.),        
+            outBremPhotonMinMomentumT(50.),                                       
             multipleScatteringSampler(nullptr),       
             conversionSampler(nullptr),               
-            outConversionProductMinMomentum(50.), 
-            outConversionProductMinMomentumT(-1.),
+            outConversionProductMinMomentum(-1.), 
+            outConversionProductMinMomentumT(50.),
             hadronicInteractionSampler(nullptr),
-            outHadIntProductMinMomentum(50.),     
-            outHadIntProductMinMomentumT(-1.) 
+            outHadIntProductMinMomentum(-1.),     
+            outHadIntProductMinMomentumT(50.), 
             prefix("[MI] - "),
             postfix(" - ")
           {}   
@@ -107,49 +108,43 @@ namespace Fatras {
                                              Acts::MaterialUpdateStage matupstage=Acts::fullUpdate) const final;
 
       /** Set configuration method */
-      void setConfiguration(const Config& eeConfig);
+      void setConfiguration(const Config& miConfig);
       
       /** Get configuration method */
       Config getConfiguration() const;                                 
                                
     protected:
 
-//      /** main templated handleMaterialT method - to be called by the concrete type ones */
-//      template <class T> Acts::ExtrapolationCode handleMaterialT( Acts::ExtrapolationCell<T>& eCell,
-//							                                      Acts::PropDirection dir=Acts::alongMomentum,
-//							                                      Acts::MaterialUpdateStage matupstage=Acts::fullUpdate) const;
-//		
-//      /** process the material on the layer, check if in-layer interaction needs to occur */    					    
-//      Acts::ExtrapolationCode processMaterialOnLayer(Acts::ExCellCharged& ecCharged,
-//					                                 Acts::PropDirection dir,
-//					                                 float& mFraction) const;
-//
-//      /** process the material on the layer, check if in-layer interaction needs to occur */    					    
-//      Acts::ExtrapolationCode processMaterialOnLayer(Acts::ExCellNeutral& ecNeutral,
-//					                                 Acts::PropDirection dir,
-//					                                 float& mFraction) const;
-//
-//      /** process the material on the layer, check if in-layer interaction needs to occur - templated */    					    
-//      template <class T> Acts::ExtrapolationCode processMaterialOnLayerT( Acts::ExtrapolationCell<T>& eCell,
-//								                                          Acts::PropDirection dir,
-//								                                          float& mFraction) const;
-//			
-//      /** update the TrackParameters accordingly */       					    
-//      const Acts::TrackParameters* updateTrackParameters(const Acts::TrackParameters& parameters,
-//							                             Acts::ExCellCharged& eCell,
-//							                             Acts::PropDirection dir,
-//							                             double dX0,
-//							                             double pathCorrection,
-//							                             double mFraction) const;
-//		
-//      /** update the TrackParameters accordingly */       					            					 
-//      const Acts::NeutralParameters* updateTrackParameters(const Acts::NeutralParameters& parameters,
-//							                               Acts::ExCellNeutral& eCell,
-//							                               Acts::PropDirection dir,
-//							                               double dX0,
-//							                               double pathCorrection,
-//							                               double mFraction) const;
-//		
+      /** main templated handleMaterialT method - to be called by the concrete type ones */
+      template <class T> Acts::ExtrapolationCode handleMaterialT( Acts::ExtrapolationCell<T>& eCell,
+							                                      Acts::PropDirection dir=Acts::alongMomentum,
+							                                      Acts::MaterialUpdateStage matupstage=Acts::fullUpdate) const;
+		
+      /** process the material on the layer, check if in-layer interaction needs to occur - templated */    					    
+      template <class T> Acts::ExtrapolationCode processOnLayerT( Acts::ExtrapolationCell<T>& eCell,
+								                                  Acts::PropDirection dir,
+                                                                  const Acts::MaterialProperties& mprop,
+                                                                  double pathCorrection,
+                                                                  float& mFraction) const;
+      		
+      /** update the TrackParameters accordingly - charged parameters */       					    
+      const Acts::TrackParameters* electroMagneticInteraction(const Acts::TrackParameters& parameters,
+							                                  Acts::ExCellCharged& eCell,
+							                                  Acts::PropDirection dir,
+                                                              const Acts::MaterialProperties& mprop,
+							                                  double dX0,
+							                                  double pathCorrection,
+							                                  double mFraction) const;
+		
+      /** update the TrackParameters accordingly - neutral parameters */       					            					 
+      const Acts::NeutralParameters* electroMagneticInteraction(const Acts::NeutralParameters& parameters,
+							                                    Acts::ExCellNeutral& eCell,
+							                                    Acts::PropDirection dir,
+                                                                const Acts::MaterialProperties& mprop,
+							                                    double dX0,
+							                                    double pathCorrection,
+							                                    double mFraction) const;
+		
 //      /** create the interaction for charged */       					    
 //      std::vector<Acts::InteractionVertex> interact(Acts::ExCellCharged& eCell, const Acts::Material&) const;
 //
@@ -175,14 +170,14 @@ namespace Fatras {
 //			                 double gammaE,
 //			                 const Vector3D& vertex,
 //			                 Acts::Vector3D& particleDir) const;
-      
+                                                                  
+                                                                  
+       /** Check for momentum cuts - checks on momentum and transverse momentum cuts on Acts::Vector3D& */
+       bool passesMomentumCuts(const Acts::Vector3D& momentum, double cutM, double cutT) const; 
+       
+       
        /** ExtrapolationEngine config object */
        Config                m_config;
-
-       Acts::ParticleMasses  particleMasses;                //!< struct of Particle Masses
-                             
-      /** useful for the angle calculation of the brem photon */ 
-      double                 m_oneOverThree;
            
       /** useful for the multiple scattering calculation */ 
       double                 m_projectionFactor;
@@ -191,11 +186,13 @@ namespace Fatras {
   
   /** Return the configuration object */    
   inline MaterialInteractionEngine::Config MaterialInteractionEngine::getConfiguration() const { return m_config; }
+                                                                                                                  
+ 
   
 
 } // end of namespace
 
 //!< define the templated function   
-// #include "FATRAS/Simulation/detail/MaterialInteractionEngine.icc" 
+#include "FATRAS/Simulation/detail/MaterialInteractionEngine.icc" 
 
 #endif // ACTS_FATRASSERVICES_FATRASMATERIALEFFECTSENGINE_H

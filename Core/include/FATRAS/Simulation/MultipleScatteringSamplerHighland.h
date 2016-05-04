@@ -8,7 +8,7 @@
 // ACTS include
 #include "ACTS/Utilities/Definitions.h"
 #include "ACTS/Material/MaterialProperties.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Extrapolation/detail/MaterialInteraction.h"
 // FATRAS include
 #include "FATRAS/Common/IRandomNumbers.h"
@@ -60,7 +60,7 @@ namespace Fatras {
       double simTheta(const Acts::MaterialProperties& mat,
                       double p,
                       double pathcorrection,
-                      Acts::ParticleHypothesis particle=Acts::pion) const final;
+                      Acts::ParticleType particle=Acts::pion) const final;
      
       /** Set configuration method */
       void setConfiguration(const Config& eeConfig);
@@ -71,26 +71,6 @@ namespace Fatras {
     protected:
       Config                            m_config; // the configuraiton object
 
-    private:
-      /** the formulas for multiple scattering evaluation */
-      Acts::MaterialInteraction         m_interactionFormulae;     
-      
-      /** struct of Particle Masses */
-      static Acts::ParticleMasses       s_particleMasses;
-     
-      /** main factor of Rutherford-Scott formula */
-      static double                     s_main_RutherfordScott;  
-      /** log factor of Rutherford-Scott formula */
-      static double                     s_log_RutherfordScott;   
-                                  
-      /** main factor for Rossi-Greisen formula */
-      static double                     s_main_RossiGreisen;     
-      /** main factor for Rossi-Greisen formula */
-      static double                     s_log_RossiGreisen;      
-                                  
-      /** projection factor to scale the projected angle out of the plane */
-      static double                     s_projectionFactor;      
-     
     };
 
     /** Return the configuration object */    

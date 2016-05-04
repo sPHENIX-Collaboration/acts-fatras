@@ -5,12 +5,10 @@
 // class header include
 #include "FATRAS/Simulation/ElectronEnergyLossSampler.h"
 #include "FATRAS/Simulation/EnergyLoss.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
 // EventData module
-#include "ACTS/EventData/ParticleProperties.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Utilities/MsgMacros.h"
-
-// static partilce masses
-Acts::ParticleMasses Fatras::ElectronEnergyLossSampler::s_particleMasses;
 
 Fatras::ElectronEnergyLossSampler::ElectronEnergyLossSampler( const Fatras::ElectronEnergyLossSampler::Config& elConfig )
   : Fatras::IEnergyLossSampler(),
@@ -33,7 +31,7 @@ Fatras::EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::Ma
 							                                     double pInitial,
 							                                     double pathCorrection,
 							                                     Acts::PropDirection direction,
-							                                     Acts::ParticleHypothesis) const
+							                                     Acts::ParticleType) const
 {  
     // start with a default energy loss
   EnergyLoss sampledEloss;
@@ -48,12 +46,11 @@ Fatras::EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::Ma
   
   // the following formulas are imported from STEP
   // preparation of kinetic constants
- 
   double beta  = p/E;
   double gamma = E/me;
   double eta2 = beta*gamma; eta2 *= eta2;  
   
-  //Ionization - Bethe-Bloch
+  // Ionization - Bethe-Bloch
   double I = 16.e-6 * std::pow(materialProperties.averageZ(),0.9); //16 eV * Z**0.9 - bring to MeV
   
   double delta = 0.;
@@ -70,9 +67,7 @@ Fatras::EnergyLoss Fatras::ElectronEnergyLossSampler::energyLoss( const Acts::Ma
   // see Stampfer, et al, "Track Fitting With Energy Loss", Comp. Pyhs. Comm. 79 (1994), 157-164
   //
   // the landau sigmaL is path length dependent
-  //    PDG formula 32.11 for MOP value from http://http://pdg.lbl.gov/2014/reviews/rpp2014-rev-passage-particles-matter.pdf
-  //
-  
+  //    PDG formula 32.11 for MOP value from http://http://pdg.lbl.gov/2014/reviews/rpp2014-rev-passage-particles-matter.pdf  
   double MOP =  -kazL*kaz*(log(2.*me*eta2/I) + log(kazL/I) + 0.2 - (beta*beta) - delta);
 
   double energyLossSigma = 0.424*4.*kazL; //0.424: scale factor from sigma to FWHM

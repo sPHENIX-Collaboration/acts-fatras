@@ -4,19 +4,11 @@
 
 // FATRAS includes
 #include "FATRAS/Simulation/PhotonConversionSampler.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
+#include "FATRAS/Simulation/detail/FatrasHelpers.h"
 // ACTS includes
-#include "ACTS/EventData/ParticleProperties.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Utilities/MsgMacros.h"
-
-// statics doubles 
-double  Fatras::PhotonConversionSampler::s_alpha         = 1./137.;
-double  Fatras::PhotonConversionSampler::s_oneOverThree  = 1./3.;
-
-//static particle masses
-Acts::ParticleMasses Fatras::PhotonConversionSampler::s_particleMasses;
-
-//static PdgToParticleHypothesis
-Fatras::PdgToParticleHypothesis Fatras::PhotonConversionSampler::s_pdgToHypo;
 
 // constructor
 Fatras::PhotonConversionSampler::PhotonConversionSampler(const PhotonConversionSampler::Config& pcConfig)
@@ -160,7 +152,7 @@ std::vector<Acts::InteractionVertex> Fatras::PhotonConversionSampler::getChildre
                                                                                const Acts::Vector3D& vertex,
                                                                                const Acts::Vector3D& photonMomentum,
                                                                                double child1Energy, const Acts::Vector3D& child1Direction,
-                                                                               Acts::ParticleHypothesis childType) const
+                                                                               Acts::ParticleType childType) const
 {
     std::vector<Acts::InteractionVertex> children;
  
@@ -184,8 +176,8 @@ std::vector<Acts::InteractionVertex> Fatras::PhotonConversionSampler::getChildre
       charge2 = -1.;
     }
 
-    int    pdg1  = s_pdgToHypo.convert(childType, charge1, false);
-    int    pdg2  = s_pdgToHypo.convert(childType, charge2, false);
+    int    pdg1  = convertToPdg(childType, charge1, false);
+    int    pdg2  = convertToPdg(childType, charge2, false);
 
     std::vector<Acts::ParticleProperties> pOutgoing;
     

@@ -1,54 +1,27 @@
 ///////////////////////////////////////////////////////////////////
-// PdgToParticleDefinitions.h, ACTS project
+// FatrasDefinitions.h, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-#ifndef ACTS_EVENTDATAUTILS_PDGTOPARTICLEHYPOTHESIS_H
-#define ACTS_EVENTDATAUTILS_PDGTOPARTICLEHYPOTHESIS_H
-
-#include "ACTS/EventData/ParticleDefinitions.h"
-// STD/STL
-#include <cmath>  
+#ifndef ACTS_FATRAS_FATRASHELPERS_H
+#define ACTS_FATRAS_FATRASHELPERS_H 1
 
 namespace Fatras {
 
-    /** @class PdgToParticleType 
-
-    small converter from the (abs) PDG code 
-    to the particle hypothsis used in Tracking
+    /** Static method: check for momentum cuts - checks on momentum and (optionally) transverse momentum */
+    static bool passesMomentumCuts(const Acts::Vector3D& momentum, double cutM, double cutT)
+    {
+        // explicitely spell the code all cases to avoid unneccessary computations
+        if (cutM < 0. && cutT < 0.) return true;
+        // only check on transvese cut
+        if (cutM < 0.) return momentum.perp2() > cutT*cutT;
+        // only check the magnitude cut
+        if (cutT < 0.) return momentum.mag2() > cutM*cutM;
+        // full check
+        return ( momentum.perp2() > cutT*cutT && momentum.mag2() > cutM*cutM );
+    }   
     
-    @author Andreas.Salzburger@cern.ch
-    
-    **/
-    
-    class PdgToParticleType {
-    
-      public:
-        /** Constructor */
-        PdgToParticleType(){}
-    
-        /** ~Destructor */
-        ~PdgToParticleType(){}
-    
-        /** Converter method : PDG -> Particle Hyptothesis */
-        Acts::ParticleType  convert(int pdg, bool& stable, bool& exiting, double charge=1.) const;
-    
-        /** Converter method : PDG -> Particle Hyptothesis , w/o stable exiting*/
-        Acts::ParticleType  convert(int pdg, double charge=1.) const;
-    
-    
-        /** Converter method : Particle Hyptothesis -> PDG*/
-        int convert(Acts::ParticleType particleHypo, double charge, bool dist=true) const;
-    
-    
-    };
-    
-    inline Acts::ParticleType PdgToParticleType::convert(int pdg, double charge) const {
-        bool stable, exiting; 
-        return convert(pdg,stable,exiting,charge); 
-    }
-    
-    
-    inline Acts::ParticleType PdgToParticleType::convert(int pdg, bool& stable, bool& exiting, double charge) const {
+    /** Static method : convert to ParticleType from pdg */
+    static Acts::ParticleType convertToParticleType(int pdg, bool& stable, bool& exiting, double charge) {
     
         int pdgCode = abs(pdg);
     
@@ -144,7 +117,8 @@ namespace Fatras {
     }
     
     
-    inline int PdgToParticleType::convert(Acts::ParticleType particleHypo, double charge, bool dist) const 
+    /** Static method : convert to pdg from ParticleType */
+    static int convertToPdg(Acts::ParticleType particleHypo, double charge, bool dist) 
     {
     
         int pdg = 0;
@@ -159,22 +133,23 @@ namespace Fatras {
             // the proton case
             case Acts::proton     :  {  pdg = 2212; pdg *= charge > 0. ? 1 : -1; 
                  if (charge*charge < 0.0001)
-                     pdg = dist ? 2112 : -2112;             } return pdg;
+                     pdg = dist ? 2112 : -2112; } return pdg;
             // the photon case
-            case Acts::photon     :  { pdg = 22;                                   } return pdg;
+            case Acts::photon     :  { pdg = 22; } return pdg;
             // the neutron case
-            case Acts::neutron     :  { pdg = 2112;                                } return pdg;
+            case Acts::neutron     :  { pdg = 2112; } return pdg;
             // the neutral pion case
-            case Acts::pi0         :  { pdg = 111;                      } return pdg;
+            case Acts::pi0         :  { pdg = 111; } return pdg;
             // the neutral kaon case
             case Acts::k0          :  { pdg = dist ? 130 : 310;                      } return pdg;
             // the pion case - is the default
             default              :  {  pdg = 211; pdg *= charge > 0. ? 1 : -1; 
                 if (charge*charge < 0.0001)
-                    pdg = 111;                             };  
+                    pdg = 111; };  
             }
-                 return pdg;
+           return pdg;
     }
 
 }
+
 #endif

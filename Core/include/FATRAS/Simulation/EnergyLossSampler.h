@@ -7,7 +7,7 @@
 
 // ACTS include
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Extrapolation/detail/MaterialInteraction.h"
 #include "ACTS/Material/MaterialProperties.h"
 // Fatras module
@@ -50,14 +50,14 @@ namespace Fatras {
       /** IEnergyLossSampler public method to compute dEdX */
       double dEdX( const Acts::MaterialProperties& materialProperties, 
                    double momentum,
-	  	           Acts::ParticleHypothesis particleHypothesis = Acts::pion ) const final;
+	  	           Acts::ParticleType particleHypothesis = Acts::pion ) const final;
       
       /** IEnergyLossSampler public method to compute the mean and variance of the energy loss */
       EnergyLoss energyLoss( const Acts::MaterialProperties& mat,
 	  	                   double momentum,
 	  	                   double pathcorrection,
 	  	                   Acts::PropDirection dir=Acts::alongMomentum,
-	  	                   Acts::ParticleHypothesis particle=Acts::pion) const final;
+	  	                   Acts::ParticleType particle=Acts::pion) const final;
     
       /** Set configuration method */
       void setConfiguration(const Config& eeConfig);
@@ -73,21 +73,14 @@ namespace Fatras {
       double dEdXBetheBloch(const Acts::MaterialProperties& mat,
 	  		               double gamma,
 	  		               double beta,
-	  		               Acts::ParticleHypothesis particle= Acts::pion) const;
+	  		               Acts::ParticleType particle= Acts::pion) const;
 	
       /** apply dEdX according to Bethe-Heitler */		  
       double dEdXBetheHeitler(const  Acts::MaterialProperties& mat,
 	  		                  double initialE,
-	  		                  Acts::ParticleHypothesis particle= Acts::pion) const;
+	  		                  Acts::ParticleType particle= Acts::pion) const;
       
-      /** the formulas for energy loss evaluation */
-      Acts::MaterialInteraction                  m_interactionFormulae;     
-      
-      /** struct of Particle masses  */
-      static Acts::ParticleMasses                s_particleMasses; 
-      
-      /** KOverA factor in Bethe-Bloch equation [MeV*cm2/gram] */
-      static double                              s_ka_BetheBloch;          
+       
 };
 
   /** Return the configuration object */    

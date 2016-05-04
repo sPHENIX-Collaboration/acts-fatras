@@ -4,20 +4,9 @@
 
 // FATRAS includes
 #include "FATRAS/Simulation/MultipleScatteringSamplerHighland.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
 // ACTS includes
-#include "ACTS/EventData/ParticleProperties.h"
-
-// static particle masses
-Acts::ParticleMasses Fatras::MultipleScatteringSamplerHighland::s_particleMasses;
-
-// static doubles
-double Fatras::MultipleScatteringSamplerHighland::s_main_RutherfordScott = 13.6;
-double Fatras::MultipleScatteringSamplerHighland::s_log_RutherfordScott  =  0.038;
-
-double Fatras::MultipleScatteringSamplerHighland::s_main_RossiGreisen    = 17.5;
-double Fatras::MultipleScatteringSamplerHighland::s_log_RossiGreisen     =  0.125;
-
-double Fatras::MultipleScatteringSamplerHighland::s_projectionFactor  =  sqrt(2.);
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 // constructor
 Fatras::MultipleScatteringSamplerHighland::MultipleScatteringSamplerHighland(const MultipleScatteringSamplerHighland::Config& msConfig)
@@ -40,7 +29,7 @@ void Fatras::MultipleScatteringSamplerHighland::setConfiguration(const Fatras::M
 double Fatras::MultipleScatteringSamplerHighland::simTheta(const Acts::MaterialProperties& mat,
 							 double p,
 							 double pathcorrection,
-							 Acts::ParticleHypothesis particle) const
+							 Acts::ParticleType particle) const
 {
   if (mat.thicknessInX0()<=0. || particle==Acts::geantino) return 0.;
  
@@ -57,7 +46,7 @@ double Fatras::MultipleScatteringSamplerHighland::simTheta(const Acts::MaterialP
  
   double sigma2(0.);
  
-  double sigma = m_interactionFormulae.sigmaMS(t, p, beta);
+  double sigma = s_interactionFormulae.sigmaMS(t, p, beta);
   sigma2 = sigma*sigma;
  
   // Code below will not be used if the parameterization of ActsUtils is used
@@ -65,10 +54,10 @@ double Fatras::MultipleScatteringSamplerHighland::simTheta(const Acts::MaterialP
 
     // the highland formula
     sigma2 = s_main_RutherfordScott/(beta*p);
-
+    // inlude the log term
     if (m_config.log_include)
       sigma2 *= (1.+s_log_RutherfordScott*log(t));
-   
+    // and 
     sigma2 *= (sigma2*t);
   }
  
@@ -86,7 +75,6 @@ double Fatras::MultipleScatteringSamplerHighland::simTheta(const Acts::MaterialP
       sigma2 *= factor;
     }
   }
- 
-  return s_projectionFactor*sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
- 
+  // returned scaled by the projection factor
+  return s_sqrtTwo*sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
 }

@@ -6,7 +6,7 @@
 #define ACTS_FATRASINTERFACES_IENERGYLOSSSAMPLER_H 1
 
 // ACTS includes
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Utilities/Definitions.h"
 
 namespace Acts {
@@ -41,14 +41,14 @@ namespace Fatras {
 				                  double momentum,
 				                  double pathcorrection,
 				                  Acts::PropDirection dir=Acts::alongMomentum,
-				 	              Acts::ParticleHypothesis particle=Acts::pion) const = 0;  
+				 	              Acts::ParticleType particle=Acts::pion) const = 0;  
 					 
     /** dEdX calculation when providing MaterialProperties,
      * a momentum, and a ParicleHypothesis. 
      * - Units: [Mev/mm]
      */
     virtual double dEdX(const Acts::MaterialProperties& mat,
-			            double momentum, Acts::ParticleHypothesis particle=Acts::pion) const = 0;
+			            double momentum, Acts::ParticleType particle=Acts::pion) const = 0;
    
   };
 

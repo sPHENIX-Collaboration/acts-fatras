@@ -7,7 +7,7 @@
 
 // ACTS include
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 namespace Acts {
     class InteractionVertex;
@@ -35,7 +35,7 @@ namespace Fatras {
     virtual std::vector<Acts::InteractionVertex> doHadronicInteraction(double time, 
 								                                       const Acts::Vector3D& position, 
 								                                       const Acts::Vector3D& momentum, 
-								                                        Acts::ParticleHypothesis particle=Acts::pion) const = 0;
+								                                        Acts::ParticleType particle=Acts::pion) const = 0;
 
   };
 

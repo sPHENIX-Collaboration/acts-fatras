@@ -4,32 +4,12 @@
 
 // class header include
 #include "FATRAS/Simulation/MultipleScatteringSamplerGaussianMixture.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
+
 // ACTS include
-#include "ACTS/EventData/ParticleProperties.h"
-
-// static particle masses
-Acts::ParticleMasses Fatras::MultipleScatteringSamplerGaussianMixture::s_particleMasses;
-// static doubles
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_main_RutherfordScott = 13.6;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_log_RutherfordScott  =  0.038;
-
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_main_RossiGreisen = 17.5;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_log_RossiGreisen  =  0.125;
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 // ============================= Gaussian mixture model =============
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a0  =  8.471e-1;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a1  =  3.347e-2;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a2  = -1.843e-3;
-
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a0 =  4.841e-2;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a1 =  6.348e-3;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a2 =  6.096e-4;
-
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b0 = -1.908e-2;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b1 =  1.106e-1;
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b2 = -5.729e-3;
-
-double Fatras::MultipleScatteringSamplerGaussianMixture::s_projectionFactor  =  sqrt(2.);
 
 // constructor
 Fatras::MultipleScatteringSamplerGaussianMixture::MultipleScatteringSamplerGaussianMixture(const MultipleScatteringSamplerGaussianMixture::Config& msConfig) 
@@ -51,7 +31,7 @@ void Fatras::MultipleScatteringSamplerGaussianMixture::setConfiguration(const Fa
 double Fatras::MultipleScatteringSamplerGaussianMixture::simTheta(const Acts::MaterialProperties& mat,
 								                                  double p,
 								                                  double pathcorrection,
-								                                  Acts::ParticleHypothesis particle) const
+								                                  Acts::ParticleType particle) const
 {
   if (mat.thicknessInX0()<=0. || particle==Acts::geantino) return 0.;
  
@@ -101,10 +81,10 @@ double Fatras::MultipleScatteringSamplerGaussianMixture::simTheta(const Acts::Ma
   double log_dprimeprime = log(std::pow(mat.averageZ(),2.0/3.0) * dprime);
   // get epsilon
   double epsilon = log_dprimeprime < 0.5 ?
-    s_gausMixEpsilon_a0 + s_gausMixEpsilon_a1*log_dprimeprime + s_gausMixEpsilon_a2*log_dprimeprime*log_dprimeprime :
-    s_gausMixEpsilon_b0 + s_gausMixEpsilon_b1*log_dprimeprime + s_gausMixEpsilon_b2*log_dprimeprime*log_dprimeprime;
+    m_config.gausMixEpsilon_a0 + m_config.gausMixEpsilon_a1*log_dprimeprime + m_config.gausMixEpsilon_a2*log_dprimeprime*log_dprimeprime :
+    m_config.gausMixEpsilon_b0 + m_config.gausMixEpsilon_b1*log_dprimeprime + m_config.gausMixEpsilon_b2*log_dprimeprime*log_dprimeprime;
   // the standard sigma
-  double sigma1square = s_gausMixSigma1_a0 + s_gausMixSigma1_a1*log_dprime + s_gausMixSigma1_a2*log_dprime*log_dprime;
+  double sigma1square = m_config.gausMixSigma1_a0 + m_config.gausMixSigma1_a1*log_dprime + m_config.gausMixSigma1_a2*log_dprime*log_dprime;
   // G4 optimised / native double Gaussian model
   if (!m_config.optGaussianMixtureG4) sigma2 = 225.*dprime/(p*p);
   // throw the random number core/tail
@@ -112,6 +92,6 @@ double Fatras::MultipleScatteringSamplerGaussianMixture::simTheta(const Acts::Ma
     sigma2 *= (1.-(1.-epsilon)*sigma1square)/epsilon;
   }
  
-  return s_projectionFactor*sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
+  return s_sqrtTwo*sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
  
 }

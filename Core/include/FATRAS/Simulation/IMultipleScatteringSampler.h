@@ -6,7 +6,7 @@
 #define ACTS_FATRASINTERFACES_IMULTIPLESCATTERINGSAMPLER_H 1
 
 // ACTS include
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 namespace Acts {
     class MaterialProperties;
@@ -32,7 +32,7 @@ namespace Fatras {
     virtual double simTheta (const Acts::MaterialProperties& mat,
 			                 double momentum,
 			                 double pathcorrection,
-			                 Acts::ParticleHypothesis particle = Acts::pion) const = 0;    
+			                 Acts::ParticleType particle = Acts::pion) const = 0;    
   };
 
 }

@@ -10,7 +10,7 @@
 #include "FATRAS/Simulation/IMultipleScatteringSampler.h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Material/MaterialProperties.h"
 // STD
 #include <memory>
@@ -19,6 +19,7 @@ namespace Fatras {
   
    /** @class MultipleScatteringSamplerGeneralMixture
    *
+   * ========= General mixture model Fruehwirth, M. Liendl. Comp. Phys. Comm. 141 (2001) 230-246 ========= 
    *
    * @TODO write documentation, move away from double* interface
    *     
@@ -37,10 +38,13 @@ namespace Fatras {
           
         std::shared_ptr<IRandomNumbers>    randomNumbers;   //!< the Random number service
         bool                               log_include; //!< include the log term
+        
+        double                             genMixtureScale; //!< numberically derived factor on mixture scale
       
         Config() :
           randomNumbers(nullptr),
-          log_include(true)
+          log_include(true),
+          genMixtureScale(0.608236)
         {}
       };
       
@@ -56,7 +60,7 @@ namespace Fatras {
       double simTheta(const Acts::MaterialProperties& mat,
                       double p,
                       double pathcorrection,
-                      Acts::ParticleHypothesis particle=Acts::pion) const final;
+                      Acts::ParticleType particle=Acts::pion) const final;
 
       /** Set configuration method */
       void setConfiguration(const Config& msConfig);
@@ -79,22 +83,6 @@ namespace Fatras {
       /** General mixture model: simulate gaussian mixture */
       double    simSemigauss(double* scattering_params) const;
                 
-      /** struct of Particle Masses */
-      static Acts::ParticleMasses s_particleMasses;
-     
-      /** main factor for Rossi-Greisen formula */
-      static double               s_main_RossiGreisen;     
-      /** main factor for Rossi-Greisen formula */
-      static double               s_log_RossiGreisen;      
-      
-      /** ========= General mixture model Fruehwirth, M. Liendl. Comp. Phys. Comm. 141 (2001) 230-246 ========= */
-      
-      /** General mixture model: Scaling factor */
-      static double                s_genMixScale;          
-             
-      /** projection factor to scale the projected angle out of the plane */
-      static double               s_projectionFactor;      
-     
     };
  
     /** Return the configuration object */    

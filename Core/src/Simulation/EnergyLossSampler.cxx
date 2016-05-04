@@ -2,18 +2,13 @@
 // EnergyLossSampler.cxx, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-// ACTS includes
-#include "ACTS/EventData/ParticleProperties.h"
-#include "ACTS/Utilities/MsgMacros.h"
 // FATRAS includes
 #include "FATRAS/Simulation/EnergyLossSampler.h"
 #include "FATRAS/Simulation/EnergyLoss.h"
-
-// static partilce masses
-Acts::ParticleMasses Fatras::EnergyLossSampler::s_particleMasses;
-
-// statics doubles 
-double Fatras::EnergyLossSampler::s_ka_BetheBloch = 30.7075;
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
+// ACTS includes
+#include "ACTS/EventData/ParticleDefinitions.h"
+#include "ACTS/Utilities/MsgMacros.h"
 
 Fatras::EnergyLossSampler::EnergyLossSampler( const Fatras::EnergyLossSampler::Config& elConfig )
 : Fatras::IEnergyLossSampler(),
@@ -35,12 +30,12 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialPr
 					                                      double momentum,
 					                                      double pathCorrection,
 					                                      Acts::PropDirection direction,
-					                                      Acts::ParticleHypothesis particleHypothesis) const
+					                                      Acts::ParticleType particleHypothesis) const
 {
   Fatras::EnergyLoss sampledEloss(0., 0.);
   
   if (particleHypothesis == Acts::undefined ) {
-    MSG_WARNING( "undefined ParticleHypothesis, energy loss calculation cancelled" );
+    MSG_WARNING( "undefined ParticleType, energy loss calculation cancelled" );
     return sampledEloss;
   }
   
@@ -50,7 +45,7 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialPr
   double kazL    = 0.;
   
   // Evaluate the energy loss and its sigma
-  double energyLoss = m_interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
+  double energyLoss = s_interactionFormulae.PDG_energyLoss_ionization(momentum, &(materialProperties.material()), particleHypothesis, energyLossSigma, kazL, pathLength);
   double simulatedDeltaE = fabs(energyLoss)+energyLossSigma*m_config.randomNumbers->draw(Fatras::Landau); 
  
   // giving the right sign to the energy loss
@@ -76,7 +71,7 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler::energyLoss( const Acts::MaterialPr
 // public interface method
 double Fatras::EnergyLossSampler::dEdX(const Acts::MaterialProperties& mat,
                                      double p,
-                                     Acts::ParticleHypothesis particle) const
+                                     Acts::ParticleType particle) const
 {
   if (particle == Acts::undefined || particle == Acts::nonInteracting) return 0.; 
    
@@ -104,7 +99,7 @@ double Fatras::EnergyLossSampler::dEdX(const Acts::MaterialProperties& mat,
 double Fatras::EnergyLossSampler::dEdXBetheBloch(const Acts::MaterialProperties& mat,
                                                  double beta,
                                                  double gamma,
-                                                 Acts::ParticleHypothesis particle) const
+                                                 Acts::ParticleType particle) const
 {
 
   if (particle == Acts::undefined || particle == Acts::nonInteracting ) return 0.;
@@ -164,7 +159,7 @@ double Fatras::EnergyLossSampler::dEdXBetheBloch(const Acts::MaterialProperties&
 
 double Fatras::EnergyLossSampler::dEdXBetheHeitler(const Acts::MaterialProperties& mat,
                                                    double initialE, 
-                                                   Acts::ParticleHypothesis particle) const
+                                                   Acts::ParticleType particle) const
 {
 
   if (particle == Acts::undefined || particle == Acts::nonInteracting ) return 0.;

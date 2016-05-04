@@ -8,10 +8,9 @@
 // FATRAS
 #include "FATRAS/Common/IRandomNumbers.h"
 #include "FATRAS/Simulation/IHadronicInteractionSampler.h"
-#include "FATRAS/Simulation/detail/PdgToParticleHypothesis.h"
 // ACTS
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 // STD
 #include <memory>
   
@@ -63,7 +62,7 @@ namespace Fatras {
     std::vector<Acts::InteractionVertex> doHadronicInteraction(double time,
 							                                   const Acts::Vector3D& position, 
 							                                   const Acts::Vector3D& momentum,
-							                                   Acts::ParticleHypothesis particle=Acts::pion) const final;
+							                                   Acts::ParticleType particle=Acts::pion) const final;
     
      /** Set configuration method */
      void setConfiguration(const Config& eeConfig);
@@ -79,12 +78,8 @@ namespace Fatras {
      std::vector<Acts::InteractionVertex> getHadState( double time, double p,
 						                               const Acts::Vector3D& vertex,
 						                               const Acts::Vector3D& particleDir,
-						                               Acts::ParticleHypothesis particle ) const;
+						                               Acts::ParticleType particle ) const;
 						       
-
-     /** struct of Particle Masses */
-     static Acts::ParticleMasses             s_particleMasses;
-     static PdgToParticleHypothesis          s_pdgToHypo;
            
    };
    

@@ -4,20 +4,9 @@
 
 // FATRAS include
 #include "FATRAS/Simulation/MultipleScatteringSamplerGeneralMixture.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
 // ACTS include
-#include "ACTS/EventData/ParticleProperties.h"
-
-// static particle masses
-Acts::ParticleMasses Fatras::MultipleScatteringSamplerGeneralMixture::s_particleMasses;
-// static doubles
-
-double Fatras::MultipleScatteringSamplerGeneralMixture::s_main_RossiGreisen = 17.5;
-double Fatras::MultipleScatteringSamplerGeneralMixture::s_log_RossiGreisen  = 0.125;
-
-double Fatras::MultipleScatteringSamplerGeneralMixture::s_projectionFactor  =  sqrt(2.);
-
-// ============================= General mixture model =============
-double Fatras::MultipleScatteringSamplerGeneralMixture::s_genMixScale       = 0.608236; //numerically derived scaling factor
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 // constructor
 Fatras::MultipleScatteringSamplerGeneralMixture::MultipleScatteringSamplerGeneralMixture(const MultipleScatteringSamplerGeneralMixture::Config& msConfig) 
@@ -40,7 +29,7 @@ void Fatras::MultipleScatteringSamplerGeneralMixture::setConfiguration(const Fat
 double Fatras::MultipleScatteringSamplerGeneralMixture::simTheta(const Acts::MaterialProperties& mat,
                                                                double p,
                                                                double pathcorrection,
-                                                               Acts::ParticleHypothesis particle) const
+                                                               Acts::ParticleType particle) const
 {
   if (mat.thicknessInX0()<=0. || particle==Acts::geantino) return 0.;
  
@@ -72,18 +61,18 @@ double Fatras::MultipleScatteringSamplerGeneralMixture::simTheta(const Acts::Mat
     if (dOverX0/(beta*beta)>0.6/pow(Z,0.6)){ //Gaussian
       // Gaussian mixture or pure Gaussian
       if (dOverX0/(beta*beta)>10){
-          scattering_params=getGaussian(beta,p,dOverX0,s_genMixScale); // Get parameters
+          scattering_params=getGaussian(beta,p,dOverX0,m_config.genMixtureScale); // Get parameters
           //std::cout<<"MultipleScatteringSamplerGeneralMixture::multipleScatteringUpdate: using pure_gaussian"<<std::endl;
       }
       else{
-          scattering_params=getGaussmix(beta,p,dOverX0,Z,s_genMixScale); // Get parameters
+          scattering_params=getGaussmix(beta,p,dOverX0,Z,m_config.genMixtureScale); // Get parameters
           //std::cout<<"MultipleScatteringSamplerGeneralMixture::multipleScatteringUpdate: using gaussian_mixture"<<std::endl;
       }
       theta = simGaussmix(scattering_params); // Simulate
     }
     else{
       //Semigaussian mixture
-      scattering_params = getSemigauss(beta,p,dOverX0,Z,s_genMixScale); // Get parameters
+      scattering_params = getSemigauss(beta,p,dOverX0,Z,m_config.genMixtureScale); // Get parameters
       //std::cout<<"MultipleScatteringSamplerGeneralMixture::multipleScatteringUpdate: using semi_gaussian mixture"<<std::endl;
       theta = simSemigauss(scattering_params); // Simulate
     }
@@ -104,8 +93,8 @@ double Fatras::MultipleScatteringSamplerGeneralMixture::simTheta(const Acts::Mat
    
     theta=sqrt(sigma2)*m_config.randomNumbers->draw(Fatras::GaussZiggurat);
   }
- 
-  return theta*s_projectionFactor;
+  // return scaled by sqare root of two
+  return theta*s_sqrtTwo;
 }
 
 double* Fatras::MultipleScatteringSamplerGeneralMixture::getGaussian(double beta, double p,double dOverX0, double scale) const{

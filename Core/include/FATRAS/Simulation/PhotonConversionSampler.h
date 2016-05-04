@@ -7,12 +7,11 @@
 
 // ACTS includes
 #include "ACTS/Utilities/Definitions.h"
-#include "ACTS/EventData/ParticleHypothesis.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 
 // FATRAS includes
 #include "FATRAS/Common/IRandomNumbers.h"
 #include "FATRAS/Simulation/IPhotonConversionSampler.h"
-#include "FATRAS/Simulation/detail/PdgToParticleHypothesis.h"
 
 // STL
 #include <algorithm>
@@ -89,7 +88,7 @@ namespace Fatras {
                                                         const Acts::Vector3D& photonMomentum,
                                                         double childEnergy, 
                                                         const Acts::Vector3D& childDirection,
-                                                        Acts::ParticleHypothesis childType) const;
+                                                        Acts::ParticleType childType) const;
       /** helper functions for the Phi1/phi2 */
       double phi1(double delta) const;
       
@@ -98,12 +97,6 @@ namespace Fatras {
       
       /** the congifuration */
       Config                                     m_config;
-      
-      /** statics for interaction */
-      static Acts::ParticleMasses                s_particleMasses;
-      static PdgToParticleHypothesis             s_pdgToHypo;
-      static double                              s_alpha;
-      static double                              s_oneOverThree;
       
   };
   

@@ -4,15 +4,11 @@
 
 // FATRAS
 #include "FATRAS/Simulation/HadronicInteractionParametricSampler.h"
+#include "FATRAS/Simulation/detail/FatrasDefinitions.h"
+#include "FATRAS/Simulation/detail/FatrasHelpers.h"
 // ACTS includes
-#include "ACTS/EventData/ParticleProperties.h"
+#include "ACTS/EventData/ParticleDefinitions.h"
 #include "ACTS/Utilities/MsgMacros.h"
-
-//static particle masses
-Acts::ParticleMasses Fatras::HadronicInteractionParametricSampler::s_particleMasses;
-
-//static PdgToParticleHypothesis
-Fatras::PdgToParticleHypothesis Fatras::HadronicInteractionParametricSampler::s_pdgToHypo;
 
 // constructor
 Fatras::HadronicInteractionParametricSampler::HadronicInteractionParametricSampler(const Fatras::HadronicInteractionParametricSampler::Config& hiConfig ) :
@@ -34,7 +30,7 @@ void Fatras::HadronicInteractionParametricSampler::setConfiguration(const Fatras
 std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSampler::doHadronicInteraction(double time,
 												                                                         const Acts::Vector3D& position, 
 												                                                         const Acts::Vector3D& momentum,
-												                                                         Acts::ParticleHypothesis particle) const 
+												                                                         Acts::ParticleType particle) const 
 {
   return getHadState(time, momentum.mag(), position, momentum.unit(), particle);
 }
@@ -42,7 +38,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
 std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSampler::getHadState(double time, double p,
 											                                                   const Acts::Vector3D& vertex,
 											                                                   const Acts::Vector3D& particleDir,
-											                                                   Acts::ParticleHypothesis particle) const
+											                                                   Acts::ParticleType particle) const
 {  
   std::vector<Acts::InteractionVertex> children;
 
@@ -112,7 +108,7 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
   // creation of shower particles
   double chargedist = 0.;
   std::vector<double> charge(Npart);
-  std::vector<Acts::ParticleHypothesis> childType(Npart);
+  std::vector<Acts::ParticleType> childType(Npart);
   std::vector<double> newm(Npart);
   std::vector<int> pdgid(Npart);    
   
@@ -334,10 +330,9 @@ std::vector<Acts::InteractionVertex> Fatras::HadronicInteractionParametricSample
       if (pdgid[i]<10000) {
           /*!>@TODO Getting the momentum from the boost */
           Acts::Vector3D childP = Acts::Vector3D(childBoost[i].x(),childBoost[i].y(),childBoost[i].z());
-      
           if (childP.mag()> m_config.minimumHadOutEnergy) {
               // create the particle and increase the number of children
-              pOutgoing.push_back(Acts::ParticleProperties(childP, s_pdgToHypo.convert(childType[i], charge[i], false)));
+              pOutgoing.push_back(Acts::ParticleProperties(childP, convertToPdg(childType[i], charge[i], false)));
               numChildren++;
           }     
           // increase the number of generated particles
