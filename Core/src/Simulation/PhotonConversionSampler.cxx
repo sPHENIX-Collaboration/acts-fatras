@@ -52,6 +52,7 @@ std::vector<Acts::InteractionVertex> Fatras::PhotonConversionSampler::doConversi
 
 double Fatras::PhotonConversionSampler::childEnergyFraction(double gammaMom) const {
 
+  // @TODO write documentation
   // the fraction
   double epsilon0      = s_particleMasses.mass[Acts::electron]/gammaMom;
   // some needed manipolations

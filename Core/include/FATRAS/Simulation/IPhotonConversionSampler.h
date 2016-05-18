@@ -24,15 +24,15 @@ namespace Fatras {
   */
     class IPhotonConversionSampler {
 
-  public:
+      public:
     
-    /** Virtual destructor */    
-    virtual ~IPhotonConversionSampler() {}
+        /** Virtual destructor */
+        virtual ~IPhotonConversionSampler() {}
     
-    /** interface for processing of the presampled conversion on layer*/
-    virtual std::vector<Acts::InteractionVertex> doConversion(double time, 
-							                                  const Acts::Vector3D& position , 
-							                                  const Acts::Vector3D& momentum) const = 0;
+        /** interface for processing of the presampled conversion on layer*/
+        virtual std::vector<Acts::InteractionVertex> doConversion(double time,
+                                                                  const Acts::Vector3D& position,
+                                                                  const Acts::Vector3D& momentum) const = 0;
 
   };
 
