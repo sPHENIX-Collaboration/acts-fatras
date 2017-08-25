@@ -1,45 +1,96 @@
-///////////////////////////////////////////////////////////////////
-// IRandomNumbers.h, ACTS project
-///////////////////////////////////////////////////////////////////
+//
+//  RandomNumbersDistributions.hpp
+//  FATRAS
+//
+//  Created by Hadrien Grasland on 27/06/17.
+//
+//
 
-#ifndef ACTS_CORE_IRANDOMNUMBERSVC_H
-#define ACTS_CORE_IRANDOMNUMBERSVC_H 1
+/// This file was copied from the ACTS Test framework
+
+#ifndef FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
+#define FATRAS_RANDOMNUMBERDISTRIBUTIONS_H 1
+
+#include <random>
+#include "Fatras/detail/LandauQuantile.hpp"
 
 namespace Fatras {
-  
-  /** @class IRandomNumberSvc
-   * 
-   * Random number service for drawing number with a specified distribution
-   * 
-   *  @author Noemi Calace -at- cern.ch
-   */
-  
-  /** @enum Distribution
-   * Distribution, enum for drawing number with a specified distribution
-   */
 
-  enum Distribution : unsigned int {
-      Flat          = 0,
-      Gauss         = 1,
-      GaussZiggurat = 2,
-      Landau        = 3,
-      Gamma         = 4
+/// The following standard random number distributions are supported:
+///
+using GaussDist = std::normal_distribution<double>;          ///< Normal
+using UniformDist = std::uniform_real_distribution<double>;  ///< Uniform
+using GammaDist = std::gamma_distribution<double>;           ///< Gamma
+using PoissonDist = std::poisson_distribution<int>;          ///< Poisson
+///
+/// In addition, the Landau distribution is provided
+///
+class LandauDist {
+ public:
+  /// A RandomNumberDistribution should provide a parameters struct
+  struct param_type {
+    double mean = 0.;   ///< Mean of the Landau distribution
+    double scale = 1.;  ///< Scale factor
+
+    /// Default constructor and constructor from raw parameters
+    param_type() = default;
+    param_type(double mean, double scale);
+
+    /// Parameters should be CopyConstructible and CopyAssignable
+    param_type(const param_type&) = default;
+    param_type& operator=(const param_type&) = default;
+
+    /// Parameters should be EqualityComparable
+    bool operator==(const param_type& other) const;
+    bool operator!=(const param_type& other) const { return !(*this == other); }
+
+    /// Parameters should link back to the host distribution
+    using distribution_type = LandauDist;
   };
-  
-  class IRandomNumbers {
-    
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
-  public:
-    /** Virtual destructor */
-    virtual ~IRandomNumbers() {}
-      
-    /** draw the random number 
-     * with a specified distribution */
-    virtual double draw(Fatras::Distribution, double k=1.0, double lambda=1.0) const = 0;
-      
-  };
+
+  /// There should be a default constructor, a constructor from raw parameters,
+  /// and a constructor from a parameters struct
+  LandauDist() = default;
+  LandauDist(double mean, double scale);
+  LandauDist(const param_type& cfg);
+
+  /// A distribution should be copy-constructible and copy-assignable
+  LandauDist(const LandauDist&) = default;
+  LandauDist& operator=(const LandauDist&) = default;
+
+  /// Some standard ways to control the distribution's state should be provided
+  void reset() { /* There is currently no state to reset here */
+  }
+  param_type param() const { return m_cfg; }
+  void param(const param_type& p) { m_cfg = p; }
+
+  /// A RandomNumberDistribution should provide a result type typedef and some
+  /// bounds on the values that can be emitted as output
+  using result_type = double;
+  result_type min() const;
+  result_type max() const;
+
+  /// Generate a random number following a Landau distribution
+  template <typename Generator>
+  result_type operator()(Generator& engine) {
+    return (*this)(engine, m_cfg);
+  }
+
+  /// Do the same, but using custom Landau distribution parameters
+  template <typename Generator>
+  result_type operator()(Generator& engine, const param_type& params) {
+    double x = std::generate_canonical<float, 10>(engine);
+    double res = params.mean + landau_quantile(x, params.scale);
+    return res;
+  }
+
+  /// Provide standard comparison operators
+  bool operator==(const LandauDist& other) const;
+  bool operator!=(const LandauDist& other) const { return !(*this == other); }
+
+ private:
+  param_type m_cfg;  ///< configuration struct
+};
 }
 
-#endif //> ! ACTS_CORE_IRANDOMNUMBERSVC_H
+#endif  // FATRAS_RANDOMNUMBERDISTRIBUTIONS_H

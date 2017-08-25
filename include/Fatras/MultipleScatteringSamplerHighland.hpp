@@ -4,79 +4,76 @@
 
 #ifndef ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H 1
- 
-// ACTS include
-#include "ACTS/Utilities/Definitions.h"
-#include "ACTS/Material/MaterialProperties.h"
-#include "ACTS/EventData/ParticleDefinitions.h"
-#include "ACTS/Extrapolation/detail/MaterialInteraction.h"
-// FATRAS include
-#include "FATRAS/Common/IRandomNumbers.h"
-#include "FATRAS/Simulation/IMultipleScatteringSampler.h"
-// STD
+
 #include <memory>
+#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "ACTS/Material/MaterialProperties.hpp"
+#include "ACTS/Utilities/Definitions.hpp"
+#include "Fatras/IMultipleScatteringSampler.hpp"
 
 namespace Fatras {
-  
-  /** @class MultipleScatteringSamplerHighland
-   * 
-   * The Formula used is the highland formula for the projected scattering angle :
-   * 
-   * @f$ \theta_{ms} = \frac{13.6MeV}{p}\cdot\sqrt{t/X_{0}}[1 + 0.038\ln(t/X_{0})] @f$
-   * 
-   * What is returned is the square of the expectation value of the deflection
-   * @f$ < (\theta_ms)^2 > = \sigma_ms^2 @f$
-   * 
-   * @author Andreas Salzburger <Andreas.Salzburger@cern.ch>
-   * @author Noemi Calace       <Noemi.Calace@cern.ch>
-   * 
-   */
- 
-  class MultipleScatteringSamplerHighland : virtual public IMultipleScatteringSampler {
-     
-    public:
-      /** @struct Config 
-          Configuration Struct for the MultipleScattering Sampler */
-      struct Config {
-          
-        std::shared_ptr<IRandomNumbers>    randomNumbers;   //!< the Random number service
-        bool                                 log_include; //!< include the log term
 
-        Config() :
-          randomNumbers(nullptr),
-          log_include(true)
-        {}
-      };
-  
-      /** AlgTool like constructor */
-      MultipleScatteringSamplerHighland(const Config& msConfig);
-     
-      /**Virtual destructor*/
-      virtual ~MultipleScatteringSamplerHighland();
-     
-      /** Calculate the theta introduced by multiple scattering,
-       *          according to the RutherFord-Scott Formula           
-       */
-      double simTheta(const Acts::MaterialProperties& mat,
-                      double p,
-                      double pathcorrection,
-                      Acts::ParticleType particle=Acts::pion) const final;
-     
-      /** Set configuration method */
-      void setConfiguration(const Config& eeConfig);
-  
-      /** Get configuration method */
-      Config getConfiguration() const;                                 
-  
-    protected:
-      Config                            m_config; // the configuraiton object
+/// @class MultipleScatteringSamplerHighland
+///
+/// The Formula used is the highland formula for the projected scattering angle:
+///
+/// @f$ \theta_{ms} = \frac{13.6MeV}{p}\cdot\sqrt{t/X_{0}}[1 +
+/// 0.038\ln(t/X_{0})]
+/// @f$
+///
+/// What is returned is the square of the expectation value of the deflection
+/// @f$ < (\theta_ms)^2 > = \sigma_ms^2 @f$
+///
+/// @author Andreas Salzburger <Andreas.Salzburger@cern.ch>
+/// @author Noemi Calace       <Noemi.Calace@cern.ch>
+///
+template <class RandomGenerator>
+class MultipleScatteringSamplerHighland
+    : virtual public IMultipleScatteringSampler<RandomGenerator> {
+ public:
+  /// @struct Config
+  /// Configuration Struct for the MultipleScattering Sampler
+  struct Config {
+    /// Include the log term
+    bool log_include;
 
-    };
+    Config() : log_include(true) {}
+  };
 
-    /** Return the configuration object */    
-    inline MultipleScatteringSamplerHighland::Config MultipleScatteringSamplerHighland::getConfiguration() const { return m_config; }
- 
-} // end of namespace
+  /// Constructor
+  /// @param[in] config The configuration object
+  MultipleScatteringSamplerHighland(const Config& config);
 
+  /// Virtual destructor
+  virtual ~MultipleScatteringSamplerHighland() = default;
 
-#endif // ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H
+  /// Implementation according to the RutherFord-Scott Formula
+  // clang-format off
+  /// @copydoc IMultipleScatteringSampler::simTheta(const Acts::MaterialProperties&,double,double,Acts::ParticleType) const
+  // clang-format on
+  double simTheta(RandomGenerator& randomGenerator,
+                  const Acts::MaterialProperties& mat, double p,
+                  double pathcorrection,
+                  Acts::ParticleType particle = Acts::pion) const final;
+
+  /// Set configuration method
+  /// @param[in] config The configuration object
+  void setConfiguration(const Config& config);
+
+  /// Get configuration method
+  /// @return The configuration object
+  Config getConfiguration() const { return m_config; }
+
+ protected:
+  /// The configuraiton object
+  Config m_config;
+  /// Struct of Particle masses
+  Acts::ParticleMasses m_particleMasses;
+};
+
+}  // end of namespace
+
+/// Define the templated function
+#include "detail/MultipleScatteringSamplerHighland.ipp"
+
+#endif  // ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H
