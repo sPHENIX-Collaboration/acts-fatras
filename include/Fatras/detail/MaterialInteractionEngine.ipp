@@ -139,17 +139,11 @@ template <class T> Acts::ExtrapolationCode Fatras::MaterialInteractionEngine<Ran
     double thicknessInL0           = mprop.thicknessInL0();
     
     // electromagnetic interaction
-  /*  std::cout << "!!Old parameters position: " << eCell.leadParameters->position().x() << "," << eCell.leadParameters->position().y() << "," << eCell.leadParameters->position().z() << std::endl;*/
     // @todo why parameters needed. when eCell handed over?
     auto newParameters = electroMagneticInteraction(*eCell.leadParameters, eCell, msurface,
                                                     dir, mprop, thicknessInX0,
                                                     pathCorrection, mFraction);
-   // if (!newParameters) std::cout << "!newParameters" << std::endl;
-
-  /*  std::cout << "!!Old parameters direction: " << eCell.leadParameters->momentum().x() << "," << eCell.leadParameters->momentum().y() << "," << eCell.leadParameters->momentum().z() << std::endl;
-   
-    std::cout << "!!New parameters direction: " << newParameters->momentum().x() << "," << newParameters->momentum().y() << "," << newParameters->momentum().z() << std::endl;
-  */
+  
     const Acts::Vector3D& stepPosition = newParameters->position();
     eCell.stepMaterial(std::move(newParameters),stepPosition,*msurface,pathCorrection,&mprop);
     //@todo could be only needed for output later
@@ -313,19 +307,12 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(c
         // for now make no distinction
         // MIP case
         // calculate the new momentum
-       /* std::cout << "MaterialInteractionEngine::m: " << m << "Energy Loss evaluation : E, deltaE:" << E << ","
-        << eloss.deltaE() << ", E + eloss.deltaE(): " << E + eloss.deltaE() << std::endl;*/
         newP = (E + eloss.deltaE()) > m
         ? sqrt((E + eloss.deltaE()) * (E + eloss.deltaE()) - m * m)
         : 0.;
-     //   std::cout << "MaterialInteractionEngine::newP: " << newP << ", old p: " << p << std::endl;
-        
-     //   if ((float)newP == (float)p) std::cout << "MaterialInteractionEngine::newP == p!" << std::endl;
-    //    if (newP == 0.) std::cout << "MaterialInteractionEngine::newP == 0.!" << std::endl;
         
         // update QOP
         uParameters[Acts::eQOP] = parameters.charge() / newP;
-     //   if (fabs(eloss.deltaE()) < 0.001) std::cout << "MaterialInteractionEngine::ELoss smaller 0.001" << std::endl;
         
         EX_MSG_VERBOSE(eCell.navigationStep, surfaceType,  surfaceID, "Energy Loss evaluation : E, deltaE:" << E << ","
                        << eloss.deltaE());
@@ -565,12 +552,9 @@ template <class RandomGenerator>
     double phi   =  parameters[Acts::ePHI];
     double sinTheta   = (sin(theta)*sin(theta) > 10e-10) ? sin(theta) : 1.;
 
-  //    std::cout << "old theta" << theta << std::endl;
     // @todo whats the projectionfactor?
     // sample them in an independent way
     double deltaTheta = m_projectionFactor*simTheta;
-  //    std::cout << "projectionfactor: " << m_projectionFactor << " simTheta: " << simTheta << std::endl;
- //     std::cout << "deltaTheta: " << deltaTheta << std::endl;
     double deltaPhi   =
     m_projectionFactor*num_deltaPhi/sinTheta;
 
@@ -592,11 +576,8 @@ template <class RandomGenerator>
     double thetaMs = simTheta;
     double psi     = 2.*M_PI*uniformDist(*m_randomGenerator);
       
-  //    std::cout << "MaterialInteractionEngine::thetaMs: " << thetaMs << std::endl;
-  //    std::cout << "MaterialInteractionEngine::Psi: " << psi << std::endl;
     // more complex but "more true"
     Acts::Vector3D newDirection(pars.momentum().unit());
-  //    std::cout << "MaterialInteractionEngine::Old Direction: " <<newDirection << std::endl;
     double x = -newDirection.y();
     double y = newDirection.x();
     double z = 0.;
@@ -616,7 +597,6 @@ template <class RandomGenerator>
     Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
     // get the new direction
     newDirection = transform*newDirection;
- //     std::cout << "MaterialInteractionEngine::New Direction: " <<newDirection << std::endl;
     // assign the new values
     parameters[Acts::ePHI]   = newDirection.phi();
     parameters[Acts::eTHETA] = newDirection.theta();

@@ -45,10 +45,6 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
     return sampledEloss;
   }
 
-  /*  std::cout
-        <<
-     "--------------------------------------------------------------------"
-        << std::endl;*/
   // calculate the path length
   double pathLength = pathCorrection * materialProperties.thickness();
   // the uncertainty of the mean energy loss
@@ -81,17 +77,8 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
     float dRad_rest = m - E - sampledEloss.deltaE();
     sampledEloss.update(0., 0., dRad_rest, 0., false);
   }
-
   ACTS_VERBOSE("[eloss] created random deltaP as : " << sampledEloss.deltaE());
 
-  /* std::cout << "eLossSampler::eLoss : " << energyLoss << std::endl;
-   std::cout << "eLossSampler::energyLossSigma : " << energyLossSigma
-             << std::endl;
-   std::cout << "eLossSampler::landau : " << landau << std::endl;
-   std::cout << "eLossSampler::simulatedDeltaE : " << simulatedDeltaE
-             << std::endl;
-   std::cout << "eLossSampler::sampledEloss : " << sampledEloss << std::endl;
- */
   return sampledEloss;
 }
 
