@@ -47,14 +47,13 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
 
   // calculate the path length
   double pathLength = pathCorrection * materialProperties.thickness();
-  // the uncertainty of the mean energy loss
-  double energyLossSigma = 0.;
-
   // Evaluate the energy loss and its sigma
-  double energyLoss = Acts::ionizationEnergyLoss(
-      Acts::InteractionType::sim, energyLossSigma, momentum,
-      materialProperties.material(), particleHypothesis, m_particleMasses,
-      pathLength);
+  auto eLoss = Acts::ionizationEnergyLoss_mop(
+      momentum, materialProperties.material(), particleHypothesis,
+      m_particleMasses, pathLength);
+  double energyLoss = eLoss.first;
+  // the uncertainty of the mean energy loss
+  double energyLossSigma = eLoss.second;
   // Create a random landau distribution between in the intervall [0,1]
   Fatras::LandauDist landauDist(0., 1.);
   double landau = landauDist(randomGenerator);
