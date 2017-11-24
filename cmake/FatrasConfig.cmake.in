@@ -1,0 +1,32 @@
+# - Config file for the FATRAS package
+#
+# It includes the cmake targets of all defined components. Additionally, the
+# following variables are set:
+# - FATRAS_INCLUDE_DIR ... directory containing the Fatras header files
+# - FATRAS_LIBRARY_DIR ... directory containing the Fatras libraries
+
+
+# find the ACTS package
+find_package(ACTS COMPONENTS Core)
+
+# - Init CMakePackageConfigHelpers
+@PACKAGE_INIT@
+
+# print information about found version
+if (NOT (${FATRAS_FIND_QUIETLY}))
+message (STATUS "found Fatras version @FATRAS_VERSION@")
+endif()
+
+# - Create relocatable paths
+# NOTE: Do not strictly need paths as all usage requirements are encoded in
+# the imported targets created later.
+set_and_check (FATRAS_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check (FATRAS_LIBRARY_DIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
+set (FATRAS_LIBRARY Fatras)
+
+set (FATRAS_INCLUDE_DIRS ${FATRAS_INCLUDE_DIR} ${ACTS_INCLUDE_DIR})
+MESSAGE(INFO "FATRAS_INCLUDE_DIRS: ${FATRAS_INCLUDE_DIRS}")
+set (FATRAS_LIBRARY_DIRS "${FATRAS_LIBRARY_DIR} ${ACTS_LIBRARY_DIR}")
+set (FATRAS_LIBRARIES "${FATRAS_LIBRARY}")
+
+include ("${CMAKE_CURRENT_LIST_DIR}/FatrasTargets.cmake")
