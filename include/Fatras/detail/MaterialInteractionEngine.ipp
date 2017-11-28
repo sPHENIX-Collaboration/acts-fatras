@@ -1,14 +1,16 @@
 ///////////////////////////////////////////////////////////////////
 // MaterialInteractionEngine.icc, ACTS project
 ///////////////////////////////////////////////////////////////////
-       
-#include "ACTS/Layers/Layer.hpp"
-#include "ACTS/Material/SurfaceMaterial.hpp"
-#include "Fatras/MaterialInteractionEngine.hpp"
-#include <math.h>
+
+#include <cmath>
 #include <sstream>
-#include "ACTS/Layers/Layer.hpp"
-#include "ACTS/Material/SurfaceMaterial.hpp"
+
+#include <ACTS/Layers/Layer.hpp>
+#include <ACTS/Material/SurfaceMaterial.hpp>
+#include <ACTS/Layers/Layer.hpp>
+#include <ACTS/Material/SurfaceMaterial.hpp>
+
+#include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/EnergyLoss.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 #include "Fatras/RandomNumberDistributions.hpp"
@@ -232,7 +234,7 @@ template <class T> Acts::ExtrapolationCode Fatras::MaterialInteractionEngine<Ran
      return Acts::ExtrapolationCode::SuccessMaterialLimit;
      }*/
     
-    return Acts::ExtrapolationCode::InProgress;   
+    return Acts::ExtrapolationCode::InProgress;
     
 }
 

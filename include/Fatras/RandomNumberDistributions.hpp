@@ -8,10 +8,11 @@
 
 /// This file was copied from the ACTS Test framework
 
-#ifndef FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
-#define FATRAS_RANDOMNUMBERDISTRIBUTIONS_H 1
+#ifndef ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
+#define ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H 1
 
 #include <random>
+
 #include "Fatras/detail/LandauQuantile.hpp"
 
 namespace Fatras {

@@ -5,8 +5,7 @@
 #ifndef ACTS_FATRAS_IMULTIPLESCATTERINGSAMPLER_H
 #define ACTS_FATRAS_IMULTIPLESCATTERINGSAMPLER_H 1
 
-// ACTS include
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include <ACTS/EventData/ParticleDefinitions.hpp>
 
 namespace Acts {
 class MaterialProperties;

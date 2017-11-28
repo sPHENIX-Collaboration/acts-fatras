@@ -2,12 +2,12 @@
 // EnergyLoss.cpp, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-// FATRAS includes
-#include "Fatras/EnergyLoss.hpp"
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <string>
+
+#include "Fatras/EnergyLoss.hpp"
 
 Fatras::EnergyLoss::EnergyLoss(double deltaE, double sigmaDeltaE,
                                double sMinusDeltaE, double sPlusDeltaE)

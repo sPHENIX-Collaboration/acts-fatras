@@ -6,9 +6,11 @@
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERHIGHLAND_H 1
 
 #include <memory>
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Material/MaterialProperties.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+
+#include <ACTS/EventData/ParticleDefinitions.hpp>
+#include <ACTS/Material/MaterialProperties.hpp>
+#include <ACTS/Utilities/Definitions.hpp>
+
 #include "Fatras/IMultipleScatteringSampler.hpp"
 
 namespace Fatras {

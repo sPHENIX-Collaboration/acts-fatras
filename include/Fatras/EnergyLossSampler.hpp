@@ -6,10 +6,12 @@
 #define ACTS_FATRAS_ENERGYLOSSSAMPLER_H 1
 
 #include <memory>
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Material/MaterialProperties.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
-#include "ACTS/Utilities/Logger.hpp"
+
+#include <ACTS/EventData/ParticleDefinitions.hpp>
+#include <ACTS/Material/MaterialProperties.hpp>
+#include <ACTS/Utilities/Definitions.hpp>
+#include <ACTS/Utilities/Logger.hpp>
+
 #include "Fatras/IEnergyLossSampler.hpp"
 
 namespace Fatras {

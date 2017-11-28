@@ -5,9 +5,8 @@
 #ifndef ACTS_FATRAS_IHADRONICINTERACTIONSAMPLER_H
 #define ACTS_FATRAS_IHADRONICINTERACTIONSAMPLER_H 1
 
-// ACTS include
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include <ACTS/EventData/ParticleDefinitions.hpp>
+#include <ACTS/Utilities/Definitions.hpp>
 
 namespace Acts {
 class InteractionVertex;

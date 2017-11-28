@@ -5,8 +5,8 @@
 #ifndef ACTS_FATRAS_ENERGYLOSS_H
 #define ACTS_FATRAS_ENERGYLOSS_H 1
 
-#include <math.h>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 
 namespace Fatras {
