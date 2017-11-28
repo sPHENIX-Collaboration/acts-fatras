@@ -67,7 +67,7 @@ double Fatras::MultipleScatteringSamplerHighland<RandomGenerator>::simTheta(Rand
     }
     // returned scaled by the projection factor
     // @todo before gaussZiggurat was used, currently use only gauss until it is implemented
-    double returnV =  constants::sqrtTwo * sqrt(sigma2) *
+    double returnV =  M_SQRT2 * std::sqrt(sigma2) *
     gaussDist(randomGenerator);
     return returnV;
 }
