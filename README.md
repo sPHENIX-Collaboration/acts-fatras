@@ -1,6 +1,7 @@
 # FATRAS Extension to the ACTS Project
 
-This project provides the necessary extension to run the fast track simulation
-modules on top of the ACTS Core.
+This project provides the code to run a fast track simulation on top of the ACTS
+Core. The project should be used by including it directly as a cmake
+subdirectory, i.e.
 
-
+    add_subdirectory(<PATH/TO/FATRAS/SOURCES>)
