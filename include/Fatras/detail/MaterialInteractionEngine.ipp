@@ -7,323 +7,407 @@
 
 #include <ACTS/Layers/Layer.hpp>
 #include <ACTS/Material/SurfaceMaterial.hpp>
-#include <ACTS/Layers/Layer.hpp>
-#include <ACTS/Material/SurfaceMaterial.hpp>
 
-#include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/EnergyLoss.hpp"
-#include "Fatras/detail/FatrasDefinitions.hpp"
+#include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/RandomNumberDistributions.hpp"
+#include "Fatras/detail/FatrasDefinitions.hpp"
 
 // constructor
 template <class RandomGenerator>
 Fatras::MaterialInteractionEngine<RandomGenerator>::MaterialInteractionEngine(
     const MaterialInteractionEngine::Config& miConfig,
-    std::unique_ptr<const Acts::Logger> logger)
-    : Acts::IMaterialEffectsEngine(),
-      m_config(),
-      m_logger(std::move(logger)),
-      m_randomGenerator(nullptr),
-      m_projectionFactor(sqrt(2.) / 2.),
-      m_particleMasses()
-       {
+    std::unique_ptr<const Acts::Logger>      logger)
+  : Acts::IMaterialEffectsEngine()
+  , m_config()
+  , m_logger(std::move(logger))
+  , m_randomGenerator(nullptr)
+  , m_projectionFactor(sqrt(2.) / 2.)
+  , m_particleMasses()
+{
   setConfiguration(miConfig);
 }
 
 // set configuration
 template <class RandomGenerator>
-void Fatras::MaterialInteractionEngine<RandomGenerator>::setConfiguration(
-    const MaterialInteractionEngine::Config& miConfig) {
+void
+Fatras::MaterialInteractionEngine<RandomGenerator>::setConfiguration(
+    const MaterialInteractionEngine::Config& miConfig)
+{
   //!< @todo introduce configuration checking
   m_config = miConfig;
 }
 
 template <class RandomGenerator>
-void Fatras::MaterialInteractionEngine<RandomGenerator>::setLogger(
-    std::unique_ptr<const Acts::Logger> newLogger) {
+void
+Fatras::MaterialInteractionEngine<RandomGenerator>::setLogger(
+    std::unique_ptr<const Acts::Logger> newLogger)
+{
   m_logger = std::move(newLogger);
 }
 
 template <class RandomGenerator>
-void Fatras::MaterialInteractionEngine<RandomGenerator>::setRandomGenerator(RandomGenerator& randomGenerator){
-    m_randomGenerator = &randomGenerator;
+void
+Fatras::MaterialInteractionEngine<RandomGenerator>::setRandomGenerator(
+    RandomGenerator& randomGenerator)
+{
+  m_randomGenerator = &randomGenerator;
 }
 
 /** neutral extrapolation */
 template <class RandomGenerator>
 Acts::ExtrapolationCode
-Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(Acts::ExCellNeutral& eCell, const Acts::Surface* msurface, Acts::PropDirection dir,
-    Acts::MaterialUpdateStage matupstage) const {
-  EX_MSG_DEBUG(++eCell.navigationStep, "handleMaterial", "neut",
+Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(
+    Acts::ExCellNeutral&      eCell,
+    const Acts::Surface*      msurface,
+    Acts::PropDirection       dir,
+    Acts::MaterialUpdateStage matupstage) const
+{
+  EX_MSG_DEBUG(++eCell.navigationStep,
+               "handleMaterial",
+               "neut",
                "handleMaterial for neutral particle called.");
-  return handleMaterialT<Acts::NeutralParameters>(eCell, msurface, dir, matupstage);
+  return handleMaterialT<Acts::NeutralParameters>(
+      eCell, msurface, dir, matupstage);
 }
 
 /** charged extrapolation */
 template <class RandomGenerator>
 Acts::ExtrapolationCode
-Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(Acts::ExCellCharged& eCell, const Acts::Surface* msurface, Acts::PropDirection dir,
-    Acts::MaterialUpdateStage matupstage) const {
-  EX_MSG_DEBUG(++eCell.navigationStep, "handleMaterial", "char",
+Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(
+    Acts::ExCellCharged&      eCell,
+    const Acts::Surface*      msurface,
+    Acts::PropDirection       dir,
+    Acts::MaterialUpdateStage matupstage) const
+{
+  EX_MSG_DEBUG(++eCell.navigationStep,
+               "handleMaterial",
+               "char",
                "handleMaterial for charged particle called.");
-  return handleMaterialT<Acts::TrackParameters>(eCell, msurface, dir, matupstage);
+  return handleMaterialT<Acts::TrackParameters>(
+      eCell, msurface, dir, matupstage);
 }
 
 template <class RandomGenerator>
-template <class T> Acts::ExtrapolationCode Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterialT(Acts::ExtrapolationCell<T>& eCell,
-                                                                                                             const Acts::Surface* msurface,
-                                                                                                             Acts::PropDirection dir,
-                                                                                                             Acts::MaterialUpdateStage matupstage) const
+template <class T>
+Acts::ExtrapolationCode
+Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterialT(
+    Acts::ExtrapolationCell<T>& eCell,
+    const Acts::Surface*        msurface,
+    Acts::PropDirection         dir,
+    Acts::MaterialUpdateStage   matupstage) const
 {
-    
-    // for readability
-    // parameters are the lead parameters
-    // by definition the material surface is the one the parameters are on
-    const Acts::Surface& mSurface = msurface ? (*msurface) : eCell.leadParameters->referenceSurface();
-    size_t approachID  = mSurface.geoID().value(Acts::GeometryID::approach_mask);
-    size_t sensitiveID = mSurface.geoID().value(Acts::GeometryID::sensitive_mask);
-    // approach of sensitive
-    std::string surfaceType = sensitiveID ? "sensitive" : "surface";
-    size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
-    if (!m_randomGenerator) {
-        EX_MSG_FATAL(++eCell.navigationStep,
-                                         surfaceType,
-                                         surfaceID,
-                                         "Random generator not set! Please set it using setRandomGenerator() and reset it for every execution!");
-        return Acts::ExtrapolationCode::FailureConfiguration;
-    }
-    // the Extrapolator made sure that the layer is the lead layer && the parameters are the lead parameters
-    if (mSurface.associatedMaterial()) {
-        EX_MSG_DEBUG(
-                     ++eCell.navigationStep,
+
+  // for readability
+  // parameters are the lead parameters
+  // by definition the material surface is the one the parameters are on
+  const Acts::Surface& mSurface
+      = msurface ? (*msurface) : eCell.leadParameters->referenceSurface();
+  size_t approachID  = mSurface.geoID().value(Acts::GeometryID::approach_mask);
+  size_t sensitiveID = mSurface.geoID().value(Acts::GeometryID::sensitive_mask);
+  // approach of sensitive
+  std::string surfaceType = sensitiveID ? "sensitive" : "surface";
+  size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
+  if (!m_randomGenerator) {
+    EX_MSG_FATAL(++eCell.navigationStep,
+                 surfaceType,
+                 surfaceID,
+                 "Random generator not set! Please set it using "
+                 "setRandomGenerator() and reset it for every execution!");
+    return Acts::ExtrapolationCode::FailureConfiguration;
+  }
+  // the Extrapolator made sure that the layer is the lead layer && the
+  // parameters are the lead parameters
+  if (mSurface.associatedMaterial()) {
+    EX_MSG_DEBUG(++eCell.navigationStep,
+                 surfaceType,
+                 surfaceID,
+                 "handleMaterial called - collect material.");
+    // path correction - the length of material seen in the given direction
+    double pathCorrection
+        = mSurface.pathCorrection(eCell.leadParameters->position(),
+                                  dir * (eCell.leadParameters->momentum()));
+    // the relative direction wrt to the layer
+    Acts::PropDirection rlDir
+        = (pathCorrection > 0. ? Acts::alongMomentum : Acts::oppositeMomentum);
+    // multiply by the pre-and post-update factor
+    double mFactor = mSurface.associatedMaterial()->factor(rlDir, matupstage);
+    if (mFactor == 0.) {
+      EX_MSG_VERBOSE(eCell.navigationStep,
                      surfaceType,
                      surfaceID,
-                     "handleMaterial called - collect material.");
-        // path correction - the length of material seen in the given direction
-        double pathCorrection = mSurface.pathCorrection(eCell.leadParameters->position(),dir*(eCell.leadParameters->momentum()));
-        // the relative direction wrt to the layer
-        Acts::PropDirection rlDir = (pathCorrection > 0. ? Acts::alongMomentum : Acts::oppositeMomentum);
-        // multiply by the pre-and post-update factor
-        double mFactor = mSurface.associatedMaterial()->factor(rlDir, matupstage);
-        if (mFactor == 0.){
-            EX_MSG_VERBOSE(eCell.navigationStep, surfaceType,  surfaceID, "material collection with "  << (matupstage > 0. ? "pre " : "post ")  << "factor 0.");
-            // return the parameters untouched
-            return Acts::ExtrapolationCode::InProgress;
-        }
-        pathCorrection *= mFactor;
-        // screen output
-        EX_MSG_VERBOSE(eCell.navigationStep, surfaceType,  surfaceID, "material update with corr factor = " << pathCorrection);
-        // get the actual material bin
-        const Acts::MaterialProperties* materialProperties = mSurface.associatedMaterial()->material(eCell.leadParameters->position());
-        // and let's check if there's acutally something to do
-        // if the material is filled perform the material interaction
-        if ( materialProperties && materialProperties->thicknessInX0()>0) {
-            // the fraction for re-entry of particles
-            float mFraction=0.;
-            // call the main method
-            return processOnSurfaceT(eCell, msurface, dir, *materialProperties, pathCorrection, mFraction);
-        }
+                     "material collection with "
+                         << (matupstage > 0. ? "pre " : "post ")
+                         << "factor 0.");
+      // return the parameters untouched
+      return Acts::ExtrapolationCode::InProgress;
     }
-    return Acts::ExtrapolationCode::InProgress;
-    
+    pathCorrection *= mFactor;
+    // screen output
+    EX_MSG_VERBOSE(eCell.navigationStep,
+                   surfaceType,
+                   surfaceID,
+                   "material update with corr factor = " << pathCorrection);
+    // get the actual material bin
+    const Acts::MaterialProperties* materialProperties
+        = mSurface.associatedMaterial()->material(
+            eCell.leadParameters->position());
+    // and let's check if there's acutally something to do
+    // if the material is filled perform the material interaction
+    if (materialProperties && materialProperties->thicknessInX0() > 0) {
+      // the fraction for re-entry of particles
+      float mFraction = 0.;
+      // call the main method
+      return processOnSurfaceT(
+          eCell, msurface, dir, *materialProperties, pathCorrection, mFraction);
+    }
+  }
+  return Acts::ExtrapolationCode::InProgress;
 }
 
 template <class RandomGenerator>
-template <class T> Acts::ExtrapolationCode Fatras::MaterialInteractionEngine<RandomGenerator>::processOnSurfaceT(Acts::ExtrapolationCell<T>& eCell,                            const Acts::Surface* msurface,
-                                                                                                             Acts::PropDirection dir,
-                                                                                                             const Acts::MaterialProperties& mprop,
-                                                                                                             double pathCorrection,
-                                                                                                             float& mFraction) const
+template <class T>
+Acts::ExtrapolationCode
+Fatras::MaterialInteractionEngine<RandomGenerator>::processOnSurfaceT(
+    Acts::ExtrapolationCell<T>&     eCell,
+    const Acts::Surface*            msurface,
+    Acts::PropDirection             dir,
+    const Acts::MaterialProperties& mprop,
+    double                          pathCorrection,
+    float&                          mFraction) const
 {
-    // get the material itself & its parameters
-    const Acts::Material& material = mprop.material();
-    double thicknessInX0           = mprop.thicknessInX0();
-    double thicknessInL0           = mprop.thicknessInL0();
-    
-    // electromagnetic interaction
-    // @todo why parameters needed. when eCell handed over?
-    auto newParameters = electroMagneticInteraction(*eCell.leadParameters, eCell, msurface,
-                                                    dir, mprop, thicknessInX0,
-                                                    pathCorrection, mFraction);
-  
-    const Acts::Vector3D& stepPosition = newParameters->position();
-    eCell.stepMaterial(std::move(newParameters),stepPosition,*msurface,pathCorrection,&mprop);
-    //@todo could be only needed for output later
-    /*
-     // for readability
-     // parameters are the lead parameters
-     // by definition the material surface is the one the parameters are on
-    const Acts::Surface& mSurface = msurface ? (*mSurface) : eCell.leadParameters->referenceSurface();
-    size_t approachID  = mSurface.geoID().value(GeometryID::approach_mask);
-    size_t sensitiveID = mSurface.geoID().value(GeometryID::sensitive_mask);
-    // approach of sensitive
-    std::string surfaceType = sensitiveID ? "sensitive" : "surface";
-    size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
-    */
-    
-    // figure out if particle stopped in the layer and recalculate path limit
-    // - the mFraction determines what's left when re-entering the surface within one pass
-   /* bool doInteraction = false;
-    float dX0 = (1.-mFraction)*pathCorrection*thicknessInX0;
-    float dL0 = (1.-mFraction)*pathCorrection*thicknessInL0;
-    
-    // electromagnetic interaction @todo check with ST and document
-    // @todo: check: before check was eCell.materialProcess < 100 now eCell.interactionProcess < 100 - what does this actually mean?
-    if ( eCell.materialLimitX0 > 0. && eCell.interactionProcess < 100 &&
-        eCell.materialX0+dX0 >= eCell.materialLimitX0) {
-        // @todo : whats this remaining material? Why are there material limits?
-        // the remaing path in X0
-        float x0rem = eCell.materialLimitX0 - eCell.materialX0;
-        // calculate the remaining (to be passed by children) L0
-        dX0 *= x0rem > 0. ? x0rem/dX0 : 1.;
-        // the remaining material in dX0
-        if ( x0rem > 0. ) dX0 = x0rem;
-        // interaction to be done as material limit will be passed
-        doInteraction = true;
-    }
-    // hadronic interaction @todo check with ST and document
-    else if ( eCell.materialLimitL0 > 0 && eCell.materialProcess > 100 &&
-             eCell.materialL0+dL0 >= eCell.materialLimitL0 ) {
-        // the remaining potential LO for this layer
-        float l0rem = eCell.materialLimitX0 - eCell.materialL0;
-        // calculate the remaining (to be passed by children) X0
-        dL0 *= l0rem > 0. ? l0rem/dL0 : 1.;
-        // the remaining material in L0
-        if ( l0rem > 0.) dL0 = l0rem;
-        // interaction to be done as material limit will be passed
-        doInteraction = true;
-    }
-    
-    // check if material filling was requested - this is mainly for validation
-    if (eCell.checkConfigurationMode(Acts::ExtrapolationMode::CollectMaterial)) {
-        EX_MSG_VERBOSE(eCell.navigationStep, "layer",  mLayer->geoID().value(), "collecting material of [t/X0] = " << thicknessInX0);
-        eCell.stepMaterial(mSurface, mLayer, eCell.leadParameters->position(), (1.-mFraction)*pathCorrection, mprop);
-    } else {
-        // always just record the material
-        EX_MSG_VERBOSE(eCell.navigationStep, "layer",  mLayer->geoID().value(), "adding material of [t/X0] = " << thicknessInX0);
-        eCell.addMaterial((1.-mFraction)*pathCorrection, mprop);
-    }
-    
-    eCell.leadParameters;
-    
-    if (eCell.leadParameters->momentum().mag() < m_config.particleMinMomentum)
-        return Acts::ExtrapolationCode::SuccessMaterialLimit;
-    
-    // Update the material fraction.
-    //!>@todo  This should be used when children re-interact on the same layer
-    mFraction += dX0/pathCorrection/thicknessInX0;
+  // get the material itself & its parameters
+  const Acts::Material& material      = mprop.material();
+  double                thicknessInX0 = mprop.thicknessInX0();
+  double                thicknessInL0 = mprop.thicknessInL0();
+
+  // electromagnetic interaction
+  // @todo why parameters needed. when eCell handed over?
+  auto newParameters = electroMagneticInteraction(*eCell.leadParameters,
+                                                  eCell,
+                                                  msurface,
+                                                  dir,
+                                                  mprop,
+                                                  thicknessInX0,
+                                                  pathCorrection,
+                                                  mFraction);
+
+  // the update killed the particle
+  if (!newParameters) return Acts::ExtrapolationCode::SuccessMaterialLimit;
+
+  const Acts::Vector3D& stepPosition = newParameters->position();
+  eCell.stepMaterial(std::move(newParameters),
+                     stepPosition,
+                     *msurface,
+                     pathCorrection,
+                     &mprop);
+
+  //@todo could be only needed for output later
+  /*
+   // for readability
+   // parameters are the lead parameters
+   // by definition the material surface is the one the parameters are on
+  const Acts::Surface& mSurface = msurface ? (*mSurface) :
+  eCell.leadParameters->referenceSurface();
+  size_t approachID  = mSurface.geoID().value(GeometryID::approach_mask);
+  size_t sensitiveID = mSurface.geoID().value(GeometryID::sensitive_mask);
+  // approach of sensitive
+  std::string surfaceType = sensitiveID ? "sensitive" : "surface";
+  size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
   */
-    /*if ( doInteraction ) {   // interaction with particle stopping
-     
-     // Interact in the layer and return the vector of InteractionVertex
-     std::vector<Acts::InteractionVertex> vertices = interact(eCell, material);
-     
-     //!>@todo Evaluate the remaining material for children interaction on the same layer
-     // And propagating to the children
-     
-     std::vector<Acts::ParticleProperties> surviving;
-     for (auto& vertex : vertices) {
-     surviving.clear();
-     for (auto& child : vertex.outgoingParticles()) {
-     // if the momentum of the child is less than the minimum --> continue
-     if (child.momentum().mag()>m_minimumMomentum) surviving.push_back(child);
-     }
-     if (surviving.size()>0)
-     eCell.interactionVertices.push_back(Acts::InteractionVertex(vertex.vertex(), vertex.interactionTime(), vertex.interactionType(), surviving));
-     }
-     return Acts::ExtrapolationCode::SuccessMaterialLimit;
-     }*/
-    
-    return Acts::ExtrapolationCode::InProgress;
-    
+
+  // figure out if particle stopped in the layer and recalculate path limit
+  // - the mFraction determines what's left when re-entering the surface within
+  // one pass
+  /* bool doInteraction = false;
+   float dX0 = (1.-mFraction)*pathCorrection*thicknessInX0;
+   float dL0 = (1.-mFraction)*pathCorrection*thicknessInL0;
+
+   // electromagnetic interaction @todo check with ST and document
+   // @todo: check: before check was eCell.materialProcess < 100 now
+   eCell.interactionProcess < 100 - what does this actually mean?
+   if ( eCell.materialLimitX0 > 0. && eCell.interactionProcess < 100 &&
+       eCell.materialX0+dX0 >= eCell.materialLimitX0) {
+       // @todo : whats this remaining material? Why are there material limits?
+       // the remaing path in X0
+       float x0rem = eCell.materialLimitX0 - eCell.materialX0;
+       // calculate the remaining (to be passed by children) L0
+       dX0 *= x0rem > 0. ? x0rem/dX0 : 1.;
+       // the remaining material in dX0
+       if ( x0rem > 0. ) dX0 = x0rem;
+       // interaction to be done as material limit will be passed
+       doInteraction = true;
+   }
+   // hadronic interaction @todo check with ST and document
+   else if ( eCell.materialLimitL0 > 0 && eCell.materialProcess > 100 &&
+            eCell.materialL0+dL0 >= eCell.materialLimitL0 ) {
+       // the remaining potential LO for this layer
+       float l0rem = eCell.materialLimitX0 - eCell.materialL0;
+       // calculate the remaining (to be passed by children) X0
+       dL0 *= l0rem > 0. ? l0rem/dL0 : 1.;
+       // the remaining material in L0
+       if ( l0rem > 0.) dL0 = l0rem;
+       // interaction to be done as material limit will be passed
+       doInteraction = true;
+   }
+
+   // check if material filling was requested - this is mainly for validation
+   if (eCell.checkConfigurationMode(Acts::ExtrapolationMode::CollectMaterial)) {
+       EX_MSG_VERBOSE(eCell.navigationStep, "layer",  mLayer->geoID().value(),
+   "collecting material of [t/X0] = " << thicknessInX0);
+       eCell.stepMaterial(mSurface, mLayer, eCell.leadParameters->position(),
+   (1.-mFraction)*pathCorrection, mprop);
+   } else {
+       // always just record the material
+       EX_MSG_VERBOSE(eCell.navigationStep, "layer",  mLayer->geoID().value(),
+   "adding material of [t/X0] = " << thicknessInX0);
+       eCell.addMaterial((1.-mFraction)*pathCorrection, mprop);
+   }
+
+   eCell.leadParameters;
+
+   if (eCell.leadParameters->momentum().mag() < m_config.particleMinMomentum)
+       return Acts::ExtrapolationCode::SuccessMaterialLimit;
+
+   // Update the material fraction.
+   //!>@todo  This should be used when children re-interact on the same layer
+   mFraction += dX0/pathCorrection/thicknessInX0;
+ */
+  /*if ( doInteraction ) {   // interaction with particle stopping
+
+   // Interact in the layer and return the vector of InteractionVertex
+   std::vector<Acts::InteractionVertex> vertices = interact(eCell, material);
+
+   //!>@todo Evaluate the remaining material for children interaction on the
+   same layer
+   // And propagating to the children
+
+   std::vector<Acts::ParticleProperties> surviving;
+   for (auto& vertex : vertices) {
+   surviving.clear();
+   for (auto& child : vertex.outgoingParticles()) {
+   // if the momentum of the child is less than the minimum --> continue
+   if (child.momentum().mag()>m_minimumMomentum) surviving.push_back(child);
+   }
+   if (surviving.size()>0)
+   eCell.interactionVertices.push_back(Acts::InteractionVertex(vertex.vertex(),
+   vertex.interactionTime(), vertex.interactionType(), surviving));
+   }
+   return Acts::ExtrapolationCode::SuccessMaterialLimit;
+   }*/
+
+  return Acts::ExtrapolationCode::InProgress;
 }
-
-
 
 /** neutral extrapolation - returning the same parameters */
 template <class RandomGenerator>
 std::unique_ptr<const Acts::NeutralParameters>
-Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(const Acts::NeutralParameters& parameters, Acts::ExCellNeutral&, const Acts::Surface* msurface,
-    Acts::PropDirection, const Acts::MaterialProperties&, double, double,
-    double) const {
+Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
+    const Acts::NeutralParameters& parameters,
+    Acts::ExCellNeutral&,
+    const Acts::Surface* msurface,
+    Acts::PropDirection,
+    const Acts::MaterialProperties&,
+    double,
+    double,
+    double) const
+{
   // don't do anything, no EM physics for neutral particles
-    return (nullptr);//std::make_unique<const Acts::NeutralParameters>(&parameters)
+  return (
+      nullptr);  // std::make_unique<const Acts::NeutralParameters>(&parameters)
 }
 
 /** charged extrapolation */
 template <class RandomGenerator>
 std::unique_ptr<const Acts::TrackParameters>
-Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(const Acts::TrackParameters& parameters, Acts::ExCellCharged& eCell, const Acts::Surface* msurface,
-    Acts::PropDirection dir, const Acts::MaterialProperties& mprop, double dX0,
-    double pathCorrection, double mFraction) const {
+Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
+    const Acts::TrackParameters&    parameters,
+    Acts::ExCellCharged&            eCell,
+    const Acts::Surface*            msurface,
+    Acts::PropDirection             dir,
+    const Acts::MaterialProperties& mprop,
+    double                          dX0,
+    double                          pathCorrection,
+    double                          mFraction) const
+{
   // for readability
-    const Acts::Surface& mSurface = msurface ? (*msurface) : eCell.leadParameters->referenceSurface();
-    size_t approachID  = mSurface.geoID().value(Acts::GeometryID::approach_mask);
-    size_t sensitiveID = mSurface.geoID().value(Acts::GeometryID::sensitive_mask);
-    // approach of sensitive
-    std::string surfaceType = sensitiveID ? "sensitive" : "surface";
-    size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
-    
-    // get the parameters
-    double p = parameters.momentum().mag();
-    double newP = 0.;
-    double m = m_particleMasses.mass[eCell.particleType];
-    double E = sqrt(p * p + m * m);
-    // @todo only needed for msc or energyloss
-    double thicknessInX0 = mprop.thicknessInX0();
-    // the parameters to be returned
-    Acts::ActsVectorD<5> uParameters = parameters.parameters();
-    // the covariance to be returned
-    // @todo use nGlobalPars not 5!
-    std::unique_ptr<Acts::ActsSymMatrixD<5>> uCovariance
-    = nullptr;
-    
-    // Multiple scattering
-    if (m_config.multipleScatteringSampler && thicknessInX0 > 0){
-        double simTheta = m_config.multipleScatteringSampler->simTheta(*m_randomGenerator,
-                                                                       mprop, p, dX0 / thicknessInX0,
-                                                                       eCell.particleType);
-        // do the update -> You need 2 evaluation of simTheta. The second one is used to calculate deltaphi in multipleScatteringUpdate
-        
-        multipleScatteringUpdate(*(eCell.leadParameters), uParameters, simTheta,
-                                 m_config.multipleScatteringSampler->simTheta(*m_randomGenerator,
-                                                                              mprop, p, dX0 / thicknessInX0,
-                                                                              eCell.particleType));
+  const Acts::Surface& mSurface
+      = msurface ? (*msurface) : eCell.leadParameters->referenceSurface();
+  size_t approachID  = mSurface.geoID().value(Acts::GeometryID::approach_mask);
+  size_t sensitiveID = mSurface.geoID().value(Acts::GeometryID::sensitive_mask);
+  // approach of sensitive
+  std::string surfaceType = sensitiveID ? "sensitive" : "surface";
+  size_t      surfaceID   = sensitiveID ? sensitiveID : approachID;
 
-    }
-    
-    if (m_config.energyLossSampler || (eCell.particleType == Acts::electron &&
-                                       m_config.energyLossSamplerElectrons)) {
-        // smeared/presampled energy loss
-        Fatras::EnergyLoss eloss =
-        (eCell.particleType == Acts::electron &&
-         m_config.energyLossSamplerElectrons)
+  // get the parameters
+  double p    = parameters.momentum().mag();
+  double newP = 0.;
+  double m    = m_particleMasses.mass[eCell.particleType];
+  double E    = sqrt(p * p + m * m);
+  // @todo only needed for msc or energyloss
+  double thicknessInX0 = mprop.thicknessInX0();
+  // the parameters to be returned
+  Acts::ActsVectorD<5> uParameters = parameters.parameters();
+  // the covariance to be returned
+  // @todo use nGlobalPars not 5!
+  std::unique_ptr<Acts::ActsSymMatrixD<5>> uCovariance = nullptr;
+
+  // Multiple scattering
+  if (m_config.multipleScatteringSampler && thicknessInX0 > 0) {
+    double simTheta = m_config.multipleScatteringSampler->simTheta(
+        *m_randomGenerator, mprop, p, dX0 / thicknessInX0, eCell.particleType);
+    // do the update -> You need 2 evaluation of simTheta. The second one is
+    // used to calculate deltaphi in multipleScatteringUpdate
+
+    multipleScatteringUpdate(
+        *(eCell.leadParameters),
+        uParameters,
+        simTheta,
+        m_config.multipleScatteringSampler->simTheta(*m_randomGenerator,
+                                                     mprop,
+                                                     p,
+                                                     dX0 / thicknessInX0,
+                                                     eCell.particleType));
+  }
+
+  if (m_config.energyLossSampler || (eCell.particleType == Acts::electron
+                                     && m_config.energyLossSamplerElectrons)) {
+    // smeared/presampled energy loss
+    Fatras::EnergyLoss eloss = (eCell.particleType == Acts::electron
+                                && m_config.energyLossSamplerElectrons)
         ? m_config.energyLossSamplerElectrons->energyLoss(*m_randomGenerator,
-                                                   mprop, p, dX0 / thicknessInX0, dir,
-                                                   eCell.particleType)
-        : m_config.energyLossSampler->energyLoss(*m_randomGenerator,mprop, p,
+                                                          mprop,
+                                                          p,
+                                                          dX0 / thicknessInX0,
+                                                          dir,
+                                                          eCell.particleType)
+        : m_config.energyLossSampler->energyLoss(*m_randomGenerator,
+                                                 mprop,
+                                                 p,
                                                  dX0 / thicknessInX0,
                                                  dir,
                                                  eCell.particleType);
-        //@todo add electron case with brem photon and radiation
-        // for now make no distinction
-        // MIP case
-        // calculate the new momentum
-        newP = (E + eloss.deltaE()) > m
-        ? sqrt((E + eloss.deltaE()) * (E + eloss.deltaE()) - m * m)
-        : 0.;
-        
-        // update QOP
-        uParameters[Acts::eQOP] = parameters.charge() / newP;
-        
-        EX_MSG_VERBOSE(eCell.navigationStep, surfaceType,  surfaceID, "Energy Loss evaluation : E, deltaE:" << E << ","
-                       << eloss.deltaE());
-    }
+    //@todo add electron case with brem photon and radiation
+    // for now make no distinction
+    // MIP case
+    // calculate the new momentum - if not physical
+    if ((E + eloss.deltaE()) < m) return nullptr;
+    // indeed possible
+    newP = sqrt((E + eloss.deltaE()) * (E + eloss.deltaE()) - m * m);
 
-    
-    // ------------------------------------------------------------------
+    // update QOP
+    uParameters[Acts::eQOP] = parameters.charge() / newP;
 
-    // get the kinematics
+    EX_MSG_VERBOSE(eCell.navigationStep,
+                   surfaceType,
+                   surfaceID,
+                   "Energy Loss evaluation : E, deltaE:" << E << ","
+                                                         << eloss.deltaE());
+  }
+
+  // ------------------------------------------------------------------
+
+  // get the kinematics
   /*  double p = parameters.momentum().mag();
     double newP = 0.;
     double m = m_particleMasses.mass[eCell.particleType];
@@ -435,8 +519,25 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(c
         }
       }
       return (&parameters);*/
-    std::unique_ptr<const Acts::TrackParameters> tParameters = std::make_unique<Acts::BoundParameters>(std::move(uCovariance), uParameters, *msurface);  // only for now
-    return std::move(tParameters);
+
+  // @todo fix until bug is found
+  // how it should be done:  std::unique_ptr<const Acts::TrackParameters>
+  // tParameters =
+  // std::make_unique<Acts::BoundParameters>(std::move(uCovariance),
+  // uParameters, *msurface);
+  // Currently use local position of parameters (energy Loss & multiple
+  // scattering do not change position) & there is a problem in the
+  // transformation
+  auto   position = parameters.position();
+  double charge   = parameters.parameters()(Acts::eQOP) * p;
+  // Use updated momentum
+  auto momentum
+      = Acts::detail::coordinate_transformation::parameters2globalMomentum(
+          uParameters);
+  std::unique_ptr<const Acts::TrackParameters> tParameters
+      = std::make_unique<Acts::BoundParameters>(
+          std::move(uCovariance), position, momentum, charge, *msurface);
+  return std::move(tParameters);
 }
 
 //// interaction for neutral particles //
@@ -540,71 +641,83 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(c
 //// updating parameters with multiple scattering effects
 
 template <class RandomGenerator>
- void Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(const Acts::TrackParameters& pars,
-                                                                  Acts::ActsVectorD<5>& parameters,
-                                                                  double simTheta,
-                                                                  double num_deltaPhi) const
+void
+Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
+    const Acts::TrackParameters& pars,
+    Acts::ActsVectorD<5>&        parameters,
+    double                       simTheta,
+    double                       num_deltaPhi) const
 {
-    
+
   // parametric scattering - independent in x/y
-  if (m_config.parametricScattering){
-    EX_MSG_VERBOSE("[msupdate]", "MultipleScatteringUpdate", "", "Using parametric scattering." );
+  if (m_config.parametricScattering) {
+    EX_MSG_VERBOSE("[msupdate]",
+                   "MultipleScatteringUpdate",
+                   "",
+                   "Using parametric scattering.");
     // the initial values
-    double theta =  parameters[Acts::eTHETA];
-    double phi   =  parameters[Acts::ePHI];
-    double sinTheta   = (sin(theta)*sin(theta) > 10e-10) ? sin(theta) : 1.;
+    double theta    = parameters[Acts::eTHETA];
+    double phi      = parameters[Acts::ePHI];
+    double sinTheta = (sin(theta) * sin(theta) > 10e-10) ? sin(theta) : 1.;
 
     // @todo whats the projectionfactor?
     // sample them in an independent way
-    double deltaTheta = m_projectionFactor*simTheta;
-    double deltaPhi   =
-    m_projectionFactor*num_deltaPhi/sinTheta;
+    double deltaTheta = m_projectionFactor * simTheta;
+    double deltaPhi   = m_projectionFactor * num_deltaPhi / sinTheta;
 
     phi += deltaPhi;
-    if (phi >= M_PI) phi -= M_PI;
-    else if (phi < -M_PI) phi += M_PI;
+    if (phi >= M_PI)
+      phi -= M_PI;
+    else if (phi < -M_PI)
+      phi += M_PI;
     if (theta > M_PI) theta -= M_PI;
 
-    EX_MSG_VERBOSE("[msupdate]", "MultipleScatteringUpdate", "", "deltaPhi / deltaTheta = " << deltaPhi << " / " << deltaTheta );
+    EX_MSG_VERBOSE("[msupdate]",
+                   "MultipleScatteringUpdate",
+                   "",
+                   "deltaPhi / deltaTheta = " << deltaPhi << " / "
+                                              << deltaTheta);
 
     // assign the new values
     parameters[Acts::ePHI]   = phi;
     parameters[Acts::eTHETA] = fabs(theta + deltaTheta);
-   
+
   } else {
     // Create a random uniform distribution between in the intervall [0,1]
     Fatras::UniformDist uniformDist(0., 1.);
     //@todo test this non parametric way - not tested yet
     double thetaMs = simTheta;
-    double psi     = 2.*M_PI*uniformDist(*m_randomGenerator);
-      
+    double psi     = 2. * M_PI * uniformDist(*m_randomGenerator);
+
     // more complex but "more true"
     Acts::Vector3D newDirection(pars.momentum().unit());
-    double x = -newDirection.y();
-    double y = newDirection.x();
-    double z = 0.;
+    double         x = -newDirection.y();
+    double         y = newDirection.x();
+    double         z = 0.;
     // if it runs along the z axis - no good ==> take the x axis
-    if (newDirection.z()*newDirection.z() > 0.999999)
-        x = 1.; y=0.;
+    if (newDirection.z() * newDirection.z() > 0.999999) x = 1.;
+    y                                                     = 0.;
     // deflector direction
     //!>@todo Check if this is right
-    Acts::Vector3D deflector(x,y,z);
+    Acts::Vector3D deflector(x, y, z);
     // rotate the new direction for scattering using theta and arbitraril in psi
     // create the rotation
     Acts::RotationMatrix3D rotation;
-    rotation = Acts::AngleAxis3D(thetaMs, deflector)*Acts::AngleAxis3D(psi,
-    pars.momentum().unit());
-    EX_MSG_VERBOSE("[msupdate]", "MultipleScatteringUpdate", "", "deltaPsi / deltaTheta = " << psi << " / " << thetaMs );
+    rotation = Acts::AngleAxis3D(thetaMs, deflector)
+        * Acts::AngleAxis3D(psi, pars.momentum().unit());
+    EX_MSG_VERBOSE("[msupdate]",
+                   "MultipleScatteringUpdate",
+                   "",
+                   "deltaPsi / deltaTheta = " << psi << " / " << thetaMs);
     // create the transform
     Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
     // get the new direction
-    newDirection = transform*newDirection;
+    newDirection = transform * newDirection;
     // assign the new values
     parameters[Acts::ePHI]   = newDirection.phi();
     parameters[Acts::eTHETA] = newDirection.theta();
   }
 }
-
 
 // radiative effects
 /*void Fatras::MaterialInteractionEngine::radiate(ActsVectorD<5>& parm,
