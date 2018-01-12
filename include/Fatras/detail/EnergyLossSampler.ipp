@@ -13,32 +13,41 @@
 template <class RandomGenerator>
 Fatras::EnergyLossSampler<RandomGenerator>::EnergyLossSampler(
     const Fatras::EnergyLossSampler<RandomGenerator>::Config& elConfig,
-    std::unique_ptr<const Acts::Logger> logger)
-    : Fatras::IEnergyLossSampler<RandomGenerator>(),
-      m_config(),
-      m_logger(std::move(logger)) {
+    std::unique_ptr<const Acts::Logger>                       logger)
+  : Fatras::IEnergyLossSampler<RandomGenerator>()
+  , m_config()
+  , m_logger(std::move(logger))
+{
   setConfiguration(elConfig);
 }
 
 template <class RandomGenerator>
-void Fatras::EnergyLossSampler<RandomGenerator>::setConfiguration(
-    const Fatras::EnergyLossSampler<RandomGenerator>::Config& elConfig) {
+void
+Fatras::EnergyLossSampler<RandomGenerator>::setConfiguration(
+    const Fatras::EnergyLossSampler<RandomGenerator>::Config& elConfig)
+{
   // @todo update to configuration checking
   m_config = elConfig;
 }
 
 template <class RandomGenerator>
-void Fatras::EnergyLossSampler<RandomGenerator>::setLogger(
-    std::unique_ptr<const Acts::Logger> newLogger) {
+void
+Fatras::EnergyLossSampler<RandomGenerator>::setLogger(
+    std::unique_ptr<const Acts::Logger> newLogger)
+{
   m_logger = std::move(newLogger);
 }
 
 template <class RandomGenerator>
-Fatras::EnergyLoss Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
-    RandomGenerator& randomGenerator,
-    const Acts::MaterialProperties& materialProperties, double momentum,
-    double pathCorrection, Acts::PropDirection direction,
-    Acts::ParticleType particleHypothesis) const {
+Fatras::EnergyLoss
+Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
+    RandomGenerator&                randomGenerator,
+    const Acts::MaterialProperties& materialProperties,
+    double                          momentum,
+    double                          pathCorrection,
+    Acts::PropDirection             direction,
+    Acts::ParticleType              particleHypothesis) const
+{
   Fatras::EnergyLoss sampledEloss(0., 0.);
   if (particleHypothesis == Acts::undefined) {
     ACTS_WARNING("undefined ParticleType, energy loss calculation cancelled");
@@ -48,24 +57,26 @@ Fatras::EnergyLoss Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
   // calculate the path length
   double pathLength = pathCorrection * materialProperties.thickness();
   // Evaluate the energy loss and its sigma
-  auto eLoss = Acts::ionizationEnergyLoss_mop(
-      momentum, materialProperties.material(), particleHypothesis,
-      m_particleMasses, pathLength);
+  auto eLoss = Acts::ionizationEnergyLoss_mop(momentum,
+                                              materialProperties.material(),
+                                              particleHypothesis,
+                                              m_particleMasses,
+                                              pathLength);
   double energyLoss = eLoss.first;
   // the uncertainty of the mean energy loss
   double energyLossSigma = eLoss.second;
   // Create a random landau distribution between in the intervall [0,1]
   Fatras::LandauDist landauDist(0., 1.);
-  double landau = landauDist(randomGenerator);
+  double             landau = landauDist(randomGenerator);
   // Simulate the energy loss
-  double simulatedDeltaE = fabs(energyLoss) * m_config.scalorMOP +
-                           energyLossSigma * landau * m_config.scalorSigma;
+  double simulatedDeltaE = fabs(energyLoss) * m_config.scalorMOP
+      + energyLossSigma * landau * m_config.scalorSigma;
 
   // giving the right sign to the energy loss
   // the sign depends on the given propagation direction
 
-  sampledEloss.update(-1. * direction * simulatedDeltaE, energyLossSigma, 0.,
-                      0., false);
+  sampledEloss.update(
+      -1. * direction * simulatedDeltaE, energyLossSigma, 0., 0., false);
 
   // protection due to straggling - maximum energy loss is E-m
   double m = m_particleMasses.mass[particleHypothesis];

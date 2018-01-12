@@ -7,7 +7,6 @@
 
 #include <ACTS/Layers/Layer.hpp>
 #include <ACTS/Material/SurfaceMaterial.hpp>
-
 #include "Fatras/EnergyLoss.hpp"
 #include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/RandomNumberDistributions.hpp"
@@ -35,7 +34,9 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::setConfiguration(
     const MaterialInteractionEngine::Config& miConfig)
 {
   //!< @todo introduce configuration checking
-  m_config = miConfig;
+  m_config                                   = miConfig;
+  Acts::IMaterialEffectsEngine::m_sopPrefix  = miConfig.prefix;
+  Acts::IMaterialEffectsEngine::m_sopPostfix = miConfig.postfix;
 }
 
 template <class RandomGenerator>
@@ -84,6 +85,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(
                "handleMaterial",
                "char",
                "handleMaterial for charged particle called.");
+
   return handleMaterialT<Acts::TrackParameters>(
       eCell, msurface, dir, matupstage);
 }
@@ -179,7 +181,11 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::processOnSurfaceT(
   // get the material itself & its parameters
   const Acts::Material& material      = mprop.material();
   double                thicknessInX0 = mprop.thicknessInX0();
-  double                thicknessInL0 = mprop.thicknessInL0();
+
+  // first try hadronic interaction
+  if (eCell.particleType == Acts::ParticleType::pion
+      && hadronicInteractionT(eCell, mprop, pathCorrection))
+    return Acts::ExtrapolationCode::SuccessMaterialLimit;
 
   // electromagnetic interaction
   // @todo why parameters needed. when eCell handed over?
@@ -191,7 +197,6 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::processOnSurfaceT(
                                                   thicknessInX0,
                                                   pathCorrection,
                                                   mFraction);
-
   // the update killed the particle
   if (!newParameters) return Acts::ExtrapolationCode::SuccessMaterialLimit;
 
@@ -315,6 +320,34 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
   // don't do anything, no EM physics for neutral particles
   return (
       nullptr);  // std::make_unique<const Acts::NeutralParameters>(&parameters)
+}
+
+template <class RandomGenerator>
+template <class T>
+bool
+Fatras::MaterialInteractionEngine<RandomGenerator>::hadronicInteractionT(
+    Acts::ExtrapolationCell<T>&     eCell,
+    const Acts::MaterialProperties& mprop,
+    double                          pathCorrection) const
+{
+
+  if (!m_config.hadronicInteractionSampler) return false;
+
+  // check the material limit in L0 - if limit not reached (yet), continue
+  eCell.materialL0 += pathCorrection * mprop.thicknessInL0();
+  if (eCell.materialL0 < eCell.materialLimitL0) return false;
+
+  auto hadVertices = m_config.hadronicInteractionSampler->doHadronicInteraction(
+      *m_randomGenerator,
+      0.,
+      eCell.leadParameters->position(),
+      eCell.leadParameters->momentum(),
+      Acts::ParticleType::pion);
+
+  if (hadVertices.size()) eCell.interactionVertices = hadVertices;
+
+  // limit is reached, for the moment - kill the track
+  return true;
 }
 
 /** charged extrapolation */

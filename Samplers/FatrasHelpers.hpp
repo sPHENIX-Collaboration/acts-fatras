@@ -8,6 +8,7 @@
 #include <cmath>
 #include "ACTS/EventData/ParticleDefinitions.hpp"
 
-namespace Fatras {}
+namespace Fatras {
+}
 
 #endif

@@ -13,15 +13,17 @@ namespace Fatras {
 ///
 /// @author Andreas.Salzburger@cern.ch
 
-class IBarcodeSampler {
- public:
+class IBarcodeSampler
+{
+public:
   /// Virtual destructor
   virtual ~IBarcodeSampler() = default;
 
   /// Interface for processing of the presampled conversion on layer
   /// @param
   /// @todo there is something wrong
-  virtual barcode_type generateChildBarcode(barcode_type mother, ) const;
+  virtual barcode_type
+  generateChildBarcode(barcode_type mother, ) const;
 };
 }
 

@@ -7,10 +7,8 @@
 #define ACTS_FATRAS_PROCESSAMPLER_H
 
 namespace Fatras {
-    
-    
-    <#declarations#>
-}
 
+<#declarations#>
+}
 
 #endif /* ACTS_FATRAS_PROCESSAMPLER_H */

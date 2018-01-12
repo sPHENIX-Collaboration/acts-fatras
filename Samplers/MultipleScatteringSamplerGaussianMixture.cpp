@@ -15,20 +15,25 @@ template <class RandomNumbers>
 Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::
     MultipleScatteringSamplerGaussianMixture(
         const MultipleScatteringSamplerGaussianMixture::Config& msConfig)
-    : m_config() {
+  : m_config()
+{
   setConfiguration(msConfig);
 }
 
 // destructor
 template <class RandomNumbers>
-Fatras::MultipleScatteringSamplerGaussianMixture<
-    RandomNumbers>::~MultipleScatteringSamplerGaussianMixture() {}
+Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::
+    ~MultipleScatteringSamplerGaussianMixture()
+{
+}
 
 template <class RandomNumbers>
-void Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::
+void
+Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::
     setConfiguration(
         const Fatras::MultipleScatteringSamplerGaussianMixture::Config&
-            msConfig) {
+            msConfig)
+{
   //!< @TODO update to configuration checking
   m_config = msConfig;
 }
@@ -36,8 +41,11 @@ void Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::
 template <class RandomNumbers>
 double
 Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::simTheta(
-    const Acts::MaterialProperties& mat, double p, double pathcorrection,
-    Acts::ParticleType particle) const {
+    const Acts::MaterialProperties& mat,
+    double                          p,
+    double                          pathcorrection,
+    Acts::ParticleType              particle) const
+{
   if (mat.thicknessInX0() <= 0. || particle == Acts::geantino) return 0.;
 
   // make sure the path correction is positive to avoid a floating point
@@ -48,8 +56,8 @@ Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::simTheta(
   double t = pathcorrection * mat.thicknessInX0();
 
   // kinematics (relativistic)
-  double m = s_particleMasses.mass[particle];
-  double E = sqrt(p * p + m * m);
+  double m    = s_particleMasses.mass[particle];
+  double E    = sqrt(p * p + m * m);
   double beta = p / E;
 
   double sigma2(0.);
@@ -80,23 +88,22 @@ Fatras::MultipleScatteringSamplerGaussianMixture<RandomNumbers>::simTheta(
   }
 
   // d_0'
-  double dprime = t / (beta * beta);
+  double dprime     = t / (beta * beta);
   double log_dprime = log(dprime);
   // d_0''
   double log_dprimeprime = log(std::pow(mat.averageZ(), 2.0 / 3.0) * dprime);
   // get epsilon
-  double epsilon =
-      log_dprimeprime < 0.5
-          ? m_config.gausMixEpsilon_a0 +
-                m_config.gausMixEpsilon_a1 * log_dprimeprime +
-                m_config.gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
-          : m_config.gausMixEpsilon_b0 +
-                m_config.gausMixEpsilon_b1 * log_dprimeprime +
-                m_config.gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
+  double epsilon = log_dprimeprime < 0.5
+      ? m_config.gausMixEpsilon_a0
+          + m_config.gausMixEpsilon_a1 * log_dprimeprime
+          + m_config.gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
+      : m_config.gausMixEpsilon_b0
+          + m_config.gausMixEpsilon_b1 * log_dprimeprime
+          + m_config.gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
   // the standard sigma
-  double sigma1square = m_config.gausMixSigma1_a0 +
-                        m_config.gausMixSigma1_a1 * log_dprime +
-                        m_config.gausMixSigma1_a2 * log_dprime * log_dprime;
+  double sigma1square = m_config.gausMixSigma1_a0
+      + m_config.gausMixSigma1_a1 * log_dprime
+      + m_config.gausMixSigma1_a2 * log_dprime * log_dprime;
   // G4 optimised / native double Gaussian model
   if (!m_config.optGaussianMixtureG4) sigma2 = 225. * dprime / (p * p);
   // throw the random number core/tail

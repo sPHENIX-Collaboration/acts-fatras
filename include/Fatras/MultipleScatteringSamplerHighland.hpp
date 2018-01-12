@@ -31,11 +31,13 @@ namespace Fatras {
 ///
 template <class RandomGenerator>
 class MultipleScatteringSamplerHighland
-    : virtual public IMultipleScatteringSampler<RandomGenerator> {
- public:
+    : virtual public IMultipleScatteringSampler<RandomGenerator>
+{
+public:
   /// @struct Config
   /// Configuration Struct for the MultipleScattering Sampler
-  struct Config {
+  struct Config
+  {
     /// Include the log term
     bool log_include;
 
@@ -53,20 +55,27 @@ class MultipleScatteringSamplerHighland
   // clang-format off
   /// @copydoc IMultipleScatteringSampler::simTheta(const Acts::MaterialProperties&,double,double,Acts::ParticleType) const
   // clang-format on
-  double simTheta(RandomGenerator& randomGenerator,
-                  const Acts::MaterialProperties& mat, double p,
-                  double pathcorrection,
-                  Acts::ParticleType particle = Acts::pion) const final;
+  double
+  simTheta(RandomGenerator&                randomGenerator,
+           const Acts::MaterialProperties& mat,
+           double                          p,
+           double                          pathcorrection,
+           Acts::ParticleType              particle = Acts::pion) const final;
 
   /// Set configuration method
   /// @param[in] config The configuration object
-  void setConfiguration(const Config& config);
+  void
+  setConfiguration(const Config& config);
 
   /// Get configuration method
   /// @return The configuration object
-  Config getConfiguration() const { return m_config; }
+  Config
+  getConfiguration() const
+  {
+    return m_config;
+  }
 
- protected:
+protected:
   /// The configuraiton object
   Config m_config;
   /// Struct of Particle masses

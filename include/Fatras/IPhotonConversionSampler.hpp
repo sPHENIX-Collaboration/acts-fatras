@@ -20,8 +20,9 @@ namespace Fatras {
 /// @author Sarka Todorova <Sarka.Todorova@cern.ch>
 /// @author Noemi Calace   <Noemi.Calace@cern.ch>
 
-class IPhotonConversionSampler {
- public:
+class IPhotonConversionSampler
+{
+public:
   /// Virtual destructor
   virtual ~IPhotonConversionSampler() = default;
 
@@ -30,9 +31,10 @@ class IPhotonConversionSampler {
   /// @param[in] position The position
   /// @param[in] momentum The momentum
   /// @return A vector of interaction vertices
-  virtual std::vector<Acts::InteractionVertex> doConversion(
-      double time, const Acts::Vector3D& position,
-      const Acts::Vector3D& momentum) const = 0;
+  virtual std::vector<Acts::InteractionVertex>
+  doConversion(double                time,
+               const Acts::Vector3D& position,
+               const Acts::Vector3D& momentum) const = 0;
 };
 }
 

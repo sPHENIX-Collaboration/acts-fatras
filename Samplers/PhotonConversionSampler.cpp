@@ -10,30 +10,39 @@
 // constructor
 Fatras::PhotonConversionSampler::PhotonConversionSampler(
     const PhotonConversionSampler::Config& pcConfig,
-    std::unique_ptr<Acts::Logger> logger)
-    : m_config(), m_logger(std::move(logger)) {
+    std::unique_ptr<Acts::Logger>          logger)
+  : m_config(), m_logger(std::move(logger))
+{
   setConfiguration(pcConfig);
 }
 
 // destructor
-Fatras::PhotonConversionSampler::~PhotonConversionSampler() {}
+Fatras::PhotonConversionSampler::~PhotonConversionSampler()
+{
+}
 
-void Fatras::PhotonConversionSampler::setConfiguration(
-    const Fatras::PhotonConversionSampler::Config& msConfig) {
+void
+Fatras::PhotonConversionSampler::setConfiguration(
+    const Fatras::PhotonConversionSampler::Config& msConfig)
+{
   //!< @TODO update to configuration checking
   m_config = msConfig;
 }
 
-void Fatras::PhotonConversionSampler::setLogger(
-    std::unique_ptr<Acts::Logger> newLogger) {
+void
+Fatras::PhotonConversionSampler::setLogger(
+    std::unique_ptr<Acts::Logger> newLogger)
+{
   m_logger = std::move(newLogger);
 }
 
 /** processing the conversion*/
 std::vector<Acts::InteractionVertex>
 Fatras::PhotonConversionSampler::doConversion(
-    double time, const Acts::Vector3D& position,
-    const Acts::Vector3D& momentum) const {
+    double                time,
+    const Acts::Vector3D& position,
+    const Acts::Vector3D& momentum) const
+{
   double p = momentum.mag();
 
   // get the energy
@@ -47,29 +56,30 @@ Fatras::PhotonConversionSampler::doConversion(
                                                        << " MeV");
 
   // calculate the second child direction and return
-  return getChildren(time, position, momentum, childEnergy, childDir,
-                     Acts::electron);
+  return getChildren(
+      time, position, momentum, childEnergy, childDir, Acts::electron);
 }
 
-double Fatras::PhotonConversionSampler::childEnergyFraction(
-    double gammaMom) const {
+double
+Fatras::PhotonConversionSampler::childEnergyFraction(double gammaMom) const
+{
   // @TODO write documentation
   // the fraction
   double epsilon0 = s_particleMasses.mass[Acts::electron] / gammaMom;
   // some needed manipolations
-  double Z = 13.;
-  double oneOverZpow = 1. / pow(Z, s_oneOverThree);
+  double Z            = 13.;
+  double oneOverZpow  = 1. / pow(Z, s_oneOverThree);
   double alphaZsquare = (s_alpha * s_alpha * Z * Z);
   // now f(Z) - from Z and s_alpha
-  double fZ = alphaZsquare *
-              (1. / (1. + alphaZsquare) + 0.20206 - 0.0369 * alphaZsquare +
-               0.0083 * alphaZsquare * alphaZsquare);
+  double fZ = alphaZsquare
+      * (1. / (1. + alphaZsquare) + 0.20206 - 0.0369 * alphaZsquare
+         + 0.0083 * alphaZsquare * alphaZsquare);
   // delta_max
   double deltaMax = exp((42.24 - fZ) * .1195) - 0.952;
   // delta_min
   double deltaMin = 4. * epsilon0 * 136. * oneOverZpow;
   // the minimum fraction
-  double epsilon1 = 0.5 - 0.5 * sqrt(1. - deltaMin / deltaMax);
+  double epsilon1   = 0.5 - 0.5 * sqrt(1. - deltaMin / deltaMax);
   double epsilonMin = epsilon1 > epsilon0 ? epsilon1 : epsilon0;
   // calculate phi1 / phi2 - calculate from deltaMin
   double Phi1 = phi1(deltaMin);
@@ -84,13 +94,12 @@ double Fatras::PhotonConversionSampler::childEnergyFraction(
   if (N1 / (N1 + N2) < m_config.randomNumbers->draw(Fatras::Flat)) {
     // sample from f1,g1 distribution
     for (;;) {
-      double epsilon =
-          0.5 -
-          (0.5 - epsilonMin) *
-              pow(m_config.randomNumbers->draw(Fatras::Flat), s_oneOverThree);
+      double epsilon = 0.5
+          - (0.5 - epsilonMin)
+              * pow(m_config.randomNumbers->draw(Fatras::Flat), s_oneOverThree);
       // prepare for the rejection check
-      double delta =
-          136. * epsilon0 * oneOverZpow / (epsilon - epsilon * epsilon);
+      double delta
+          = 136. * epsilon0 * oneOverZpow / (epsilon - epsilon * epsilon);
       double F1 = 3. * phi1(delta) - phi2(delta) - fZ;
       // reject ? - or redo the exercise
       if (F1 / F10 > m_config.randomNumbers->draw(Fatras::Flat))
@@ -99,12 +108,11 @@ double Fatras::PhotonConversionSampler::childEnergyFraction(
   } else {
     // sample from f2,g2 distribution
     for (;;) {
-      double epsilon =
-          epsilonMin +
-          (0.5 - epsilonMin) * m_config.randomNumbers->draw(Fatras::Flat);
+      double epsilon = epsilonMin
+          + (0.5 - epsilonMin) * m_config.randomNumbers->draw(Fatras::Flat);
       // prepare for the rejection check
-      double delta =
-          136. * epsilon0 * oneOverZpow / (epsilon - epsilon * epsilon);
+      double delta
+          = 136. * epsilon0 * oneOverZpow / (epsilon - epsilon * epsilon);
       double F2 = 1.5 * phi1(delta) - 0.5 * phi2(delta) - fZ;
       // reject ? - or redo the exercise
       if (F2 / F20 > m_config.randomNumbers->draw(Fatras::Flat))
@@ -113,8 +121,10 @@ double Fatras::PhotonConversionSampler::childEnergyFraction(
   }
 }
 
-Acts::Vector3D Fatras::PhotonConversionSampler::childDirection(
-    const Acts::Vector3D& gammaMom, double childE) const {
+Acts::Vector3D
+Fatras::PhotonConversionSampler::childDirection(const Acts::Vector3D& gammaMom,
+                                                double childE) const
+{
   // --------------------------------------------------
   // Following the Geant4 approximation from L. Urban
   // the azimutal angle
@@ -138,9 +148,9 @@ Acts::Vector3D Fatras::PhotonConversionSampler::childDirection(
 
   // more complex but "more true"
   Acts::Vector3D newDirection(gammaMom.unit());
-  double x = -newDirection.y();
-  double y = newDirection.x();
-  double z = 0.;
+  double         x = -newDirection.y();
+  double         y = newDirection.x();
+  double         z = 0.;
   // if it runs along the z axis - no good ==> take the x axis
   if (newDirection.z() * newDirection.z() > 0.999999) x = 1.;
   // deflector direction
@@ -149,8 +159,8 @@ Acts::Vector3D Fatras::PhotonConversionSampler::childDirection(
   // rotate the new direction for scattering using theta and arbitrarily in psi
   // create the rotation
   Acts::RotationMatrix3D rotation;
-  rotation =
-      Acts::AngleAxis3D(theta, deflector) * Acts::AngleAxis3D(psi, gammaMom);
+  rotation
+      = Acts::AngleAxis3D(theta, deflector) * Acts::AngleAxis3D(psi, gammaMom);
   // create the transform
   Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
   // get the new direction
@@ -161,20 +171,24 @@ Acts::Vector3D Fatras::PhotonConversionSampler::childDirection(
 
 std::vector<Acts::InteractionVertex>
 Fatras::PhotonConversionSampler::getChildren(
-    double time, const Acts::Vector3D& vertex,
-    const Acts::Vector3D& photonMomentum, double child1Energy,
-    const Acts::Vector3D& child1Direction, Acts::ParticleType childType) const {
+    double                time,
+    const Acts::Vector3D& vertex,
+    const Acts::Vector3D& photonMomentum,
+    double                child1Energy,
+    const Acts::Vector3D& child1Direction,
+    Acts::ParticleType    childType) const
+{
   std::vector<Acts::InteractionVertex> children;
 
   // child 1 momentum
-  double p1 =
-      sqrt(child1Energy * child1Energy -
-           s_particleMasses.mass[childType] * s_particleMasses.mass[childType]);
+  double p1 = sqrt(child1Energy * child1Energy
+                   - s_particleMasses.mass[childType]
+                       * s_particleMasses.mass[childType]);
 
   // now properly : energy-momentum conservation
   // child 2 momentum
-  Acts::Vector3D child2Direction =
-      (photonMomentum - p1 * child1Direction).unit();
+  Acts::Vector3D child2Direction
+      = (photonMomentum - p1 * child1Direction).unit();
   double p2 = (photonMomentum - p1 * child1Direction).mag();
 
   // charge sampling

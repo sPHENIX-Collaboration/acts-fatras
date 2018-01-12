@@ -21,8 +21,9 @@ namespace Fatras {
 /// @author Noemi Calace       <Noemi.Calace@cern.ch>
 
 template <class RandomGenerator>
-class IMultipleScatteringSampler {
- public:
+class IMultipleScatteringSampler
+{
+public:
   /// Virtual destructor
   virtual ~IMultipleScatteringSampler() = default;
 
@@ -31,10 +32,12 @@ class IMultipleScatteringSampler {
   /// @param[in] momentum The value of the momentum
   /// @param[in] pathcorrection The correction due to the incident angle
   /// @param[in] particle The particle type
-  virtual double simTheta(RandomGenerator& randomGenerator,
-                          const Acts::MaterialProperties& mat, double momentum,
-                          double pathcorrection,
-                          Acts::ParticleType particle = Acts::pion) const = 0;
+  virtual double
+  simTheta(RandomGenerator&                randomGenerator,
+           const Acts::MaterialProperties& mat,
+           double                          momentum,
+           double                          pathcorrection,
+           Acts::ParticleType              particle = Acts::pion) const = 0;
 };
 }
 

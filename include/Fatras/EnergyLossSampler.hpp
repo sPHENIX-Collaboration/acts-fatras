@@ -29,11 +29,13 @@ class EnergyLoss;
 /// @author Noemi Calace       <Noemi.Calace@cern.ch>
 
 template <class RandomGenerator>
-class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator> {
- public:
+class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator>
+{
+public:
   /// @struct Config
   /// Configuration config for the EnergyLossSampler
-  struct Config {
+  struct Config
+  {
     /// Scalor for the mean energy loss
     double scalorMOP = 1.;  // G4: 0.962
     /// Scalor for the energy loss uncertainty
@@ -45,10 +47,10 @@ class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator> {
   /// Constructor with AlgTool parameters
   /// @param[in] config Configuration
   /// @param[in] logger The logging instance
-  EnergyLossSampler(const Config& config,
-                    std::unique_ptr<const Acts::Logger> logger =
-                        Acts::getDefaultLogger("EnergyLossSampler",
-                                               Acts::Logging::INFO));
+  EnergyLossSampler(const Config&                       config,
+                    std::unique_ptr<const Acts::Logger> logger
+                    = Acts::getDefaultLogger("EnergyLossSampler",
+                                             Acts::Logging::INFO));
 
   /// Destructor
   ~EnergyLossSampler() = default;
@@ -56,11 +58,13 @@ class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator> {
   // clang-format off
   /// @copydoc IEnergyLossSampler::energyLoss(const Acts::MaterialProperties&,double,double,Acts::PropDirection,Acts::ParticleType) const
   // clang-format on
-  EnergyLoss energyLoss(RandomGenerator& randomGenerator,
-                        const Acts::MaterialProperties& mat, double momentum,
-                        double pathcorrection,
-                        Acts::PropDirection dir = Acts::alongMomentum,
-                        Acts::ParticleType particle = Acts::pion) const final;
+  EnergyLoss
+  energyLoss(RandomGenerator&                randomGenerator,
+             const Acts::MaterialProperties& mat,
+             double                          momentum,
+             double                          pathcorrection,
+             Acts::PropDirection             dir      = Acts::alongMomentum,
+             Acts::ParticleType              particle = Acts::pion) const final;
 
   // @todo Merge with functions in ACTS core - only one bethe and one heitler
   // formula!
@@ -74,23 +78,29 @@ class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator> {
 
   /// Set configuration method
   /// @param[in] config The configuration object
-  void setConfiguration(const Config& config);
+  void
+  setConfiguration(const Config& config);
 
   /// Get configuration method
-  Config getConfiguration() const { return m_config; }
+  Config
+  getConfiguration() const
+  {
+    return m_config;
+  }
 
   /// Set logging instance
   ///
   /// @param[in] logger the logging instance to be set
-  void setLogger(std::unique_ptr<const Acts::Logger> logger);
+  void
+  setLogger(std::unique_ptr<const Acts::Logger> logger);
 
- protected:
+protected:
   /// Configuration object
   Config m_config;
   /// Struct of Particle masses
   Acts::ParticleMasses m_particleMasses;
 
- private:
+private:
   /// Apply dEdX according to Bethe-Bloch
   /// @param mat The material properties, containing the thickness of the
   /// material
@@ -111,7 +121,11 @@ class EnergyLossSampler : virtual public IEnergyLossSampler<RandomGenerator> {
    double dEdXBetheHeitler(const Acts::MaterialProperties& mat, double initialE,
                            Acts::ParticleType particle = Acts::pion) const;
  */
-  const Acts::Logger& logger() const { return *m_logger; }
+  const Acts::Logger&
+  logger() const
+  {
+    return *m_logger;
+  }
   /// logger instance
   std::unique_ptr<const Acts::Logger> m_logger;
 };

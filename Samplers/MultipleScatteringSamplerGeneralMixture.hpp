@@ -29,21 +29,23 @@ namespace Fatras {
 */
 
 class MultipleScatteringSamplerGeneralMixture
-    : virtual public IMultipleScatteringSampler {
- public:
+    : virtual public IMultipleScatteringSampler
+{
+public:
   /** @struct Config
       Configuration Struct for the MultipleScattering Sampler */
-  struct Config {
+  struct Config
+  {
     std::shared_ptr<IRandomNumbers>
-        randomNumbers;  //!< the Random number service
-    bool log_include;   //!< include the log term
+         randomNumbers;  //!< the Random number service
+    bool log_include;    //!< include the log term
 
     double genMixtureScale;  //!< numberically derived factor on mixture scale
 
     Config()
-        : randomNumbers(nullptr),
-          log_include(true),
-          genMixtureScale(0.608236) {}
+      : randomNumbers(nullptr), log_include(true), genMixtureScale(0.608236)
+    {
+    }
   };
 
   /** AlgTool like constructor */
@@ -55,38 +57,47 @@ class MultipleScatteringSamplerGeneralMixture
   /** Calculate the theta introduced by multiple scattering,
    *          according to the RutherFord-Scott Formula
    */
-  double simTheta(const Acts::MaterialProperties& mat, double p,
-                  double pathcorrection,
-                  Acts::ParticleType particle = Acts::pion) const final;
+  double
+  simTheta(const Acts::MaterialProperties& mat,
+           double                          p,
+           double                          pathcorrection,
+           Acts::ParticleType              particle = Acts::pion) const final;
 
   /** Set configuration method */
-  void setConfiguration(const Config& msConfig);
+  void
+  setConfiguration(const Config& msConfig);
 
   /** Get configuration method */
-  Config getConfiguration() const;
+  Config
+  getConfiguration() const;
 
- protected:
+protected:
   Config m_config;  // the configuraiton object
 
- private:
+private:
   /** General mixture model: get parameters for single gaussian simulation */
-  double* getGaussian(double beta, double p, double dOverX0,
-                      double scale) const;
+  double*
+  getGaussian(double beta, double p, double dOverX0, double scale) const;
   /** General mixture model: get parameters for gaussian mixture */
-  double* getGaussmix(double beta, double p, double dOverX0, double Z,
-                      double scale) const;
+  double*
+  getGaussmix(double beta, double p, double dOverX0, double Z, double scale)
+      const;
   /** General mixture model: get parameters for semi-gaussian mixture */
-  double* getSemigauss(double beta, double p, double dOverX0, double Z,
-                       double scale) const;
+  double*
+  getSemigauss(double beta, double p, double dOverX0, double Z, double scale)
+      const;
   /** General mixture model: simulate semi-gaussian mixture */
-  double simGaussmix(double* scattering_params) const;
+  double
+  simGaussmix(double* scattering_params) const;
   /** General mixture model: simulate gaussian mixture */
-  double simSemigauss(double* scattering_params) const;
+  double
+  simSemigauss(double* scattering_params) const;
 };
 
 /** Return the configuration object */
 inline MultipleScatteringSamplerGeneralMixture::Config
-MultipleScatteringSamplerGeneralMixture::getConfiguration() const {
+MultipleScatteringSamplerGeneralMixture::getConfiguration() const
+{
   return m_config;
 }
 

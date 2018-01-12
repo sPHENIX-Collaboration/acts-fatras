@@ -38,15 +38,20 @@ public:
     double minimumHadOutEnergy;  //!< hadronic interaction setting */
     bool   cutChain;             //!<
 
-    Config() : processCode(1), minimumHadOutEnergy(100), cutChain(true) {}
+    Config()
+      : processCode(1)
+      , minimumHadOutEnergy(100. * Acts::units::_MeV)
+      , cutChain(true)
+    {
+    }
   };
 
   /// Constructor
   /// @param [in] hiConfig the configuration object
   /// @param [in] logger the logger instance
   HadronicInteractionParametricSampler(
-      const Config&                 hiConfig,
-      std::unique_ptr<Acts::Logger> logger
+      const Config&                       hiConfig,
+      std::unique_ptr<const Acts::Logger> logger
       = Acts::getDefaultLogger("HadronicInteractionSampler",
                                Acts::Logging::INFO));
 
@@ -72,18 +77,16 @@ public:
   void
   setConfiguration(const Config& eeConfig);
 
-  // Get configuration object (a copy)
-  Config
-  getConfiguration() const;
-
   /// Set logging instance
   ///
   /// @param logger the logging instance to be set
   void
-  setLogger(std::unique_ptr<Acts::Logger> logger);
+  setLogger(std::unique_ptr<const Acts::Logger> logger);
 
 protected:
   Config m_config;  //!< configuration object
+  /// Struct of Particle masses
+  Acts::ParticleMasses m_particleMasses;
 
 private:
   /// Collect secondaries for layer material update
@@ -102,19 +105,12 @@ private:
   }
 
   /// logger instance
-  std::unique_ptr<Acts::Logger> m_logger;
+  std::unique_ptr<const Acts::Logger> m_logger;
 };
-
-/** Return the configuration object */
-inline HadronicInteractionParametricSampler::Config
-HadronicInteractionParametricSampler::getConfiguration() const
-{
-  return m_config;
-}
 
 }  // end of namespace
 
 /// Define the templated function
-#include "detail/MultipleScatteringSamplerHighland.ipp"
+#include "detail/HadronicInteractionParametricSampler.ipp"
 
 #endif  // ACTS_FATRASTOOLS_HADRONICINTERACTIONPARAMETRICSAMPLER_H

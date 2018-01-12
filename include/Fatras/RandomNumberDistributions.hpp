@@ -19,18 +19,20 @@ namespace Fatras {
 
 /// The following standard random number distributions are supported:
 ///
-using GaussDist = std::normal_distribution<double>;          ///< Normal
+using GaussDist   = std::normal_distribution<double>;        ///< Normal
 using UniformDist = std::uniform_real_distribution<double>;  ///< Uniform
-using GammaDist = std::gamma_distribution<double>;           ///< Gamma
+using GammaDist   = std::gamma_distribution<double>;         ///< Gamma
 using PoissonDist = std::poisson_distribution<int>;          ///< Poisson
 ///
 /// In addition, the Landau distribution is provided
 ///
-class LandauDist {
- public:
+class LandauDist
+{
+public:
   /// A RandomNumberDistribution should provide a parameters struct
-  struct param_type {
-    double mean = 0.;   ///< Mean of the Landau distribution
+  struct param_type
+  {
+    double mean  = 0.;  ///< Mean of the Landau distribution
     double scale = 1.;  ///< Scale factor
 
     /// Default constructor and constructor from raw parameters
@@ -39,11 +41,18 @@ class LandauDist {
 
     /// Parameters should be CopyConstructible and CopyAssignable
     param_type(const param_type&) = default;
-    param_type& operator=(const param_type&) = default;
+    param_type&
+    operator=(const param_type&)
+        = default;
 
     /// Parameters should be EqualityComparable
-    bool operator==(const param_type& other) const;
-    bool operator!=(const param_type& other) const { return !(*this == other); }
+    bool
+    operator==(const param_type& other) const;
+    bool
+    operator!=(const param_type& other) const
+    {
+      return !(*this == other);
+    }
 
     /// Parameters should link back to the host distribution
     using distribution_type = LandauDist;
@@ -57,39 +66,62 @@ class LandauDist {
 
   /// A distribution should be copy-constructible and copy-assignable
   LandauDist(const LandauDist&) = default;
-  LandauDist& operator=(const LandauDist&) = default;
+  LandauDist&
+  operator=(const LandauDist&)
+      = default;
 
   /// Some standard ways to control the distribution's state should be provided
-  void reset() { /* There is currently no state to reset here */
+  void
+  reset()
+  { /* There is currently no state to reset here */
   }
-  param_type param() const { return m_cfg; }
-  void param(const param_type& p) { m_cfg = p; }
+  param_type
+  param() const
+  {
+    return m_cfg;
+  }
+  void
+  param(const param_type& p)
+  {
+    m_cfg = p;
+  }
 
   /// A RandomNumberDistribution should provide a result type typedef and some
   /// bounds on the values that can be emitted as output
   using result_type = double;
-  result_type min() const;
-  result_type max() const;
+  result_type
+  min() const;
+  result_type
+  max() const;
 
   /// Generate a random number following a Landau distribution
   template <typename Generator>
-  result_type operator()(Generator& engine) {
+  result_type
+  operator()(Generator& engine)
+  {
     return (*this)(engine, m_cfg);
   }
 
   /// Do the same, but using custom Landau distribution parameters
   template <typename Generator>
-  result_type operator()(Generator& engine, const param_type& params) {
-    double x = std::generate_canonical<float, 10>(engine);
+  result_type
+  operator()(Generator& engine, const param_type& params)
+  {
+    double x   = std::generate_canonical<float, 10>(engine);
     double res = params.mean + landau_quantile(x, params.scale);
     return res;
   }
 
   /// Provide standard comparison operators
-  bool operator==(const LandauDist& other) const;
-  bool operator!=(const LandauDist& other) const { return !(*this == other); }
+  bool
+  operator==(const LandauDist& other) const;
+  bool
+  operator!=(const LandauDist& other) const
+  {
+    return !(*this == other);
+  }
 
- private:
+private:
   param_type m_cfg;  ///< configuration struct
 };
 }

@@ -12,26 +12,35 @@ template <class RandomNumbers>
 Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::
     MultipleScatteringSamplerHighland(
         const MultipleScatteringSamplerHighland::Config& msConfig)
-    : m_config() {
+  : m_config()
+{
   setConfiguration(msConfig);
 }
 
 // destructor
 template <class RandomNumbers>
-Fatras::MultipleScatteringSamplerHighland<
-    RandomNumbers>::~MultipleScatteringSamplerHighland() {}
+Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::
+    ~MultipleScatteringSamplerHighland()
+{
+}
 
 template <class RandomNumbers>
-void Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::setConfiguration(
-    const Fatras::MultipleScatteringSamplerHighland::Config& msConfig) {
+void
+Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::setConfiguration(
+    const Fatras::MultipleScatteringSamplerHighland::Config& msConfig)
+{
   //!< @TODO update to configuration checking
   m_config = msConfig;
 }
 
 template <class RandomNumbers>
-double Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::simTheta(
-    const Acts::MaterialProperties& mat, double p, double pathcorrection,
-    Acts::ParticleType particle) const {
+double
+Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::simTheta(
+    const Acts::MaterialProperties& mat,
+    double                          p,
+    double                          pathcorrection,
+    Acts::ParticleType              particle) const
+{
   if (mat.thicknessInX0() <= 0. || particle == Acts::geantino) return 0.;
 
   // make sure the path correction is positive to avoid a floating point
@@ -42,14 +51,14 @@ double Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::simTheta(
   double t = pathcorrection * mat.thicknessInX0();
 
   // kinematics (relativistic)
-  double m = s_particleMasses.mass[particle];
-  double E = sqrt(p * p + m * m);
+  double m    = s_particleMasses.mass[particle];
+  double E    = sqrt(p * p + m * m);
   double beta = p / E;
 
   double sigma2(0.);
 
   double sigma = s_interactionFormulae.sigmaMS(t, p, beta);
-  sigma2 = sigma * sigma;
+  sigma2       = sigma * sigma;
 
   // Code below will not be used if the parameterization of ActsUtils is used
   if (particle != Acts::electron) {
@@ -77,6 +86,6 @@ double Fatras::MultipleScatteringSamplerHighland<RandomNumbers>::simTheta(
     }
   }
   // returned scaled by the projection factor
-  return s_sqrtTwo * sqrt(sigma2) *
-         m_config.randomNumbers->draw(Fatras::GaussZiggurat);
+  return s_sqrtTwo * sqrt(sigma2)
+      * m_config.randomNumbers->draw(Fatras::GaussZiggurat);
 }

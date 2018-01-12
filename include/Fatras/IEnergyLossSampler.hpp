@@ -24,8 +24,9 @@ class EnergyLoss;
 /// @author Noemi Calace       <Noemi.Calace@cern.ch>
 
 template <class RandomGenerator>
-class IEnergyLossSampler {
- public:
+class IEnergyLossSampler
+{
+public:
   /// Virtual destructor
   virtual ~IEnergyLossSampler() = default;
 
@@ -41,11 +42,13 @@ class IEnergyLossSampler {
   /// @param[in] dir The direction of the propagation
   /// @param[in] particle The particle type
   /// @return The energy loss
-  virtual EnergyLoss energyLoss(
-      RandomGenerator& randomGenerator, const Acts::MaterialProperties& mat,
-      double momentum, double pathcorrection,
-      Acts::PropDirection dir = Acts::alongMomentum,
-      Acts::ParticleType particle = Acts::pion) const = 0;
+  virtual EnergyLoss
+  energyLoss(RandomGenerator&                randomGenerator,
+             const Acts::MaterialProperties& mat,
+             double                          momentum,
+             double                          pathcorrection,
+             Acts::PropDirection             dir      = Acts::alongMomentum,
+             Acts::ParticleType              particle = Acts::pion) const = 0;
 
   /// dEdX calculation when providing MaterialProperties,
   /// a momentum, and a ParicleHypothesis
