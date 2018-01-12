@@ -9,20 +9,19 @@ if(NOT TARGET ACTSCore)
   find_package(ACTS REQUIRED COMPONENTS Core)
 endif()
 
-# Fatras library
-set(Fatras_SOURCES
+# main library
+add_library(ActsFatras SHARED
   src/EnergyLoss.cpp
   src/RandomNumberDistributions.cpp)
-add_library(Fatras SHARED ${Fatras_SOURCES})
-target_include_directories(Fatras PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
-target_link_libraries(Fatras PUBLIC ACTSCore)
-set_target_properties(Fatras PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE)
+target_include_directories(ActsFatras PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
+target_link_libraries(ActsFatras PUBLIC ACTSCore)
+set_target_properties(ActsFatras PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE)
 
 # install library and include files to default directories
 include(GNUInstallDirs)
 install(
-  TARGETS Fatras
-  EXPORT FatrasTargets
+  TARGETS ActsFatras
+  EXPORT ActsFatrasTargets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
@@ -32,11 +31,11 @@ install(
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  cmake/FatrasConfig.cmake.in "${PROJECT_BINARY_DIR}/FatrasConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")
+  cmake/ActsFatrasConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 install(
-  EXPORT FatrasTargets
-  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
+  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 install(
-  FILES "${PROJECT_BINARY_DIR}/FatrasConfig.cmake"
-  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")
+  EXPORT ActsFatrasTargets
+  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
