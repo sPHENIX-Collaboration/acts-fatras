@@ -87,8 +87,6 @@ Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
     float dRad_rest = m - E - sampledEloss.deltaE();
     sampledEloss.update(0., 0., dRad_rest, 0., false);
   }
-  ACTS_VERBOSE("[eloss] created random deltaP as : " << sampledEloss.deltaE());
-
   return sampledEloss;
 }
 

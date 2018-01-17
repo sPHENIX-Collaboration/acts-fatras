@@ -420,6 +420,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
                                                  dX0 / thicknessInX0,
                                                  dir,
                                                  eCell.particleType);
+
     //@todo add electron case with brem photon and radiation
     // for now make no distinction
     // MIP case
@@ -562,11 +563,15 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
   // scattering do not change position) & there is a problem in the
   // transformation
   auto   position = parameters.position();
-  double charge   = parameters.parameters()(Acts::eQOP) * p;
+  double charge   = parameters.charge();
+
   // Use updated momentum
   auto momentum
       = Acts::detail::coordinate_transformation::parameters2globalMomentum(
           uParameters);
+
+  if (momentum.perp() < m_config.particleMinMomentumT) return nullptr;
+
   std::unique_ptr<const Acts::TrackParameters> tParameters
       = std::make_unique<Acts::BoundParameters>(
           std::move(uCovariance), position, momentum, charge, *msurface);
@@ -684,10 +689,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
 
   // parametric scattering - independent in x/y
   if (m_config.parametricScattering) {
-    EX_MSG_VERBOSE("[msupdate]",
-                   "MultipleScatteringUpdate",
-                   "",
-                   "Using parametric scattering.");
+    EX_MSG_VERBOSE("", "scatter", "", "Using parametric scattering.");
     // the initial values
     double theta    = parameters[Acts::eTHETA];
     double phi      = parameters[Acts::ePHI];
@@ -705,8 +707,8 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
       phi += M_PI;
     if (theta > M_PI) theta -= M_PI;
 
-    EX_MSG_VERBOSE("[msupdate]",
-                   "MultipleScatteringUpdate",
+    EX_MSG_VERBOSE("",
+                   "scatter",
                    "",
                    "deltaPhi / deltaTheta = " << deltaPhi << " / "
                                               << deltaTheta);
@@ -738,8 +740,8 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
     Acts::RotationMatrix3D rotation;
     rotation = Acts::AngleAxis3D(thetaMs, deflector)
         * Acts::AngleAxis3D(psi, pars.momentum().unit());
-    EX_MSG_VERBOSE("[msupdate]",
-                   "MultipleScatteringUpdate",
+    EX_MSG_VERBOSE("",
+                   "scatter",
                    "",
                    "deltaPsi / deltaTheta = " << psi << " / " << thetaMs);
     // create the transform

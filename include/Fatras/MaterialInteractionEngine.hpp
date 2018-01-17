@@ -93,7 +93,7 @@ public:
 
     Config()
       : particleMinMomentum(-1.)
-      , particleMinMomentumT(50.)
+      , particleMinMomentumT(100.)
       , particleKillBelowCut(true)
       , energyLossSampler(nullptr)
       , energyLossSamplerElectrons(nullptr)

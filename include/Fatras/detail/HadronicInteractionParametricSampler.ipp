@@ -424,8 +424,8 @@ Fatras::HadronicInteractionParametricSampler<RandomGenerator>::getHadState(
       if (childP.mag() > m_config.minimumHadOutEnergy) {
         // create the particle and increase the number of children
         // auto part = convert(childType[i], charge[i], false);
-        pOutgoing.push_back(Acts::ParticleProperties(
-            childP, 105. * Acts::units::_MeV, charge[i], pdgid[i], 10000));
+        pOutgoing.push_back(
+            Acts::ParticleProperties(childP, m, charge[i], pdgid[i], 100000));
         numChildren++;
       }
       // increase the number of generated particles
