@@ -82,7 +82,7 @@ public:
     /// (if cut > 0.)
     /// Outgoing: minimum momentum for HIproducts (if cut > 0.)
     double outHadIntProductMinMomentum;
-    /// Outgoint: minim transverse momentum for for HI products (ifcut > 0.)
+    /// Outgoint: minim transverse momentum for for HI products (if cut > 0.)
     double outHadIntProductMinMomentumT;
     /// Output prefix
     std::string prefix;
@@ -93,20 +93,20 @@ public:
 
     Config()
       : particleMinMomentum(-1.)
-      , particleMinMomentumT(100.)
+      , particleMinMomentumT(0.150*Acts::units::_GeV)
       , particleKillBelowCut(true)
       , energyLossSampler(nullptr)
       , energyLossSamplerElectrons(nullptr)
       , recordBremPhoton(true)
       , outBremPhotonMinMomentum(-1.)
-      , outBremPhotonMinMomentumT(50.)
+      , outBremPhotonMinMomentumT(0.150*Acts::units::_GeV)
       , multipleScatteringSampler(nullptr)
       , conversionSampler(nullptr)
       , outConversionProductMinMomentum(-1.)
-      , outConversionProductMinMomentumT(50.)
+      , outConversionProductMinMomentumT(0.150*Acts::units::_GeV)
       , hadronicInteractionSampler(nullptr)
       , outHadIntProductMinMomentum(-1.)
-      , outHadIntProductMinMomentumT(50.)
+      , outHadIntProductMinMomentumT(0.150*Acts::units::_GeV)
       , prefix("[MI] - ")
       , postfix(" - ")
     {
