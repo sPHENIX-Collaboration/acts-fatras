@@ -730,8 +730,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
     double         y = newDirection.x();
     double         z = 0.;
     // if it runs along the z axis - no good ==> take the x axis
-    if (newDirection.z() * newDirection.z() > 0.999999) x = 1.;
-    y                                                     = 0.;
+    if (newDirection.z() * newDirection.z() > 0.999999) { x = 1.; y  = 0.; }
     // deflector direction
     //!>@todo Check if this is right
     Acts::Vector3D deflector(x, y, z);
@@ -747,7 +746,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::multipleScatteringUpdate(
     // create the transform
     Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
     // get the new direction
-    newDirection = transform * newDirection;
+    newDirection = transform * newDirection.unit();
     // assign the new values
     parameters[Acts::ePHI]   = newDirection.phi();
     parameters[Acts::eTHETA] = newDirection.theta();
