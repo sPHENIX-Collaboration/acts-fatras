@@ -47,7 +47,7 @@ public:
              const Acts::MaterialProperties& mat,
              double                          momentum,
              double                          pathcorrection,
-             Acts::PropDirection             dir      = Acts::alongMomentum,
+             Acts::NavigationDirection             dir      = Acts::forward,
              Acts::ParticleType              particle = Acts::pion) const = 0;
 
   /// dEdX calculation when providing MaterialProperties,

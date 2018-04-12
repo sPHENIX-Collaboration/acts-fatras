@@ -61,7 +61,7 @@ Acts::ExtrapolationCode
 Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(
     Acts::ExCellNeutral&      eCell,
     const Acts::Surface*      msurface,
-    Acts::PropDirection       dir,
+    Acts::NavigationDirection       dir,
     Acts::MaterialUpdateStage matupstage) const
 {
   EX_MSG_DEBUG(++eCell.navigationStep,
@@ -78,7 +78,7 @@ Acts::ExtrapolationCode
 Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterial(
     Acts::ExCellCharged&      eCell,
     const Acts::Surface*      msurface,
-    Acts::PropDirection       dir,
+    Acts::NavigationDirection       dir,
     Acts::MaterialUpdateStage matupstage) const
 {
   EX_MSG_DEBUG(++eCell.navigationStep,
@@ -96,7 +96,7 @@ Acts::ExtrapolationCode
 Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterialT(
     Acts::ExtrapolationCell<T>& eCell,
     const Acts::Surface*        msurface,
-    Acts::PropDirection         dir,
+    Acts::NavigationDirection         dir,
     Acts::MaterialUpdateStage   matupstage) const
 {
 
@@ -130,8 +130,8 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::handleMaterialT(
         = mSurface.pathCorrection(eCell.leadParameters->position(),
                                   dir * (eCell.leadParameters->momentum()));
     // the relative direction wrt to the layer
-    Acts::PropDirection rlDir
-        = (pathCorrection > 0. ? Acts::alongMomentum : Acts::oppositeMomentum);
+    Acts::NavigationDirection rlDir
+        = (pathCorrection > 0. ? Acts::forward : Acts::backward);
     // multiply by the pre-and post-update factor
     double mFactor = mSurface.associatedMaterial()->factor(rlDir, matupstage);
     if (mFactor == 0.) {
@@ -173,7 +173,7 @@ Acts::ExtrapolationCode
 Fatras::MaterialInteractionEngine<RandomGenerator>::processOnSurfaceT(
     Acts::ExtrapolationCell<T>&     eCell,
     const Acts::Surface*            msurface,
-    Acts::PropDirection             dir,
+    Acts::NavigationDirection             dir,
     const Acts::MaterialProperties& mprop,
     double                          pathCorrection,
     float&                          mFraction) const
@@ -311,7 +311,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
     const Acts::NeutralParameters& parameters,
     Acts::ExCellNeutral&,
     const Acts::Surface* msurface,
-    Acts::PropDirection,
+    Acts::NavigationDirection,
     const Acts::MaterialProperties&,
     double,
     double,
@@ -357,7 +357,7 @@ Fatras::MaterialInteractionEngine<RandomGenerator>::electroMagneticInteraction(
     const Acts::TrackParameters&    parameters,
     Acts::ExCellCharged&            eCell,
     const Acts::Surface*            msurface,
-    Acts::PropDirection             dir,
+    Acts::NavigationDirection             dir,
     const Acts::MaterialProperties& mprop,
     double                          dX0,
     double                          pathCorrection,
