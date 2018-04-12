@@ -1,14 +1,3 @@
-cmake_minimum_required(VERSION 3.7)
-
-project(ACTSFatras LANGUAGES CXX)
-
-# could be included in a larger project, e.g. acts-framework, that also
-# includes acts-core as a subproject. in this case we do not need to
-# explicitely add it here.
-if(NOT TARGET ACTSCore)
-  find_package(ACTS REQUIRED COMPONENTS Core)
-endif()
-
 # main library
 add_library(ACTSFatras SHARED
   src/EnergyLoss.cpp
@@ -26,16 +15,9 @@ install(
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
   DIRECTORY include/Fatras
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Fatras)
+target_include_directories(ACTSFatras PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  
 
-# CMake package configuration files
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  cmake/ACTSFatrasConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ACTSFatrasConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
-install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/ACTSFatrasConfig.cmake"
-  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
-install(
-  EXPORT ACTSFatrasTargets
-  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
+
+
