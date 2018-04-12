@@ -56,14 +56,14 @@ public:
   ~EnergyLossSampler() = default;
 
   // clang-format off
-  /// @copydoc IEnergyLossSampler::energyLoss(const Acts::MaterialProperties&,double,double,Acts::PropDirection,Acts::ParticleType) const
+  /// @copydoc IEnergyLossSampler::energyLoss(const Acts::MaterialProperties&,double,double,Acts::NavigationDirection,Acts::ParticleType) const
   // clang-format on
   EnergyLoss
   energyLoss(RandomGenerator&                randomGenerator,
              const Acts::MaterialProperties& mat,
              double                          momentum,
              double                          pathcorrection,
-             Acts::PropDirection             dir      = Acts::alongMomentum,
+             Acts::NavigationDirection       dir      = Acts::forward,
              Acts::ParticleType              particle = Acts::pion) const final;
 
   // @todo Merge with functions in ACTS core - only one bethe and one heitler

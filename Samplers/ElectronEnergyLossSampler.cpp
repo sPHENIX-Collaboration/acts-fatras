@@ -40,7 +40,7 @@ Fatras::ElectronEnergyLossSampler::energyLoss(
     const Acts::MaterialProperties& materialProperties,
     double                          pInitial,
     double                          pathCorrection,
-    Acts::PropDirection             direction,
+    Acts::NavigationDirection             direction,
     Acts::ParticleType) const
 {
   // start with a default energy loss
@@ -102,7 +102,7 @@ Fatras::ElectronEnergyLossSampler::energyLoss(
       = m_config.randomNumbers->draw(Fatras::Gamma, pathLength / log(2.), 1.);
   double z = exp(-1. * u);
   double deltaE(0.);
-  if (direction == Acts::alongMomentum)
+  if (direction == Acts::forward)
     deltaE = m_config.scaleFactor * E * (z - 1.);
   else
     deltaE = m_config.scaleFactor * E * (1. / z - 1.);

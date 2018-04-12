@@ -1,15 +1,14 @@
+// This file is part of the ACTS project.
 //
-//  RandomNumbersDistributions.hpp
-//  FATRAS
+// Copyright (C) 2018 ACTS project team
 //
-//  Created by Hadrien Grasland on 27/06/17.
-//
-//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-/// This file was copied from the ACTS Test framework
 
 #ifndef ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
-#define ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H 1
+#define ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
 
 #include <random>
 

@@ -67,7 +67,7 @@ public:
   energyLoss(const Acts::MaterialProperties& mat,
              double                          momentum,
              double                          pathcorrection,
-             Acts::PropDirection             dir      = Acts::alongMomentum,
+             Acts::NavigationDirection             dir      = Acts::forward,
              Acts::ParticleType              particle = Acts::pion) const final;
 
   /** Set configuration method */

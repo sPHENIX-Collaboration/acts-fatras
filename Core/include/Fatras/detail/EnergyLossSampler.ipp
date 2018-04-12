@@ -45,7 +45,7 @@ Fatras::EnergyLossSampler<RandomGenerator>::energyLoss(
     const Acts::MaterialProperties& materialProperties,
     double                          momentum,
     double                          pathCorrection,
-    Acts::PropDirection             direction,
+    Acts::NavigationDirection             direction,
     Acts::ParticleType              particleHypothesis) const
 {
   Fatras::EnergyLoss sampledEloss(0., 0.);

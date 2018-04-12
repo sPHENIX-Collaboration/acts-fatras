@@ -134,7 +134,7 @@ public:
   Acts::ExtrapolationCode
   handleMaterial(Acts::ExCellCharged&      ecCharged,
                  const Acts::Surface*      msurface = nullptr,
-                 Acts::PropDirection       dir      = Acts::alongMomentum,
+                 Acts::NavigationDirection       dir      = Acts::forward,
                  Acts::MaterialUpdateStage matupstage
                  = Acts::fullUpdate) const final;
 
@@ -149,7 +149,7 @@ public:
   Acts::ExtrapolationCode
   handleMaterial(Acts::ExCellNeutral&      ecNeutral,
                  const Acts::Surface*      msurface = nullptr,
-                 Acts::PropDirection       dir      = Acts::alongMomentum,
+                 Acts::NavigationDirection       dir      = Acts::forward,
                  Acts::MaterialUpdateStage matupstage
                  = Acts::fullUpdate) const final;
 
@@ -192,7 +192,7 @@ private:
   Acts::ExtrapolationCode
   handleMaterialT(Acts::ExtrapolationCell<T>& eCell,
                   const Acts::Surface*        msurface = nullptr,
-                  Acts::PropDirection         dir      = Acts::alongMomentum,
+                  Acts::NavigationDirection         dir      = Acts::forward,
                   Acts::MaterialUpdateStage   matupstage
                   = Acts::fullUpdate) const;
 
@@ -208,7 +208,7 @@ private:
   Acts::ExtrapolationCode
   processOnSurfaceT(Acts::ExtrapolationCell<T>&     eCell,
                     const Acts::Surface*            msurface,
-                    Acts::PropDirection             dir,
+                    Acts::NavigationDirection             dir,
                     const Acts::MaterialProperties& mprop,
                     double                          pathCorrection,
                     float&                          mFraction) const;
@@ -229,7 +229,7 @@ private:
   electroMagneticInteraction(const Acts::TrackParameters&    parameters,
                              Acts::ExCellCharged&            eCell,
                              const Acts::Surface*            msurface,
-                             Acts::PropDirection             dir,
+                             Acts::NavigationDirection             dir,
                              const Acts::MaterialProperties& mprop,
                              double                          dX0,
                              double                          pathCorrection,
@@ -253,7 +253,7 @@ private:
   electroMagneticInteraction(const Acts::NeutralParameters&  parameters,
                              Acts::ExCellNeutral&            eCell,
                              const Acts::Surface*            msurface,
-                             Acts::PropDirection             dir,
+                             Acts::NavigationDirection             dir,
                              const Acts::MaterialProperties& mprop,
                              double                          dX0,
                              double                          pathCorrection,
@@ -319,7 +319,7 @@ private:
   ///   nothing to do (e.g. no material) : return nullptr */
   /*void updateTrackParameters(const Acts::TrackParameters& parameters,
                              Acts::ExCellCharged& eCell,
-                             Acts::PropDirection dir,
+                             Acts::NavigationDirection dir,
                              Acts::MaterialUpdateStage matupstage) const;
 */
 
