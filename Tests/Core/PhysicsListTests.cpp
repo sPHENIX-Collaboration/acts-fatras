@@ -44,6 +44,42 @@ namespace Test {
   {
   };
   
+  /// Physics process that does not trigger a break
+  struct SterileProcess {
+
+    /// call operator 
+    template <typename cache_t,
+              typename generator_t,
+              typename detector_t,
+              typename particle_t>
+    bool
+    operator()(cache_t&, 
+               generator_t&,
+               const detector_t&,
+               const particle_t&,             
+               std::vector<particle_t>&) const 
+    { return false; }
+  
+  };
+  
+  
+  /// Physics process that DOES trigger a break
+  struct FatalProcess {
+
+    /// call operator 
+    template <typename cache_t,
+              typename generator_t,
+              typename detector_t,
+              typename particle_t>
+    bool
+    operator()(cache_t&, 
+               generator_t&,
+               const detector_t&,
+               const particle_t&,             
+               std::vector<particle_t>&) const 
+    { return true; }
+  
+  };
   
   // This tests the implementation of the AbortList
   // and the standard aborters
@@ -52,14 +88,37 @@ namespace Test {
     //
     Cache_type                 cache;
     Generator_type             generator;
-    Detctor_type               detector;
-    Particle_type              incoming;
-    std::vector<Particle_tyep> outoing;
+    Detector_type               detector;
+    Particle_type              in;
+    std::vector<Particle_type> out;
     
     /// empty physics_list
     typedef PhysicsList<> ProcessLess;
-    ProcessLess sterile;
-    BOOST_TEST(sterile(cache,generator,detector,incoming,outgoing));
+    ProcessLess emptyList;
+    
+    /// sterile test should never send the abort command
+    BOOST_TEST(!emptyList(cache,generator,detector,in,out));
+    
+    // now create a single sterile process
+    typedef PhysicsList<SterileProcess> SterileList;
+    SterileList sterileProcess;
+    
+    /// sterile test should not send the abort command
+    BOOST_TEST(!sterileProcess(cache,generator,detector,in,out));
+    
+    // now create a single fatal process
+    typedef PhysicsList<FatalProcess> FatalList;
+    FatalList fatalProcess;
+    
+    /// fatal test should send  abort command
+    BOOST_TEST(fatalProcess(cache,generator,detector,in,out));
+    
+    // now create a list of a sterile and fatal process
+    typedef PhysicsList<SterileProcess,FatalProcess> SterileFatalList;
+    SterileFatalList stfaProcess;
+    
+    /// fatal test should send  abort command
+    BOOST_TEST(stfaProcess(cache,generator,detector,in,out));
     
   }
 

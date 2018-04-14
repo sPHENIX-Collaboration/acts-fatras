@@ -14,7 +14,7 @@
 #include "ACTS/Utilities/detail/MPL/has_duplicates.hpp"
 #include "ACTS/Utilities/detail/MPL/type_collector.hpp"
 #include "Fatras/detail/physics_list_implementation.hpp"
-#include "Fatras/detail/physics_list_check.hpp"
+#include "Fatras/detail/physics_list_signature_check.hpp"
 
 namespace Fatras {
 
@@ -22,21 +22,17 @@ namespace Fatras {
 /// Users can add a variable list of processes in order to drive the
 /// physics simulation
 template <typename... processes>
-struct PhysicsList : private detail::Extendable<processes...>
+struct PhysicsList : private Acts::detail::Extendable<processes...>
 {
 private:
-  static_assert(not detail::has_duplicates_v<processes...>,
+  static_assert(not Acts::detail::has_duplicates_v<processes...>,
                 "same action type specified several times");
 
-  // clang-format off
-  typedef detail::type_collector_t<detail::result_type_extractor, processes...> results;
-  // clang-format on
-
-  using detail::Extendable<processes...>::tuple;
+  using Acts::detail::Extendable<processes...>::tuple;
 
 public:
   
-  using detail::Extendable<processes...>::get;
+  using Acts::detail::Extendable<processes...>::get;
 
   /// Call operator that is that broadcasts the call to the tuple()
   /// members of the list
@@ -59,24 +55,19 @@ public:
             typename particle_t>
   bool
   operator()(cache_t& cache, 
-             generator_t& generator,
-             const detector_t& detector,
-             const particle_t& ingoing,             
-             std::vector<particle_t>& outgoing) const
+             generator_t& gen,
+             const detector_t& det,
+             const particle_t& in,             
+             std::vector<particle_t>& out) const
   {
     // clang-format off
-    static_assert(detail::all_of_v<detail::physics_list_signature_check_v<processes, cache_t, generator_t, detector_t, particle_t>...>,
+    static_assert(Acts::detail::all_of_v<detail::physics_list_signature_check_v<processes, cache_t, generator_t, detector_t, particle_t>...>,
                   "not all process processes support the specified interface");
     // clang-format on
     
     // create an emtpy particle vector            
     typedef detail::physics_list_impl<processes...> impl;
-    return impl::process(tuple(), 
-                         cache, 
-                         generator, 
-                         detector, 
-                         ingoing, 
-                         outgoing);
+    return impl::process(tuple(),cache,gen,det,in,out);
   }
   
 };

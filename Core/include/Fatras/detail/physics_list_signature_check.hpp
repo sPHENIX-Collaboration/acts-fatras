@@ -22,8 +22,8 @@ namespace Fatras {
 ///  operator()(cache_t& cache, 
 ///             generator_t& generator,
 ///             const detector_t& detector,
-///             const particle_t& ingoing,             
-///             std::vector<particle_t>& outgoing) const { return false; }
+///             const particle_t& in,             
+///             std::vector<particle_t>& out) const { return false; }
 ///
 /// @endcode
 namespace detail {
@@ -39,7 +39,7 @@ namespace detail {
                                              std::declval<generator_t&>(),
                                              std::declval<const detector_t&>(),
                                              std::declval<const particle_t&>(),
-                                             std::declval<std::vector<partilce_t>&>())>
+                                             std::declval<std::vector<particle_t>&>()))>
                 
     std::true_type
     test_physics_list(int);
