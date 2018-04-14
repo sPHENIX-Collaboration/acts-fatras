@@ -14,7 +14,7 @@
 #include "ACTS/Utilities/detail/MPL/has_duplicates.hpp"
 #include "ACTS/Utilities/detail/MPL/type_collector.hpp"
 #include "Fatras/Kernel/detail/physics_list_implementation.hpp"
-#include "Fatras/Kernel/detail/physics_list_signature_check.hpp"
+#include "Fatras/Kernel/detail/process_signature_check.hpp"
 
 namespace Fatras {
 
