@@ -1,7 +1,6 @@
 # main library
 add_library(ACTSFatras SHARED
-  src/EnergyLoss.cpp
-  src/RandomNumberDistributions.cpp)
+src/RandomNumberDistributions.cpp)
 target_include_directories(ACTSFatras PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
 target_link_libraries(ACTSFatras PUBLIC ACTSCore)
 set_target_properties(ACTSFatras PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE)

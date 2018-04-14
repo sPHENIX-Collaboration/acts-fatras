@@ -1,12 +1,13 @@
+// This file is part of the ACTS project.
 //
-//  RandomNumbersDistributions.cpp
-//  ACTFW
+// Copyright (C) 2018 ACTS project team
 //
-//  Created by Hadrien Grasland on 27/06/17.
-//
-//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "Fatras/Kernel.RandomNumberDistributions.hpp"
+
+#include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 Fatras::LandauDist::param_type::param_type(double mean, double scale)
   : mean(mean), scale(scale)
