@@ -22,7 +22,7 @@
 #include "ProcessTestUtils.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
-#include "Fatras/Processes/Scattering.hpp"
+#include "Fatras/Processes/EnergyLoss.hpp"
 #include "ACTS/Utilities/Definitions.hpp"
 
 namespace bdata = boost::unit_test::data;
@@ -33,9 +33,10 @@ namespace Fatras {
 namespace Test {
 
   /// The scattering formula
-  struct ScatteringAngle {
+  struct EnergyDecreaser {
 
-    double cvalue = 0.15;
+    // constant 10 percent of enery loss
+    double cvalue = 0.90;
 
     template <typename generator_t,
               typename detector_t,
@@ -43,16 +44,16 @@ namespace Test {
     double 
     operator()(generator_t&,
                const detector_t&,
-               const particle_t&) const 
+               particle_t& in) const 
     {
-      return cvalue;
+      return in.E*cvalue;
     }
     
   };
   
   /// Test the scattering implementation
   BOOST_DATA_TEST_CASE(
-      Scattering_test_,
+      EnergyLoss_test_,
       bdata::random((bdata::seed = 20,
                      bdata::distribution
                      = std::uniform_real_distribution<>(0.,1.)))
@@ -79,7 +80,7 @@ namespace Test {
     // Dummy detctor
     Detector detector;
 
-    // create the particle and set the momentum
+    // create the particle and set the momentum    
     /// position at 0.,0.,0
     Acts::Vector3D position{0.,0.,0.};
     // pT of 1 GeV 
@@ -90,25 +91,25 @@ namespace Test {
     
     // create the particle 
     Particle particle(position,momentum,q,m,13,1);
-    
+          
     // outgoing particles (always none for scattering)
     std::vector<Particle> outgoing;
     
-    // The select all list
+    // T"{he select all list
     typedef SelectorList<Selector> SelectAll;
-    typedef Scattering<ScatteringAngle, SelectAll> Scattering;
-    Scattering cScattering;
+    typedef EnergyLoss<EnergyDecreaser, SelectAll, SelectAll> EnergyLoss;
+    EnergyLoss cEnergyLoss;
     
     // scattering is not allowed to throw abort command
-    BOOST_CHECK(!cScattering(generator,detector,particle,outgoing));
+    BOOST_CHECK(!cEnergyLoss(generator,detector,particle,outgoing));
     
     // check the the particle momentum magnitude is identical
-    BOOST_CHECK_CLOSE(particle.momentum.mag(),momentum.mag(),10e-3);
+    BOOST_CHECK(momentum.mag() != particle.momentum.mag());
     
     // let's test this as part of a physics list
-    PhysicsList<Scattering> scatteringPhysics;
+    PhysicsList<EnergyLoss> energyLossPhysics;
     // scattering is not allowed to throw abort command
-    BOOST_CHECK(!scatteringPhysics(generator,detector,particle,outgoing));
+    BOOST_CHECK(!energyLossPhysics(generator,detector,particle,outgoing));
         
   }
 

@@ -30,8 +30,7 @@ namespace Fatras {
 
 namespace Test {
   
-  // This tests the implementation of the AbortList
-  // and the standard aborters
+  // This tests the implementation of the detector info 
   BOOST_AUTO_TEST_CASE(DetectorInfo_tests)
   {
     
@@ -44,12 +43,10 @@ namespace Test {
     
     // This is a simple container 
     BOOST_TEST(detector.material == mat);
-    BOOST_TEST(detector.pathLength == pathlength);
-    
+    BOOST_TEST(detector.pathLength == pathlength);    
   }
 
-  // This tests the implementation of the AbortList
-  // and the standard aborters
+  // This tests the implementation of the particle info 
   BOOST_AUTO_TEST_CASE(ParticleInfo_tests)
   {
     
@@ -71,11 +68,8 @@ namespace Test {
     
     // test magnitude of momentum
     BOOST_TEST(particle.pT == 1000.*Acts::units::_MeV);
-    BOOST_TEST(particle.pT == particle.p);
-  
+    BOOST_TEST(particle.pT == particle.p);  
   }
-  
-  
-
+ 
 }  // namespace Test
 }  // namespace Fatras

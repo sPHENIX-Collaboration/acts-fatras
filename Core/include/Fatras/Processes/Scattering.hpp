@@ -27,7 +27,7 @@ namespace Fatras {
   /// - a parametric action that relates phi and theta (default: off)
   /// - an actuall out of direction scattering applying two random numbers
     
-  template <typename Formula, typename SelectorList>  
+  template <typename Formula, typename Selector>  
   struct Scattering
   {
   
@@ -39,7 +39,7 @@ namespace Fatras {
     Formula         angle;
     
     /// The selector list
-    SelectorList    selector;
+    Selector    selector;
           
     /// This is the scattering call operator
     template <typename generator_t,
