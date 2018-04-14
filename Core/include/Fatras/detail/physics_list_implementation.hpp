@@ -31,26 +31,17 @@ namespace {
     static bool
     process(const T& process_tuple, 
            cache_t& cache,
-           generator_t& generator,
-           const detector_t& detector,
-           const particle_t& ingoing,
-           std::vector<particle_t>& outgoing)
+           generator_t& gen,
+           const detector_t& det,
+           const particle_t& in,
+           std::vector<particle_t>& out)
     {
       // pick the first process
       const auto&  this_process = std::get<first>(process_tuple);
-      bool this_process_kills = this_process(cache,
-                                             generator,
-                                             detector,
-                                             ingoing,
-                                             outgoing);
+      bool this_process_kills = this_process(cache,gen,det,in,out);
       // recursive call on the remaining ones
       return (this_process_kills 
-              || physics_list_impl<others...>::process(process_tuple, 
-                                                       cache, 
-                                                       generator,
-                                                       detector, 
-                                                       ingoing, 
-                                                       outgoing));
+              || physics_list_impl<others...>::process(process_tuple, cache,gen,det,in,out));
     }
   };
 
@@ -66,18 +57,14 @@ namespace {
     static bool
     process(const T& process_tuple, 
             cache_t& cache,
-            generator_t& generator,
-            const detector_t& detector,
-            const particle_t& ingoing,
-            std::vector<particle_t>& outgoing)
+            generator_t& gen,
+            const detector_t& det,
+            const particle_t& in,
+            std::vector<particle_t>& out)
     {
       // this is the last process in the tuple
       const auto& this_process = std::get<last>(process_tuple);
-      return this_process(cache,
-                          generator,
-                          detector,
-                          ingoing,
-                          outgoing);
+      return this_process(cache,gen,det,in,out);
     }
   };
 
@@ -102,7 +89,9 @@ namespace {
     }
   };
 
-}  // namespace
+} // namespace
 
-}  // namespace Acts
+} // namespace detail
+
+} // namespace Acts
 #endif  // FATRAS_PHYSICS_LIST_IMPLEMENTATION_HPP
