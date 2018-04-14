@@ -16,12 +16,12 @@ namespace detail {
 namespace {
 
   template <typename... selectors>
-  struct slector_list_impl;
+  struct selector_list_impl;
 
-  /// Recursive Call pattern
+  /// Recursive call pattern
   /// - make sure it bails out 
   template <typename first, typename... others>
-  struct slector_list_impl<first, others...>
+  struct selector_list_impl<first, others...>
   {
     template <typename T, typename particle_t>
     static bool
@@ -35,13 +35,13 @@ namespace {
       // is allowed to fail - a single failed selector rejects the particle
       // @todo check if rhs is actually evaluated if lhs fails (should not!)
       return (selected 
-            && slector_list_impl<others...>::select(slector_tuple, particle));
+            && selector_list_impl<others...>::select(slector_tuple, particle));
     }
   };
 
   /// Final call pattern
   template <typename last>
-  struct slector_list_impl<last>
+  struct selector_list_impl<last>
   {
     template <typename T, typename particle_t>
     static bool
@@ -55,7 +55,7 @@ namespace {
 
   /// Empty call pattern
   template <>
-  struct slector_list_impl<>
+  struct selector_list_impl<>
   {
     template <typename T, typename particle_t>
     static bool

@@ -9,13 +9,11 @@
 #ifndef FATRAS_PROCESSES_SCATTERING_HPP
 #define FATRAS_PROCESSES_SCATTERING_HPP
 
-#include <memory>
+#include <cmath>
 
-#include <ACTS/EventData/ParticleDefinitions.hpp>
-#include <ACTS/Material/MaterialProperties.hpp>
-#include <ACTS/Utilities/Definitions.hpp>
-
-#include "Fatras/IMultipleScatteringSampler.hpp"
+#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "ACTS/Utilities/Definitions.hpp"
 
 namespace Fatras {
 
@@ -29,42 +27,100 @@ namespace Fatras {
   /// - a parametric action that relates phi and theta (default: off)
   /// - an actuall out of direction scattering applying two random numbers
     
-  template <typename Formula>  
+  template <typename Formula, typename SelectorList>  
   struct Scattering
   {
   
     /// Include the log term
     bool     parametric = false;
+    double   projectionFactor = 1./std::sqrt(2.);
     
     /// The scattering formula
-    Formula  angle;
+    Formula         angle;
     
-    /// This is the scattering 
-    /// call operator:  
-    template <typename cache_t,
-              typename generator_t,
+    /// The selector list
+    SelectorList    selector;
+          
+    /// This is the scattering call operator
+    template <typename generator_t,
               typename detector_t,
               typename particle_t>
     bool
-    operator()(cache_t&, 
-               generator_t&,
-               const detector_t&,
-               const particle_t&,             
+    operator()(generator_t& gen,
+               const detector_t& det,
+               particle_t& in,             
                std::vector<particle_t>&) const 
     { 
-      
-      
-      
+      // check if scattering applies
+      if (selector(in)){
+        
+        /// uniform distribution
+        UniformDist uniformDist = UniformDist(0., 1.);
+        
+        // 3D scattering angle
+        double angle3D = angle(gen,det,in);
+        
+        // parametric scattering
+        if (parametric){
+          
+          // the initial values
+          double theta    = in.momentum.theta();
+          double phi      = in.momentum.phi();
+          double sinTheta = (sin(theta) * sin(theta) > 10e-10) ? sin(theta) : 1.;
 
-      /// scattering always returns false, it is 
-      /// a non-distructive process
+          // sample them in an independent way
+          double deltaTheta = projectionFactor * angle3D;
+          double numDetlaPhi = 0. ; //??
+          double deltaPhi   = projectionFactor *  numDetlaPhi/ sinTheta;
+
+          // use bound parameter 
+          // (i) phi
+          phi += deltaPhi;
+          if (phi >= M_PI) phi -= M_PI;
+          else if (phi < -M_PI)  phi += M_PI;
+          // (ii) theta
+          theta += deltaTheta;
+          if (theta > M_PI) theta -= M_PI;
+          else if (theta < 0.) theta += M_PI;
+          
+          double sphi   = sin(phi);
+          double cphi   = cos(phi);
+          double stheta = sin(theta);
+          double ctheta = cos(theta);
+
+          // assign the new values
+          in.momentum = in.p * Acts::Vector3D(cphi*stheta,sphi*stheta,ctheta);
+          
+        } else {
+          // Create a random uniform distribution between in the intervall [0,1]      
+          double psi     = 2. * M_PI * uniformDist(gen);
+      
+          // more complex but "more true"
+          Acts::Vector3D pDirection(in.momentum.unit());
+          double         x = -pDirection.y();
+          double         y =  pDirection.x();
+          double         z = 0.;
+          
+          // if it runs along the z axis - no good ==> take the x axis
+          if (pDirection.z() * pDirection.z() > 0.999999) 
+            { x = 1.;  y = 0.; }
+          // deflector direction
+          Acts::Vector3D deflector(x, y, z);
+          // rotate the new direction for scattering using theta and  psi
+          Acts::RotationMatrix3D rotation;
+          rotation = Acts::AngleAxis3D(angle3D, deflector)
+              * Acts::AngleAxis3D(psi, pDirection);
+          // rotate and set a new direction to the cache 
+          in.momentum = in.p * rotation*pDirection.unit();
+        }
+      }
+      // scattering always returns false
+      // - it is a non-distructive process
       return false; 
     }
-    
-    
   
   };
   
 }  // end of namespace
 
-#endif  // FATRAS_PROCESSES_HIGHLAND_HPP
+#endif  // FATRAS_PROCESSES_SCATTERING_HPP
