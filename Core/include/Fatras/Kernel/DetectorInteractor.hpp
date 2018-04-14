@@ -51,8 +51,20 @@ namespace Fatras {
 
 /// The Fatras Material interactor struct
 ///   
-/// - this is the Fatras plugin to the Propagator and will make 
+/// This is the Fatras plugin to the ACTS Propagator
+/// It replaces the reconstruction material updator
+/// for the fast track simulation.
 ///
+/// @tparam RandomGenerator is the given random generator type
+/// @tparam SensitvitveSeclector is type of selector struct/class
+///   that detrmines if a cache.current_surface is sensitive
+/// @tparam PhysicsList is an extendable physics list that is called
+///  
+/// The physics list plays a central role in this Interactor
+/// it is called on each process that is defined at compile time
+/// if a process triggers an abort, this will be forwarded to
+/// the propagation cache.
+  
 template <typename RandomGenerator, 
           typename SensitiveSelector,
           typename PhysicsList>    
@@ -64,8 +76,6 @@ struct Interactor
 
   /// The selector for sensitive surfaces
   SensitiveSelector sensitiveSelector;
-
-
   
   /// debug output flag
   bool debug = false;
@@ -85,19 +95,21 @@ struct Interactor
 
   typedef this_result result_type;
 
-  /// Interaction with detector material
-  /// for the ActionList of the Propagator
+  /// Interaction with detector material for the ActionList of the Propagator
   ///
-  /// It checks if the cache has a current surface,
-  /// in which case the action is performed according to
-  /// the configruation, eventual particles produced
-  /// in electromagnetic or hadronic interactions
-  /// are stored in the result vector 
+  /// It checks if the cache has a current surface, in which case the action 
+  /// is performed according to the physics list content.
+  /// 
+  /// Eventual particles produced in electromagnetic or hadronic interactions 
+  /// are stored in the result struct and can thus be retrieved by the caller
   ///
   /// @tparam cache_t is the type of Stepper cache
   ///
   /// @param cache is the mutable stepper cache object
   /// @param result is the mutable result cache object
+  ///
+  /// return value is void as it is a standard actor in the 
+  /// propagation
   template <typename cache_t>
   void
   operator()(cache_t& cache, result_type& result) const
@@ -133,78 +145,12 @@ struct Interactor
         } else
           FATLOG(cache, result, "Update while pass through: full mode.");
         
-        
         if (prepofu == 0.) {
           FATLOG(cache, result, "Pre/Post factor set material to zero.");
-        } else {
-
-          // get the path correction due to the incident angle
-          double pCorrection = cache.current_surface->pathCorrection(
-              cache.position(), cache.direction());
+        } 
         
-          // the momentum at current position
-          double p    = std::abs(1. / cache.qop);
-          double m    = particleMasses.mass.at(pType);
-          double E    = std::sqrt(p * p + m * m);
-          double beta = p / E;
         
-          // apply the multiple scattering
-          if (multipleScatteringSampler && randomGenerator) {
-            // the multiple scattering sampler 
-            double sTheta = multipleScatteringSampler->simTheta(*randomGenerator,
-                                                                *mProperties,
-                                                                p, pCorrection,
-                                                                pType);
-          
-            // Create a random uniform distribution between in the intervall [0,1]
-            UniformDist uniformDist(0., 1.);
-          
-            //@todo test this non parametric way - not tested yet
-            double psi     = 2. * M_PI * uniformDist(*randomGenerator);
-          
-            // more complex but "more true"
-            Acts::Vector3D pDirection(cache.momentum().unit());
-            double         x = -pDirection.y();
-            double         y =  pDirection.x();
-            double         z = 0.;
-            // if it runs along the z axis - no good ==> take the x axis
-            if (pDirection.z() * pDirection.z() > 0.999999) { x = 1.;  y = 0.; }
-          
-            // deflector direction
-            Acts::Vector3D deflector(x, y, z);
-            // rotate the new direction for scattering using theta and arbitraril in psi
-            // create the rotation
-            Acts::RotationMatrix3D rotation;
-            rotation = Acts::AngleAxis3D(sTheta, deflector)
-                * Acts::AngleAxis3D(psi, pDirection);
-            // Some screen output
-            FATLOG(cache, result, "Multiple scattering deltaPsi / deltaTheta = " 
-                                  << psi << " / " << sTheta);         
-            // create the transform
-            // @todo ? can we not just use rotation ??
-            Acts::Transform3D transform(rotation, Acts::Vector3D(0., 0., 0.));
-            // get the new direction
-            pDirection = transform.linear()*pDirection;
-            // assign the new direction - make sure it's the unit vector
-            cache.dir = pDirection.unit();
-          }
-          // apply the energy loss
-          if (energyLossSampler && randomGenerator) {
-            // energy loss from the eloss sampler
-            auto eloss = energyLossSampler->energyLoss(*randomGenerator,
-                                                       *mProperties,
-                                                       p, pCorrection,
-                                                       cache.nav_dir,
-                                                       pType);
-            depositedEnergy = eloss.deltaE();                                           
-            FATLOG(cache, result, "Energy loss sampled " << eloss.deltaE());
-            if ((E + eloss.deltaE()) < m) return;
-            // indeed possible, apply and update
-            double newP = sqrt((E + eloss.deltaE()) * (E + eloss.deltaE()) - m * m);
-            double q = cache.qop > 0. ? 1. : -1.;
-            cache.qop = q/newP;             
-          }
-        }
+        
       }
     }
     
