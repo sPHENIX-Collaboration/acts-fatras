@@ -73,7 +73,6 @@ namespace Test {
     BOOST_TEST(particle.pT == 1000.*Acts::units::_MeV);
     BOOST_TEST(particle.pT == particle.p);
   
-  
   }
   
   
