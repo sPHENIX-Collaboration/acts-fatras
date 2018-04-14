@@ -22,7 +22,7 @@ namespace Fatras {
 /// Users can add a variable list of selectors in order to drive the
 /// physics simulation
 template <typename... selectors>
-struct PhysicsList : private Acts::detail::Extendable<selectors...>
+struct SelectorList : private Acts::detail::Extendable<selectors...>
 {
 private:
   static_assert(not Acts::detail::has_duplicates_v<selectors...>,
@@ -43,16 +43,16 @@ public:
   /// @return inticator if the particle is accepted
   template <typename particle_t>
   bool
-  operator()(const particle_t& partilce) const
+  operator()(const particle_t& particle) const
   {
     // clang-format off
-    static_assert(Acts::detail::all_of_v<detail::physics_list_signature_check_v<selectors, particle_t>...>,
+    static_assert(Acts::detail::all_of_v<detail::selector_list_signature_check_v<selectors, particle_t>...>,
                   "not all particle selectors support the specified interface");
     // clang-format on
     
     // create an emtpy particle vector            
-    typedef detail::physics_list_impl<selectors...> impl;
-    return impl::select(tuple(),cache,gen,det,in,out);
+    typedef detail::selector_list_impl<selectors...> impl;
+    return impl::select(tuple(),particle);
   }
   
 };

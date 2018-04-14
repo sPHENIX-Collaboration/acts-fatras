@@ -60,7 +60,7 @@ namespace Fatras {
 ///   that detrmines if a cache.current_surface is sensitive
 /// @tparam PhysicsList is an extendable physics list that is called
 ///  
-/// The physics list plays a central role in this Interactor
+/// The physics list plays a central role in this DetectorInteractor
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
@@ -68,7 +68,7 @@ namespace Fatras {
 template <typename RandomGenerator, 
           typename SensitiveSelector,
           typename PhysicsList>    
-struct Interactor
+struct DetectorInteractor
 {
 
   /// The random generator to be spawn per event

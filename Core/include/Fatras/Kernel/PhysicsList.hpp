@@ -37,37 +37,33 @@ public:
   /// Call operator that is that broadcasts the call to the tuple()
   /// members of the list
   ///
-  /// @tparam cache_t is the cache type from the propagator 
   /// @tparam generator_t is the random number generator type
   /// @tparam detector_t is the detector information type used
   /// @tparam particle_t is the particle type used in simulation
   ///
-  /// @param[in] cache is the propgator/stepper cache
-  /// @param[in] cache is the generator
+  /// @param[in] gen is the generator object
   /// @param[in] detector is the necessary detector information
-  /// @param[in] ingoig is the ingoing particle
+  /// @param[in] ingoig is the ingoing particle (can be modified)
   /// @param[in,out] outgoing are the (eventually) outgoing particles
   ///
   /// @return inticator which would trigger an abort
-  template <typename cache_t, 
-            typename generator_t,
+  template <typename generator_t,
             typename detector_t, 
             typename particle_t>
   bool
-  operator()(cache_t& cache, 
-             generator_t& gen,
+  operator()(generator_t& gen,
              const detector_t& det,
-             const particle_t& in,             
+             particle_t& in,             
              std::vector<particle_t>& out) const
   {
     // clang-format off
-    static_assert(Acts::detail::all_of_v<detail::physics_list_signature_check_v<processes, cache_t, generator_t, detector_t, particle_t>...>,
+    static_assert(Acts::detail::all_of_v<detail::physics_list_signature_check_v<processes, generator_t, detector_t, particle_t>...>,
                   "not all process processes support the specified interface");
     // clang-format on
     
     // create an emtpy particle vector            
     typedef detail::physics_list_impl<processes...> impl;
-    return impl::process(tuple(),cache,gen,det,in,out);
+    return impl::process(tuple(),gen,det,in,out);
   }
   
 };

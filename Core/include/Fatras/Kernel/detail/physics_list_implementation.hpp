@@ -18,30 +18,26 @@ namespace {
   template <typename... processes>
   struct physics_list_impl;
 
-  /// Recursive Call pattern
+  /// Recursive call pattern
   /// - make sure it bails out 
   template <typename first, typename... others>
   struct physics_list_impl<first, others...>
   {
     template <typename T,
-              typename cache_t,
-              typename generator_t,
-              typename detector_t,
-              typename particle_t>
+              typename generator_t, typename detector_t, typename particle_t>
     static bool
     process(const T& process_tuple, 
-           cache_t& cache,
            generator_t& gen,
            const detector_t& det,
-           const particle_t& in,
+           particle_t& in,
            std::vector<particle_t>& out)
     {
       // pick the first process
       const auto&  this_process = std::get<first>(process_tuple);
-      bool this_process_kills = this_process(cache,gen,det,in,out);
+      bool this_process_kills = this_process(gen,det,in,out);
       // recursive call on the remaining ones
       return (this_process_kills 
-              || physics_list_impl<others...>::process(process_tuple, cache,gen,det,in,out));
+              || physics_list_impl<others...>::process(process_tuple,gen,det,in,out));
     }
   };
 
@@ -49,22 +45,18 @@ namespace {
   template <typename last>
   struct physics_list_impl<last>
   {
-    template <typename T,
-              typename cache_t,
-              typename generator_t,
-              typename detector_t,
-              typename particle_t>
+    template <typename T, 
+              typename generator_t, typename detector_t, typename particle_t>
     static bool
     process(const T& process_tuple, 
-            cache_t& cache,
             generator_t& gen,
             const detector_t& det,
-            const particle_t& in,
+            particle_t& in,
             std::vector<particle_t>& out)
     {
       // this is the last process in the tuple
       const auto& this_process = std::get<last>(process_tuple);
-      return this_process(cache,gen,det,in,out);
+      return this_process(gen,det,in,out);
     }
   };
 
@@ -73,13 +65,10 @@ namespace {
   struct physics_list_impl<>
   {
     template <typename T,
-              typename cache_t,
-              typename generator_t,
-              typename detector_t,
-              typename particle_t>
+              typename generator_t, typename detector_t, typename particle_t>
+              
     static bool
     process(const T&, 
-            cache_t&,
             generator_t&,
             const detector_t&,
             const particle_t&,
