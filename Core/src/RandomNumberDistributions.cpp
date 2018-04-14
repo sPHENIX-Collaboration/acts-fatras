@@ -6,7 +6,7 @@
 //
 //
 
-#include "Fatras/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel.RandomNumberDistributions.hpp"
 
 Fatras::LandauDist::param_type::param_type(double mean, double scale)
   : mean(mean), scale(scale)
