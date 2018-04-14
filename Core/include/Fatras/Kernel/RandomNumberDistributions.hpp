@@ -11,7 +11,6 @@
 #define ACTS_FATRAS_RANDOMNUMBERDISTRIBUTIONS_H
 
 #include <random>
-
 #include "Fatras/Kernel/detail/LandauQuantile.hpp"
 
 namespace Fatras {
