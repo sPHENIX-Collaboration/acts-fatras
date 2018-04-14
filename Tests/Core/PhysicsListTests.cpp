@@ -18,7 +18,7 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/PhysicsList.hpp"
+#include "Fatras/Kernel/PhysicsList.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
