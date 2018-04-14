@@ -1,6 +1,10 @@
-///////////////////////////////////////////////////////////////////
-// FatrasDefinitions.h, ACTS project
-///////////////////////////////////////////////////////////////////
+// This file is part of the ACTS project.
+//
+// Copyright (C) 2018 ACTS project team
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef ACTS_FATRAS_FATRASDEFINITIONS_H
 #define ACTS_FATRAS_FATRASDEFINITIONS_H
@@ -65,17 +69,18 @@ namespace Fatras {
                  double pq,
                  double pm,
                  int ppdg = 0, int pbarcode = 0) :
-       position(position),
+       position(pposition),
        momentum(pmomentum),
        q(pq),
        m(pm),
-       E(std::sqrt(p * p + m * m)),
-       beta(p/E),
        p(pmomentum.mag()),
        pT(pmomentum.perp()),
        pdg(ppdg),
        barcode(pbarcode) 
-    {}
+    {
+      E    = std::sqrt(p * p + m * m);
+      beta = (p/E);
+    }
       
     /// boost the particle
     /// @todo implement boost definition

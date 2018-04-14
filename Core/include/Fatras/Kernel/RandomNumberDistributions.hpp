@@ -12,7 +12,7 @@
 
 #include <random>
 
-#include "Fatras/detail/LandauQuantile.hpp"
+#include "Fatras/Kernel/detail/LandauQuantile.hpp"
 
 namespace Fatras {
 
