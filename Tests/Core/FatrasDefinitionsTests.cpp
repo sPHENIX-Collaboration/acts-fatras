@@ -39,11 +39,11 @@ namespace Test {
   
     DetectorInfo detector;
     detector.material   = mat;
-    detector.pathLength = pathlength;
+    detector.thickness = pathlength;
     
     // This is a simple container 
     BOOST_TEST(detector.material == mat);
-    BOOST_TEST(detector.pathLength == pathlength);    
+    BOOST_TEST(detector.thickness == pathlength);    
   }
 
   // This tests the implementation of the particle info 

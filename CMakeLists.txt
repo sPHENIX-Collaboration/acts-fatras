@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 include(GNUInstallDirs)
 
 add_subdirectory(Core)
+add_subdirectory(Samplers)
 add_subdirectory(Tests)
   
 # CMake package configuration files
