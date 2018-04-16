@@ -18,12 +18,9 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include <algorithm>
-#include "ProcessTestUtils.hpp"
-#include "Fatras/Kernel/SelectorList.hpp"
-#include "Fatras/Kernel/PhysicsList.hpp"
-#include "Fatras/Processes/EnergyLoss.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include <random>
+#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Samplers/Scattering/HighlandScatterer.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -31,29 +28,13 @@ namespace tt    = boost::test_tools;
 namespace Fatras {
 
 namespace Test {
-
-  /// The scattering formula
-  struct EnergyDecreaser {
-
-    // constant 10 percent of enery loss
-    double cvalue = 0.90;
-
-    template <typename generator_t,
-              typename detector_t,
-              typename particle_t>
-    double 
-    operator()(generator_t&,
-               const detector_t&,
-               particle_t& in) const 
-    {
-      return in.E*cvalue;
-    }
-    
-  };
+  
+  // let's get some material
+  Material berilium = Material(352.8, 407., 9.012, 4., 1.848e-3);
   
   /// Test the scattering implementation
   BOOST_DATA_TEST_CASE(
-      EnergyLoss_test_,
+      HighlandScattering_test_,
       bdata::random((bdata::seed = 20,
                      bdata::distribution
                      = std::uniform_real_distribution<>(0.,1.)))
@@ -65,7 +46,7 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_int_distribution<>(1., 100.)))
+                           = std::uniform_int_distribution<>(0.5, 1.5)))
           ^ bdata::xrange(100),
       x,
       y,
@@ -73,45 +54,42 @@ namespace Test {
       p,
       index)
   {
+
+    /// the generator
+    typedef std::mt19937 Generator;
+    typedef ParticleInfo Particle;
+    typedef DetectorInfo Detector;
+    
     // standard generator
     Generator generator;
     
-    // Dummy detctor
+    // a detector with 1 mm Be
     Detector detector;
+    detector.material = berilium;
+    detector.thickness = 1 * Acts::units::_mm;
 
-    // create the particle and set the momentum    
+    // create the particle and set the momentum
     /// position at 0.,0.,0
     Acts::Vector3D position{0.,0.,0.};
     // pT of 1 GeV 
     Acts::Vector3D momentum = p * Acts::units::_GeV * Acts::Vector3D(x,y,z).unit();
     // positively charged
-    double q = 1.;
+    double q = -1.;
     double m = 105.658367 * Acts::units::_MeV;  // muon mass
     
     // create the particle 
     Particle particle(position,momentum,q,m,13,1);
-          
-    // outgoing particles (always none for scattering)
-    std::vector<Particle> outgoing;
     
-    // T"{he select all list
-    typedef SelectorList<Selector> SelectAll;
-    typedef EnergyLoss<EnergyDecreaser, SelectAll, SelectAll> EnergyLoss;
-    EnergyLoss cEnergyLoss;
+    // make the highland scatterer
+    HighlandScatterer hscat;
     
-    // scattering is not allowed to throw abort command
-    BOOST_CHECK(!cEnergyLoss(generator,detector,particle,outgoing));
+    double angle = hscat(generator, detector, particle);
     
-    // check the the particle momentum magnitude is identical
-    BOOST_CHECK(momentum.mag() != particle.momentum.mag());
     
-    // let's test this as part of a physics list
-    PhysicsList<EnergyLoss> energyLossPhysics;
     
-    // scattering is not allowed to throw abort command
-    BOOST_CHECK(!energyLossPhysics(generator,detector,particle,outgoing));
-        
   }
+  
+  
+} // end of namespace Test
 
-}  // namespace Test
-}  // namespace Fatras
+} // end of namespace Fatras

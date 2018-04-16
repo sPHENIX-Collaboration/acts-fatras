@@ -39,7 +39,7 @@ namespace Fatras {
   // Detector information struct for phsycis process samplers
   struct DetectorInfo {
     
-      double         pathLength; //!< the scaled & corrected pathlength 
+      double         thickness;  //!< the scaled & corrected pathlength 
       Acts::Material material;   //!< the material (potentially with composition)
   };
 
