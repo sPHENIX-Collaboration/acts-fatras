@@ -32,6 +32,8 @@ namespace Fatras {
     double gausMixEpsilon_b1 = 1.106e-1;
     double gausMixEpsilon_b2 = -5.729e-3;
     
+    bool optGaussianMixtureG4 = false;
+    
     /// Call operator to perform this scattering
     /// 
     /// @tparam generator_t is a random number generator type 
@@ -77,7 +79,8 @@ namespace Fatras {
           + gausMixSigma1_a1 * log_dprime
           + gausMixSigma1_a2 * log_dprime * log_dprime;
       // G4 optimised / native double Gaussian model
-      // if (!optGaussianMixtureG4) sigma2 = 225. * dprime / (p * p);
+      if (!optGaussianMixtureG4) 
+        sigma2 = 225. * dprime / (particle.p * particle.p);
       // throw the random number core/tail
       if (uniformDist(generator) < epsilon) 
         sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;
