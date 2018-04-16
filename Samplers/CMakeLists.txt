@@ -3,4 +3,4 @@ target_include_directories(ACTSFatrasSamplers INTERFACE $<BUILD_INTERFACE:${CMAK
 target_include_directories(ACTSFatrasSamplers INTERFACE ACTS::ACTSCore ACTSFatras)
 
 install(TARGETS ACTSFatrasSamplers LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY include/Fatras DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/Fatras DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Fatras)

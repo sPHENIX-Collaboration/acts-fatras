@@ -1,0 +1,4 @@
+add_executable (ScatteringSamplerTests ScatteringSamplerTests.cpp)
+target_include_directories (ScatteringSamplerTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (ScatteringSamplerTests PRIVATE ACTSCore ACTSFatras ACTSFatrasSamplers)
+add_test (NAME ScatteringSamplerUnitTest COMMAND ScatteringSamplerTests)
