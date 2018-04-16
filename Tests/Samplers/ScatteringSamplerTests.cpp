@@ -19,8 +19,11 @@
 // leave blank line
 
 #include <random>
+#include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
-#include "Fatras/Samplers/Scattering/HighlandScatterer.hpp"
+#include "Fatras/Scattering/Highland.hpp"
+#include "Fatras/Scattering/GaussianMixture.hpp"
+#include "Fatras/Scattering/GeneralMixture.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -29,8 +32,18 @@ namespace Fatras {
 
 namespace Test {
   
-  // let's get some material
-  Material berilium = Material(352.8, 407., 9.012, 4., 1.848e-3);
+  // the generator
+  typedef std::mt19937 Generator;
+  // standard generator
+  Generator generator;
+  
+  // some material
+  Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
+  
+  bool write_csv = true;
+    
+  std::ofstream os("ScatteringAngles.csv", std::ofstream::out | std::ofstream::trunc);
+  
   
   /// Test the scattering implementation
   BOOST_DATA_TEST_CASE(
@@ -46,22 +59,17 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_int_distribution<>(0.5, 1.5)))
-          ^ bdata::xrange(100),
+                           = std::uniform_real_distribution<>(1.5, 1.5)))
+          ^ bdata::xrange(10000),
       x,
       y,
       z,
       p,
       index)
   {
-
-    /// the generator
-    typedef std::mt19937 Generator;
+    
     typedef ParticleInfo Particle;
     typedef DetectorInfo Detector;
-    
-    // standard generator
-    Generator generator;
     
     // a detector with 1 mm Be
     Detector detector;
@@ -71,7 +79,7 @@ namespace Test {
     // create the particle and set the momentum
     /// position at 0.,0.,0
     Acts::Vector3D position{0.,0.,0.};
-    // pT of 1 GeV 
+    // p of 1 GeV 
     Acts::Vector3D momentum = p * Acts::units::_GeV * Acts::Vector3D(x,y,z).unit();
     // positively charged
     double q = -1.;
@@ -81,10 +89,22 @@ namespace Test {
     Particle particle(position,momentum,q,m,13,1);
     
     // make the highland scatterer
-    HighlandScatterer hscat;
+    Highland        hscat;
+    GaussianMixture gamscat;
+    GeneralMixture  genscat;
+      
+    double angleHiS = hscat(generator, detector, particle);
+    double angleGaM = gamscat(generator, detector, particle);
+    double angleGeM = genscat(generator, detector, particle);
     
-    double angle = hscat(generator, detector, particle);
+    BOOST_CHECK(angleHiS != 0.);
     
+    // write out a csv file 
+    if (write_csv){
+      if (!index) 
+        os << " p,highland,gaussian_mixture,general_mixture" << '\n';
+      os << particle.p << "," << angleHiS << "," << angleGaM << "," << angleGeM << '\n';
+    }
     
     
   }

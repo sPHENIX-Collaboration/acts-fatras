@@ -64,7 +64,7 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_int_distribution<>(1., 100.)))
+                           = std::uniform_real_distribution<>(1., 100.)))
           ^ bdata::xrange(100),
       x,
       y,
