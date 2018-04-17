@@ -21,6 +21,8 @@
 #include <random>
 #include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/PhysicsList.hpp"
+#include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/Scattering/Scattering.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
 #include "Fatras/Physics/Scattering/GaussianMixture.hpp"
@@ -37,6 +39,17 @@ namespace Test {
   typedef std::mt19937 Generator;
   // standard generator
   Generator generator;
+  
+  /// The selector 
+  struct Selector {
+    
+    /// call operator 
+    template <typename particle_t>
+    bool
+    operator()(const particle_t&) const 
+    { return true; }
+  
+  };
   
   // some material
   Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
@@ -106,6 +119,19 @@ namespace Test {
         os << " p,highland,gaussian_mixture,general_mixture" << '\n';
       os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
     }
+    
+    // Run the Scatterer as a plug-in process
+    Scattering<Highland> hsScattering;
+    auto out =  hsScattering(generator, detector, particle);
+    BOOST_CHECK(!out.size());
+
+    // Run the Scatterer as a physics list
+    typedef Selector All;
+    std::vector<ParticleInfo> outgoing;
+    typedef Process< Scattering<Highland>, All, All, All > HighlandProcess;
+    PhysicsList< HighlandProcess > hsPhysicsList;
+    hsPhysicsList(generator, detector, particle, outgoing);
+    BOOST_CHECK(!outgoing.size());
     
     
   }
