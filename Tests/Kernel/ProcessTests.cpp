@@ -100,7 +100,6 @@ namespace Test {
       p,
       index)
   {
-
     // standard generator
     Generator generator;
     

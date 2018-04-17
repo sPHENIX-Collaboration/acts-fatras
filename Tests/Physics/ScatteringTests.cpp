@@ -98,7 +98,7 @@ namespace Test {
     double gamr = gamscat(generator, detector, particle);
     double genr = genscat(generator, detector, particle);
     
-    BOOST_CHECK(angleHiS != 0.);
+    BOOST_CHECK(hsr != 0.);
     
     // write out a csv file 
     if (write_csv){
