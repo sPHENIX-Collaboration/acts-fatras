@@ -41,13 +41,13 @@ namespace detail {
     std::true_type
     test_physics_list(int);
 
-    template <typename, typename, typename, typename, typename>
+    template <typename, typename, typename, typename>
     std::false_type
     test_physics_list(...);
     
     template <typename T, 
               typename generator_t, typename detector_t, typename particle_t>
-    struct physics_list_signature_check
+    struct process_signature_check
         : decltype(test_physics_list<T, generator_t,
                                         detector_t,
                                         particle_t>(0))
@@ -59,9 +59,8 @@ namespace detail {
 
   template <typename T, 
             typename generator_t, typename detector_t, typename particle_t>
-  constexpr bool physics_list_signature_check_v
-      = physics_list_signature_check<T, 
-                                     generator_t, detector_t, particle_t>::value;
+  constexpr bool process_signature_check_v
+      = process_signature_check<T, generator_t, detector_t, particle_t>::value;
                                      
 }  // namespace detail
 

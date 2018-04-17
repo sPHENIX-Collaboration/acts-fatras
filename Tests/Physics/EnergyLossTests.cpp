@@ -21,6 +21,8 @@
 #include <random>
 #include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/PhysicsList.hpp"
+#include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/EnergyLoss/BetheBloch.hpp"
 #include "Fatras/Physics/EnergyLoss/BetheHeitler.hpp"
 
@@ -33,12 +35,26 @@ namespace Test {
   
   // the generator
   typedef std::mt19937 Generator;
+  
   // standard generator
   Generator generator;
   
   // some material
   Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
   
+  
+  /// The selector 
+  struct Selector {
+    
+    /// call operator 
+    template <typename particle_t>
+    bool
+    operator()(const particle_t&) const 
+    { return true; }
+  
+  };
+  
+  /// write CSV flag
   bool write_csv = true;
     
   std::ofstream os("EnergyLoss.csv", std::ofstream::out | std::ofstream::trunc);
@@ -58,7 +74,7 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_real_distribution<>(1.5, 1.5)))
+                           = std::uniform_real_distribution<>(1.5, 10.5)))
           ^ bdata::xrange(10000),
       x,
       y,
@@ -98,7 +114,7 @@ namespace Test {
     E = particle.E;
     
     auto bhr = bheitler(generator, detector, particle);
-    double eloss_rad =E = particle.E;
+    double eloss_rad = E - particle.E;
     BOOST_CHECK(E > particle.E);
     BOOST_CHECK(bhr.size()==0);
         
@@ -109,6 +125,18 @@ namespace Test {
       os << particle.p << "," << eloss_io << ","<< eloss_rad << '\n';
     }
     
+    // Accept everything
+    typedef Selector All;
+    // Define the processes with selectors
+    typedef Process<BetheBloch,All,All,All>   BetheBlochProcess;
+    typedef Process<BetheHeitler,All,All,All> BetheHeitlerProcess;
+    
+    // now check the EnergyLoss as a PhysicsList
+    typedef PhysicsList<BetheBlochProcess,BetheHeitlerProcess> EnergyLoss;
+    EnergyLoss eLoss;
+    std::vector<ParticleInfo> outgoing;
+    BOOST_CHECK(!eLoss(generator,detector,particle,outgoing));
+    BOOST_CHECK(!outgoing.size());
     
   }
   

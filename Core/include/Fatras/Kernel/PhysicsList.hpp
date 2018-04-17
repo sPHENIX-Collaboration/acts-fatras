@@ -25,9 +25,7 @@ template <typename... processes>
 struct PhysicsList : private Acts::detail::Extendable<processes...>
 {
 private:
-  static_assert(not Acts::detail::has_duplicates_v<processes...>,
-                "same action type specified several times");
-
+  
   using Acts::detail::Extendable<processes...>::tuple;
 
 public:
@@ -57,8 +55,8 @@ public:
              std::vector<particle_t>& out) const
   {
     // clang-format off
-    static_assert(Acts::detail::all_of_v<detail::physics_list_signature_check_v<processes, generator_t, detector_t, particle_t>...>,
-                  "not all process processes support the specified interface");
+    static_assert(Acts::detail::all_of_v<detail::process_signature_check_v<processes, generator_t, detector_t, particle_t>...>,
+                  "not all processes support the specified interface");
     // clang-format on
     
     // create an emtpy particle vector            

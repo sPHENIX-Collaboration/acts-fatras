@@ -6,13 +6,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef FATRAS_SAMPLER_HIGHLAND_HPP
-#define FATRAS_SAMPLER_HIGHLAND_HPP
+#ifndef FATRAS_PHYSICS_SCATTERING_HIGHLAND_HPP
+#define FATRAS_PHYSICS_SCATTERING_HIGHLAND_HPP
 
 #include "ACTS/Utilities/MaterialInteraction.hpp"
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
-#include "Fatras/Scattering/Highland.hpp"
 
 namespace Fatras {
       

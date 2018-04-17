@@ -109,6 +109,7 @@ namespace Fatras {
       // scattering always returns an empty list
       // - it is a non-distructive process
       return {}; 
+    }
   
   };
   

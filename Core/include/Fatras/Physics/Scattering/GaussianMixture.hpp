@@ -11,7 +11,7 @@
 
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
-#include "Fatras/Scattering/Highland.hpp"
+#include "Fatras/Physics/Scattering/Highland.hpp"
 
 namespace Fatras {
       
