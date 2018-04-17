@@ -42,7 +42,6 @@ namespace Test {
   // some material
   Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
   
-  
   /// The selector 
   struct Selector {
     
@@ -133,9 +132,9 @@ namespace Test {
     
     // now check the EnergyLoss as a PhysicsList
     typedef PhysicsList<BetheBlochProcess,BetheHeitlerProcess> EnergyLoss;
-    EnergyLoss eLoss;
+    EnergyLoss eLossPhysicsList;
     std::vector<ParticleInfo> outgoing;
-    BOOST_CHECK(!eLoss(generator,detector,particle,outgoing));
+    BOOST_CHECK(!eLossPhysicsList(generator,detector,particle,outgoing));
     BOOST_CHECK(!outgoing.size());
     
   }
