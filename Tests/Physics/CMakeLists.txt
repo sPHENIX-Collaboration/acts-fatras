@@ -1,11 +1,11 @@
-add_executable (ScatteringSamplerTests ScatteringSamplerTests.cpp)
-target_include_directories (ScatteringSamplerTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (ScatteringSamplerTests PRIVATE ACTSCore ACTSFatras ACTSFatrasSamplers)
-add_test (NAME ScatteringSamplerUnitTest COMMAND ScatteringSamplerTests)
+add_executable (ScatteringTests ScatteringTests.cpp)
+target_include_directories (ScatteringTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (ScatteringTests PRIVATE ACTSCore ACTSFatras ACTSFatrasSamplers)
+add_test (NAME ScatteringUnitTest COMMAND ScatteringTests)
 
-add_executable (EnergyLossSamplerTests EnergyLossSamplerTests.cpp)
-target_include_directories (EnergyLossSamplerTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (EnergyLossSamplerTests PRIVATE ACTSCore ACTSFatras ACTSFatrasSamplers)
-add_test (NAME EnergyLossSamplerUnitTest COMMAND EnergyLossSamplerTests)
+add_executable (EnergyLossTests EnergyLossTests.cpp)
+target_include_directories (EnergyLossTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (EnergyLossTests PRIVATE ACTSCore ACTSFatras ACTSFatrasSamplers)
+add_test (NAME EnergyLossUnitTest COMMAND EnergyLossTests)
 
 
