@@ -19,7 +19,6 @@ namespace Fatras {
   /// 
   /// General mixture model Fruehwirth, M. Liendl. 
   /// Comp. Phys. Comm. 141 (2001) 230-246
-  ///
   struct GeneralMixture {
   
     /// Steering parameter

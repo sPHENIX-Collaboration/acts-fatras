@@ -41,12 +41,18 @@ namespace Test {
     template <typename generator_t,
               typename detector_t,
               typename particle_t>
-    double 
+    std::vector<particle_t> 
     operator()(generator_t&,
                const detector_t&,
                particle_t& in) const 
     {
-      return in.E*cvalue;
+      
+      in.E        *= cvalue;
+      in.p         = std::sqrt(in.E*in.E-in.m*in.m);
+      in.momentum  = in.p * in.momentum.unit();
+      in.pT        = in.momentum.perp();
+      
+      return {};
     }
     
   };
@@ -95,14 +101,14 @@ namespace Test {
     std::vector<Particle> outgoing;
     
     // T"{he select all list
-    typedef SelectorList<Selector> SelectAll;
-    typedef EnergyLoss<EnergyDecreaser, SelectAll, SelectAll> EnergyLoss;
+    typedef SelectorList<Selector> All;
+    typedef EnergyLoss<EnergyDecreaser, All, All, All> EnergyLoss;
     EnergyLoss cEnergyLoss;
     
-    // scattering is not allowed to throw abort command
+    // energy loss is not allowed to throw abort command
     BOOST_CHECK(!cEnergyLoss(generator,detector,particle,outgoing));
     
-    // check the the particle momentum magnitude is identical
+    // check the the particle momentum magnitude is NOT identical
     BOOST_CHECK(momentum.mag() != particle.momentum.mag());
     
     // let's test this as part of a physics list
