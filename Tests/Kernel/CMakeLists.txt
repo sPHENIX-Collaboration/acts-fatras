@@ -13,14 +13,10 @@ target_include_directories (SelectorListTests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (SelectorListTests PRIVATE ACTSCore ACTSFatras)
 add_test (NAME SelectorListUnitTest COMMAND SelectorListTests)
 
-add_executable (ScatteringTests ScatteringTests.cpp)
-target_include_directories (ScatteringTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (ScatteringTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME ScatteringUnitTest COMMAND ScatteringTests)
+add_executable (ProcessTests ProcessTests.cpp)
+target_include_directories (ProcessTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (ProcessTests PRIVATE ACTSCore ACTSFatras)
+add_test (NAME ProcessUnitTest COMMAND ProcessTests)
 
-add_executable (EnergyLossTests EnergyLossTests.cpp)
-target_include_directories (EnergyLossTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (EnergyLossTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME EnergyLossUnitTest COMMAND EnergyLossTests)
 
 

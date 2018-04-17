@@ -66,7 +66,8 @@ namespace Fatras {
           std::copy_if(children.begin(),
                        children.end(), 
                        out.begin(), 
-                       [this](const particle_t& p){return selectorChild(p);});
+                       [this](const particle_t& p)
+                       {return selectorChild(p);});
         }
       }
       // check if this killed the partilce, 

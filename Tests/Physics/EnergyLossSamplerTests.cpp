@@ -21,8 +21,8 @@
 #include <random>
 #include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
-#include "Fatras/EnergyLoss/BetheBloch.hpp"
-#include "Fatras/EnergyLoss/BetheHeitler.hpp"
+#include "Fatras/Physics/EnergyLoss/BetheBloch.hpp"
+#include "Fatras/Physics/EnergyLoss/BetheHeitler.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
