@@ -18,11 +18,12 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
+#include <random>
 #include <algorithm>
-#include "ProcessTestUtils.hpp"
+#include "Fatras/Kernel/FatrasDefinitions.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
-#include "Fatras/Processes/EnergyLoss.hpp"
+#include "Fatras/Kernel/Process.hpp"
 #include "ACTS/Utilities/Definitions.hpp"
 
 namespace bdata = boost::unit_test::data;
@@ -32,6 +33,27 @@ namespace Fatras {
 
 namespace Test {
 
+  /// the generator
+  typedef std::mt19937 Generator;
+  
+  /// The particle definition
+  typedef ParticleInfo Particle;  
+  
+  /// The selector 
+  struct Selector {
+    
+    /// call operator 
+    template <typename particle_t>
+    bool
+    operator()(const particle_t&) const 
+    { return true; }
+  
+  };
+  
+  /// The detector
+  struct Detector {   
+  };
+  
   /// The scattering formula
   struct EnergyDecreaser {
 
@@ -54,12 +76,11 @@ namespace Test {
       
       return {};
     }
-    
   };
   
   /// Test the scattering implementation
   BOOST_DATA_TEST_CASE(
-      EnergyLoss_test_,
+      Process_test_,
       bdata::random((bdata::seed = 20,
                      bdata::distribution
                      = std::uniform_real_distribution<>(0.,1.)))
@@ -71,7 +92,7 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_int_distribution<>(1., 100.)))
+                           = std::uniform_real_distribution<>(1., 100.)))
           ^ bdata::xrange(100),
       x,
       y,
@@ -79,13 +100,14 @@ namespace Test {
       p,
       index)
   {
+
     // standard generator
     Generator generator;
     
     // Dummy detctor
     Detector detector;
 
-    // create the particle and set the momentum    
+    // create the particle and set the momentum
     /// position at 0.,0.,0
     Acts::Vector3D position{0.,0.,0.};
     // pT of 1 GeV 
@@ -102,7 +124,7 @@ namespace Test {
     
     // T"{he select all list
     typedef SelectorList<Selector> All;
-    typedef EnergyLoss<EnergyDecreaser, All, All, All> EnergyLoss;
+    typedef Process<EnergyDecreaser, All, All, All> EnergyLoss;
     EnergyLoss cEnergyLoss;
     
     // energy loss is not allowed to throw abort command
@@ -116,7 +138,8 @@ namespace Test {
     
     // scattering is not allowed to throw abort command
     BOOST_CHECK(!energyLossPhysics(generator,detector,particle,outgoing));
-        
+    
+    
   }
 
 }  // namespace Test

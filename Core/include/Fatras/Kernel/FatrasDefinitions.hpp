@@ -51,17 +51,18 @@ namespace Fatras {
   /// can be broken, so it should update the rest (no checking done)
   struct ParticleInfo {
     
-    Acts::Vector3D position;     //!< particle position at sampler call
-    Acts::Vector3D momentum;     //!< particle momentum at sampler call 
-    double         q       = 0.; //!< the charge
-    double         m       = 0.; //!< particle mass
-    double         E       = 0.; //!< total energy
-    double         beta    = 0.; //!< relativistic beta factor
-    double         gamma   = 1.; //!< relativistic gamma factor 
-    double         p       = 0.; //!< momentum magnitude
-    double         pT      = 0.; //!< transverse momentum magnitude
-    int            pdg     = 0;  //!< pdg code of the particle
-    int            barcode = 0;  //!< barcode of the particle
+    Acts::Vector3D position;       //!< particle position at sampler call
+    Acts::Vector3D momentum;       //!< particle momentum at sampler call 
+    double         q       = 0.;   //!< the charge
+    double         m       = 0.;   //!< particle mass
+    double         E       = 0.;   //!< total energy
+    double         beta    = 0.;   //!< relativistic beta factor
+    double         gamma   = 1.;   //!< relativistic gamma factor 
+    double         p       = 0.;   //!< momentum magnitude
+    double         pT      = 0.;   //!< transverse momentum magnitude
+    int            pdg     = 0;    //!< pdg code of the particle
+    int            barcode = 0;    //!< barcode of the particle
+    bool           alive   = true; //!< the particle is alive
     
     // Construct a particle consistently
     ParticleInfo(const Acts::Vector3D pposition,

@@ -21,9 +21,10 @@
 #include <random>
 #include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
-#include "Fatras/Scattering/Highland.hpp"
-#include "Fatras/Scattering/GaussianMixture.hpp"
-#include "Fatras/Scattering/GeneralMixture.hpp"
+#include "Fatras/Physics/Scattering/Scattering.hpp"
+#include "Fatras/Physics/Scattering/Highland.hpp"
+#include "Fatras/Physics/Scattering/GaussianMixture.hpp"
+#include "Fatras/Physics/Scattering/GeneralMixture.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -93,9 +94,9 @@ namespace Test {
     GaussianMixture gamscat;
     GeneralMixture  genscat;
       
-    double angleHiS = hscat(generator, detector, particle);
-    double angleGaM = gamscat(generator, detector, particle);
-    double angleGeM = genscat(generator, detector, particle);
+    double hsr  = hscat(generator, detector, particle);
+    double gamr = gamscat(generator, detector, particle);
+    double genr = genscat(generator, detector, particle);
     
     BOOST_CHECK(angleHiS != 0.);
     
@@ -103,7 +104,7 @@ namespace Test {
     if (write_csv){
       if (!index) 
         os << " p,highland,gaussian_mixture,general_mixture" << '\n';
-      os << particle.p << "," << angleHiS << "," << angleGaM << "," << angleGeM << '\n';
+      os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
     }
     
     
