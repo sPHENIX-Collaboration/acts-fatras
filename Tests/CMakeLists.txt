@@ -1,2 +1,2 @@
-add_subdirectory(Core)
-add_subdirectory(Samplers)
+add_subdirectory(Kernel)
+add_subdirectory(Physics)

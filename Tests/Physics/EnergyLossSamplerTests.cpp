@@ -22,6 +22,7 @@
 #include <fstream>
 #include "Fatras/Kernel/FatrasDefinitions.hpp"
 #include "Fatras/EnergyLoss/BetheBloch.hpp"
+#include "Fatras/EnergyLoss/BetheHeitler.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -87,16 +88,25 @@ namespace Test {
     Particle particle(position,momentum,q,m,13,1);
     
     // make the highland scatterer
-    BetheBloch  bbloch;      
-    double eloss_io = bbloch(generator, detector, particle);
+    BetheBloch    bbloch;      
+    BetheHeitler  bheitler;
+    double E = particle.E;
+    auto bbr =  bbloch(generator, detector, particle);
+    double eloss_io = E - particle.E;
+    BOOST_CHECK(E > particle.E);
+    BOOST_CHECK(bbr.size()==0);
+    E = particle.E;
     
-    BOOST_CHECK(eloss_io != 0.);
-    
+    auto bhr = bheitler(generator, detector, particle);
+    double eloss_rad =E = particle.E;
+    BOOST_CHECK(E > particle.E);
+    BOOST_CHECK(bhr.size()==0);
+        
     // write out a csv file 
     if (write_csv){
       if (!index) 
-        os << "p,bethebloch" << '\n';
-      os << particle.p << "," << eloss_io << '\n';
+        os << "p,bethe_bloch,bethe_heitler" << '\n';
+      os << particle.p << "," << eloss_io << ","<< eloss_rad << '\n';
     }
     
     
