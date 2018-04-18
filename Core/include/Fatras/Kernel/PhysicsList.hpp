@@ -44,7 +44,7 @@ public:
   /// @param[in] ingoig is the ingoing particle (can be modified)
   /// @param[in,out] outgoing are the (eventually) outgoing particles
   ///
-  /// @return inticator which would trigger an abort
+  /// @return indicator which would trigger an abort
   template <typename generator_t,
             typename detector_t, 
             typename particle_t>

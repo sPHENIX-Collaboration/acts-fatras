@@ -18,11 +18,13 @@
 
 namespace Fatras {
 
-/// This is the PhysicsList struct that is used for fast simulation
+/// This is the SelectorList struct that is used for fast simulation
+///
 /// Users can add a variable list of selectors in order to drive the
-/// physics simulation
-template <typename... selectors>
-struct SelectorList : private Acts::detail::Extendable<selectors...>
+/// physics simulation. Selectors can access particle information and
+/// detector information to decide whether a process is to take place
+template <bool inclusive, typename... selectors>
+struct SelectorListAXOR : private Acts::detail::Extendable<selectors...>
 {
 private:
   static_assert(not Acts::detail::has_duplicates_v<selectors...>,
@@ -36,26 +38,33 @@ public:
 
   /// Call operator that is that broadcasts the call to the tuple()
   ///
+  /// @tparam detector_t is the detector type used in simulation
   /// @tparam particle_t is the particle type used in simulation
+  /// @tparam inclusive steers || (true) or && (false) combination
   ///
+  /// @param[in] detector the current detector/material information
   /// @param[in] particle to be checked for further processing
   ///
-  /// @return inticator if the particle is accepted
-  template <typename particle_t>
+  /// @return indicator if the particle is accepted
+  template <typename detector_t, typename particle_t>
   bool
-  operator()(const particle_t& particle) const
+  operator()(const detector_t& detector, const particle_t& particle) const
   {
     // clang-format off
-    static_assert(Acts::detail::all_of_v<detail::selector_list_signature_check_v<selectors, particle_t>...>,
+    static_assert(Acts::detail::all_of_v<detail::selector_list_signature_check_v<selectors, detector_t, particle_t>...>,
                   "not all particle selectors support the specified interface");
     // clang-format on
     
     // create an emtpy particle vector            
     typedef detail::selector_list_impl<selectors...> impl;
-    return impl::select(tuple(),particle);
+    return impl::select(tuple(),detector,particle,inclusive);
   }
   
 };
+
+template<typename... selectors> using SelectorListOR  = SelectorListAXOR<true, selectors...>;
+
+template<typename... selectors> using SelectorListAND = SelectorListAXOR<false, selectors...>;
 
 }  // namespace Fatras
 

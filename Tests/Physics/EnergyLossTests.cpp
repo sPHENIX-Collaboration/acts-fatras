@@ -46,9 +46,9 @@ namespace Test {
   struct Selector {
     
     /// call operator 
-    template <typename particle_t>
+    template <typename detector_t, typename particle_t>
     bool
-    operator()(const particle_t&) const 
+    operator()(const detector_t, const particle_t&) const 
     { return true; }
   
   };

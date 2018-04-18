@@ -58,7 +58,7 @@ namespace Fatras {
                std::vector<particle_t>& out) const 
     { 
       // check if the process applies
-      if (selectorIn(in)){
+      if (selectorIn(det,in)){
         // apply energy loss and get eventual children
         auto children = process(gen,det,in);
         if (children.size()){
@@ -66,13 +66,13 @@ namespace Fatras {
           std::copy_if(children.begin(),
                        children.end(), 
                        out.begin(), 
-                       [this](const particle_t& p)
-                       {return selectorChild(p);});
+                       [this,det](const particle_t& p)
+                       {return selectorChild(det,p);});
         }
       }
       // check if this killed the partilce, 
       // or pushed below threshold
-      return (!selectorOut(in)); 
+      return (!selectorOut(det,in)); 
     }
   
   };

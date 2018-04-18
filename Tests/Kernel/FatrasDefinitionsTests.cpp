@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ///  Boost include(s)
-#define BOOST_TEST_MODULE AbortList Tests
+#define BOOST_TEST_MODULE Fatras Definitions Tests
 
 #include <boost/test/included/unit_test.hpp>
 // leave blank line
