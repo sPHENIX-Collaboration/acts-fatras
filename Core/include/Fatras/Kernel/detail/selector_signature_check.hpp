@@ -15,39 +15,44 @@
 namespace Fatras {
 
 /// The following operator has to be inplemented in order to satisfy
-/// as an sampler for fast simulation
+/// as a process for fast simulation. The selector can access both,
+/// current particle information, but also current detector information,
+/// e.g. for deciding if an interaction or process has to take place
 ///
 /// @code
 ///  bool
-///  operator()(const particle_t& particle) const { return true; }
+///  operator()(const detector_t& detector,
+///             const particle_t& particle) const { return true; }
 ///
 /// @endcode
 namespace detail {
 
   namespace {    
     template <typename T,
+              typename detector_t,
               typename particle_t,
               typename = decltype(std::declval<T>().
-                                  operator()(std::declval<const particle_t&>()))>
+                                  operator()(std::declval<const detector_t&>(),
+                                             std::declval<const particle_t&>()))>
                 
     std::true_type
     test_selector_list(int);
 
-    template <typename, typename>
+    template <typename, typename, typename>
     std::false_type
     test_selector_list(...);
     
-    template <typename T, typename particle_t>
+    template <typename T, typename detector_t, typename particle_t>
     struct selector_list_signature_check
-        : decltype(test_selector_list<T,particle_t>(0))
+        : decltype(test_selector_list<T,detector_t,particle_t>(0))
     {
     };
 
   }  // end of anonymous namespace
 
-  template <typename T, typename particle_t>
+  template <typename T, typename detector_t, typename particle_t>
   constexpr bool selector_list_signature_check_v
-      = selector_list_signature_check<T, particle_t>::value;
+      = selector_list_signature_check<T, detector_t, particle_t>::value;
 }  // namespace detail
 
 }  // namespace Fatras

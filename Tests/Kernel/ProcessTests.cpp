@@ -38,21 +38,22 @@ namespace Test {
   
   /// The particle definition
   typedef ParticleInfo Particle;  
+    
+  /// The detector
+  struct Detector {   
+  };
   
   /// The selector 
   struct Selector {
     
     /// call operator 
-    template <typename particle_t>
+    template <typename detector_t, typename particle_t>
     bool
-    operator()(const particle_t&) const 
+    operator()(const detector_t&, const particle_t&) const 
     { return true; }
   
   };
   
-  /// The detector
-  struct Detector {   
-  };
   
   /// The scattering formula
   struct EnergyDecreaser {
@@ -122,7 +123,7 @@ namespace Test {
     std::vector<Particle> outgoing;
     
     // T"{he select all list
-    typedef SelectorList<Selector> All;
+    typedef SelectorListAND<Selector> All;
     typedef Process<EnergyDecreaser, All, All, All> EnergyLoss;
     EnergyLoss cEnergyLoss;
     
