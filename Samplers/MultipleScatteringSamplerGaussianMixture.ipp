@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 // class header include
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 

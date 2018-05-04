@@ -5,7 +5,7 @@
 #ifndef ACTS_FATRASINTERFACES_IPHOTONCONVERSIONSAMPLER_H
 #define ACTS_FATRASINTERFACES_IPHOTONCONVERSIONSAMPLER_H 1
 
-#include <ACTS/Utilities/Definitions.hpp>
+#include <Acts/Utilities/Definitions.hpp>
 
 namespace Acts {
 class InteractionVertex;

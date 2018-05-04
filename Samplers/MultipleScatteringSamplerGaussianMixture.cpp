@@ -4,7 +4,7 @@
 
 // class header include
 #include "Fatras/MultipleScatteringSamplerGaussianMixture.hpp"
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 

@@ -5,7 +5,7 @@ project(ActsFatras LANGUAGES CXX)
 # could be included in a larger project, e.g. acts-framework, that also
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
-if(NOT TARGET ACTSCore)
+if(NOT TARGET ActsCore)
   find_package(ACTS REQUIRED COMPONENTS Core)
 endif()
 
@@ -14,7 +14,7 @@ add_library(ActsFatras SHARED
   src/EnergyLoss.cpp
   src/RandomNumberDistributions.cpp)
 target_include_directories(ActsFatras PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
-target_link_libraries(ActsFatras PUBLIC ACTSCore)
+target_link_libraries(ActsFatras PUBLIC ActsCore)
 set_target_properties(ActsFatras PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE)
 
 # install library and include files to default directories

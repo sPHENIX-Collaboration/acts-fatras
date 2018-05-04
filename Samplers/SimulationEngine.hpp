@@ -6,8 +6,8 @@
 #define ACTS_FATRAS_SIMULATIONENGINE_H 1
 
 #include <memory>
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Extrapolation/IExtrapolationEngine.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
+#include "Acts/Extrapolation/IExtrapolationEngine.hpp"
 
 namespace Acts {
 class IExtrapolationEngine;

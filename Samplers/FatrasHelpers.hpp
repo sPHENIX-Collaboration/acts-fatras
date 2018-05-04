@@ -6,7 +6,7 @@
 #define ACTS_FATRAS_FATRASHELPERS_H 1
 
 #include <cmath>
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 
 namespace Fatras {
 }

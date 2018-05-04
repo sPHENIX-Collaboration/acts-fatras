@@ -2,7 +2,7 @@
 // HadronicInteractionParametricSampler.cxx, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/HadronicInteractionParametricSampler.hpp"
 #include "Fatras/RandomNumberDistributions.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"

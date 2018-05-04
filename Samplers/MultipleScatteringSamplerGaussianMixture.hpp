@@ -6,9 +6,9 @@
 #define ACTS_FATRASTOOLS_MULTIPLESCATTERINGSAMPLERGAUSSIANMIXTURE_H 1
 
 #include <memory>
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Material/MaterialProperties.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
+#include "Acts/Material/MaterialProperties.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 #include "Fatras/IMultipleScatteringSampler.hpp"
 
 namespace Fatras {

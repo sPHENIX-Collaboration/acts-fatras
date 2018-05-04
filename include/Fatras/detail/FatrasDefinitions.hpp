@@ -7,8 +7,8 @@
 
 #include <cmath>
 
-#include <ACTS/EventData/ParticleDefinitions.hpp>
-#include <ACTS/Utilities/Units.hpp>
+#include <Acts/EventData/ParticleDefinitions.hpp>
+#include <Acts/Utilities/Units.hpp>
 
 namespace Fatras {
 namespace constants {

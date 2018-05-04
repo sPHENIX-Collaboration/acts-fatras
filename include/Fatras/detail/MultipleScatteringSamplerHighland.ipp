@@ -2,8 +2,8 @@
 // MultipleScatteringSamplerHighland.cxx, ACTS project
 ///////////////////////////////////////////////////////////////////
 
-#include <ACTS/EventData/ParticleDefinitions.hpp>
-#include <ACTS/Utilities/MaterialInteraction.hpp>
+#include <Acts/EventData/ParticleDefinitions.hpp>
+#include <Acts/Utilities/MaterialInteraction.hpp>
 #include "Fatras/RandomNumberDistributions.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 

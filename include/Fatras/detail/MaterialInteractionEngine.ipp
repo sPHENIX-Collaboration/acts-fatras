@@ -5,8 +5,8 @@
 #include <cmath>
 #include <sstream>
 
-#include <ACTS/Layers/Layer.hpp>
-#include <ACTS/Material/SurfaceMaterial.hpp>
+#include <Acts/Layers/Layer.hpp>
+#include <Acts/Material/SurfaceMaterial.hpp>
 #include "Fatras/EnergyLoss.hpp"
 #include "Fatras/MaterialInteractionEngine.hpp"
 #include "Fatras/RandomNumberDistributions.hpp"

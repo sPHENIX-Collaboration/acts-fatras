@@ -9,9 +9,9 @@
 #include <memory>
 
 #include "../include/Fatras/RandomNumberDistributions.hpp"
-#include "ACTS/EventData/ParticleDefinitions.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
-#include "ACTS/Utilities/Logger.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
+#include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Logger.hpp"
 #include "Fatras/IPhotonConversionSampler.hpp"
 
 namespace Acts {

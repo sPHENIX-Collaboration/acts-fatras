@@ -4,7 +4,7 @@
 
 // FATRAS includes
 #include "Fatras/MultipleScatteringSamplerHighland.hpp"
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 
 // constructor

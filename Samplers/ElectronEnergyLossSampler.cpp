@@ -4,7 +4,7 @@
 
 // class header include
 #include "Fatras/ElectronEnergyLossSampler.hpp"
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/EnergyLoss.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 

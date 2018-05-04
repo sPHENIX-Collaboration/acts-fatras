@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "Fatras/PhotonConversionSampler.hpp"
-#include "ACTS/EventData/ParticleDefinitions.hpp"
+#include "Acts/EventData/ParticleDefinitions.hpp"
 #include "Fatras/detail/FatrasDefinitions.hpp"
 #include "Fatras/detail/FatrasHelpers.hpp"
 
