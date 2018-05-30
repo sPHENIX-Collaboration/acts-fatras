@@ -9,8 +9,8 @@
 #ifndef FATRAS_SAMPLER_GENERALMIXTURE_HPP
 #define FATRAS_SAMPLER_GENERALMIXTURE_HPP
 
-#include "ACTS/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/MaterialInteraction.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -49,12 +49,11 @@ namespace Fatras {
       Fatras::UniformDist uniformDist(0., 1.);
       
       // scale the path length to the radiation length
-      double tInX0 = detector.thickness/detector.material.X0();
+      double tInX0 = detector.thickness()/detector.material().X0();
       
       // material properties
-      double Z = detector.material.Z();  // charge layer material
+      double Z = detector.material().Z();  // charge layer material
       
-      double sigma2(0.);
       double theta(0.);
       
       if (std::abs(particle.pdg) != 11) {
@@ -65,7 +64,7 @@ namespace Fatras {
         //----------------------------------------------------------------------------
         std::array<double,4> scattering_params; 
         // Decide which mixture is best
-        if (tInX0 / (particle.beta * particle.beta) > 0.6 / std::pow(Z, 0.6)) {  // Gaussian
+        if (tInX0 / (particle.beta * particle.beta) > 0.6 / std::pow(Z, 0.6)) { 
           // Gaussian mixture or pure Gaussian
           if (tInX0 / (particle.beta * particle.beta) > 10) {
             scattering_params = getGaussian(particle.beta, 
@@ -76,7 +75,7 @@ namespace Fatras {
             scattering_params = getGaussmix(particle.beta, 
                                             particle.p, 
                                             tInX0, 
-                                            detector.material.Z(), 
+                                            detector.material().Z(), 
                                             genMixtureScalor); 
           }
           // Simulate
@@ -86,7 +85,7 @@ namespace Fatras {
           auto scattering_params_sg = getSemigauss(particle.beta, 
                                                    particle.p, 
                                                    tInX0, 
-                                                   detector.material.Z(), 
+                                                   detector.material().Z(), 
                                                    genMixtureScalor);
           // Simulate                                           
           theta = semigauss(uniformDist,generator,scattering_params_sg);  
@@ -197,6 +196,6 @@ namespace Fatras {
     }
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_GENERALMIXTURE_HPP

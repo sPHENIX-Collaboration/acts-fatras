@@ -20,11 +20,12 @@
 
 #include <random>
 #include <algorithm>
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -35,10 +36,7 @@ namespace Test {
 
   /// the generator
   typedef std::mt19937 Generator;
-  
-  /// The particle definition
-  typedef ParticleInfo Particle;  
-    
+      
   /// The detector
   struct Detector {   
   };

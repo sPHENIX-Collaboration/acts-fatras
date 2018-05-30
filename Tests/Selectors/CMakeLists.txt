@@ -1,14 +1,21 @@
-add_executable (KinematicCastsTests KinematicCastsTests.cpp)
-target_include_directories (KinematicCastsTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (KinematicCastsTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME KinematicCastsUnitTest COMMAND KinematicCastsTests)
+add_executable (FatrasKinematicCastsTests KinematicCastsTests.cpp)
+target_include_directories (FatrasKinematicCastsTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasKinematicCastsTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasKinematicCastsUnitTest COMMAND FatrasKinematicCastsTests)
 
-add_executable (SelectorHelpersTests SelectorHelpersTests.cpp)
-target_include_directories (SelectorHelpersTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (SelectorHelpersTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME SelectorHelpersUnitTest COMMAND SelectorHelpersTests)
+add_executable (FatrasSelectorHelpersTests SelectorHelpersTests.cpp)
+target_include_directories (FatrasSelectorHelpersTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasSelectorHelpersTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasSelectorHelpersUnitTest COMMAND FatrasSelectorHelpersTests)
 
-add_executable (PdgSelectorsTests PdgSelectorsTests.cpp)
-target_include_directories (PdgSelectorsTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (PdgSelectorsTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME PdgSelectorsUnitTest COMMAND PdgSelectorsTests)
+add_executable (FatrasPdgSelectorsTests PdgSelectorsTests.cpp)
+target_include_directories (FatrasPdgSelectorsTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasPdgSelectorsTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasPdgSelectorsUnitTest COMMAND FatrasPdgSelectorsTests)
+
+add_executable (FatrasLimitSelectorsTests LimitSelectorsTests.cpp)
+target_include_directories (FatrasLimitSelectorsTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasLimitSelectorsTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasLimitSelectorsUnitTest COMMAND FatrasLimitSelectorsTests)
+
+

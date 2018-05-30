@@ -9,16 +9,17 @@
 #ifndef FATRAS_PHYSICS_LIST_HPP
 #define FATRAS_PHYSICS_LIST_HPP
 
-#include "ACTS/Utilities/detail/Extendable.hpp"
-#include "ACTS/Utilities/detail/MPL/all_of.hpp"
-#include "ACTS/Utilities/detail/MPL/has_duplicates.hpp"
-#include "ACTS/Utilities/detail/MPL/type_collector.hpp"
+#include "Acts/Utilities/detail/Extendable.hpp"
+#include "Acts/Utilities/detail/MPL/all_of.hpp"
+#include "Acts/Utilities/detail/MPL/has_duplicates.hpp"
+#include "Acts/Utilities/detail/MPL/type_collector.hpp"
 #include "Fatras/Kernel/detail/physics_list_implementation.hpp"
 #include "Fatras/Kernel/detail/process_signature_check.hpp"
 
 namespace Fatras {
 
 /// This is the PhysicsList struct that is used for fast simulation
+///
 /// Users can add a variable list of processes in order to drive the
 /// physics simulation
 template <typename... processes>
@@ -33,7 +34,7 @@ public:
   using Acts::detail::Extendable<processes...>::get;
 
   /// Call operator that is that broadcasts the call to the tuple()
-  /// members of the list
+  /// members of the list 
   ///
   /// @tparam generator_t is the random number generator type
   /// @tparam detector_t is the detector information type used

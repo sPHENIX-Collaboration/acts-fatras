@@ -11,9 +11,9 @@
 
 #include <cmath>
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 
 namespace Fatras {
 
@@ -101,10 +101,10 @@ namespace Fatras {
         Acts::Vector3D deflector(x, y, z);
         // rotate the new direction for scattering using theta and  psi
         Acts::RotationMatrix3D rotation;
-        rotation = Acts::AngleAxis3D(angle3D, deflector)
-            * Acts::AngleAxis3D(psi, pDirection);
+        rotation = Acts::AngleAxis3D(psi, pDirection)
+                  * Acts::AngleAxis3D(angle3D, deflector);
         // rotate and set a new direction to the cache 
-        in.momentum = in.p * rotation*pDirection.unit();
+        in.momentum = in.p *rotation*pDirection.unit();
       }
       // scattering always returns an empty list
       // - it is a non-distructive process
@@ -113,6 +113,6 @@ namespace Fatras {
   
   };
   
-}  // end of namespace
+}  // namespace
 
 #endif  // FATRAS_PROCESSES_SCATTERING_HPP

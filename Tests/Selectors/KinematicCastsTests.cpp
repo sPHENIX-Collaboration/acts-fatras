@@ -18,16 +18,15 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "ACTS/Utilities/Units.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/Units.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
 
 namespace Fatras {
-
-typedef ParticleInfo Particle;
 
 namespace Test {
     
@@ -37,14 +36,14 @@ namespace Test {
   BOOST_AUTO_TEST_CASE(Kinematic_cast_tests)
   {
 
+    // a central pion
     Acts::Vector3D position(0.,0.,0.);
     Acts::Vector3D momentum_c(1500.,0.,0);
-
-    // e central electron
     Particle pion_c(position, momentum_c, -1., m_pion);
+
+    // a forward pion
     Acts::Vector3D position_fwd(0.,0.,100.);    
     Acts::Vector3D momentum_fwd(10., 10., 1500.);  
-    
     Particle pion_fwd(position_fwd, momentum_fwd, -1., m_pion);
       
     // the list of possible casts  
@@ -72,5 +71,5 @@ namespace Test {
     
   }
   
-} // end of namespace Test
-} // end of namespace Fatras
+} // namespace Test
+} // namespace Fatras

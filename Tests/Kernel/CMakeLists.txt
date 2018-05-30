@@ -1,22 +1,22 @@
-add_executable (FatrasDefinitionsTests FatrasDefinitionsTests.cpp)
-target_include_directories (FatrasDefinitionsTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (FatrasDefinitionsTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME FatrasDefinitionsUnitTest COMMAND FatrasDefinitionsTests)
+add_executable (ParticleTests ParticleTests.cpp)
+target_include_directories (ParticleTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (ParticleTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME ParticleUnitTest COMMAND ParticleTests)
 
-add_executable (PhysicsListTests PhysicsListTests.cpp)
-target_include_directories (PhysicsListTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (PhysicsListTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME PhysicsListUnitTest COMMAND PhysicsListTests)
+add_executable (FatrasPhysicsListTests PhysicsListTests.cpp)
+target_include_directories (FatrasPhysicsListTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasPhysicsListTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasPhysicsListUnitTest COMMAND FatrasPhysicsListTests)
 
-add_executable (SelectorListTests SelectorListTests.cpp)
-target_include_directories (SelectorListTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (SelectorListTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME SelectorListUnitTest COMMAND SelectorListTests)
+add_executable (FatrasSelectorListTests SelectorListTests.cpp)
+target_include_directories (FatrasSelectorListTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasSelectorListTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasSelectorListUnitTest COMMAND FatrasSelectorListTests)
 
-add_executable (ProcessTests ProcessTests.cpp)
-target_include_directories (ProcessTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (ProcessTests PRIVATE ACTSCore ACTSFatras)
-add_test (NAME ProcessUnitTest COMMAND ProcessTests)
+add_executable (FatrasProcessTests ProcessTests.cpp)
+target_include_directories (FatrasProcessTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries (FatrasProcessTests PRIVATE ACTSCore FatrasCore)
+add_test (NAME FatrasProcessUnitTest COMMAND FatrasProcessTests)
 
 
 

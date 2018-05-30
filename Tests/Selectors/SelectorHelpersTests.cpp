@@ -18,8 +18,9 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "ACTS/Utilities/Units.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/Units.hpp"
+#include "Fatras/Kernel/Particle.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
 #include "Fatras/Selectors/SelectorHelpers.hpp"
 
@@ -28,12 +29,13 @@ namespace tt    = boost::test_tools;
 
 namespace Fatras {
 
-typedef ParticleInfo Particle;
-typedef DetectorInfo Detector;
 
 
 namespace Test {
-    
+  
+  struct Detector {
+  };
+      
   double m_pion = 134.9766 * Acts::units::_MeV;    // pi0 rest mass
 
   // This tests the implementation of kinematic cast operators
@@ -112,5 +114,5 @@ namespace Test {
     
   }
   
-} // end of namespace Test
-} // end of namespace Fatras
+} // namespace Test
+} // namespace Fatras

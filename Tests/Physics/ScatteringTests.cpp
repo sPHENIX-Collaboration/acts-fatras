@@ -20,7 +20,10 @@
 
 #include <random>
 #include <fstream>
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Material/Material.hpp"
+#include "Acts/Material/MaterialProperties.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/Scattering/Scattering.hpp"
@@ -37,6 +40,7 @@ namespace Test {
   
   // the generator
   typedef std::mt19937 Generator;
+  
   // standard generator
   Generator generator;
   
@@ -73,7 +77,7 @@ namespace Test {
                            = std::uniform_real_distribution<>(0.,1.)))
           ^ bdata::random((bdata::seed = 23,
                            bdata::distribution
-                           = std::uniform_real_distribution<>(1.5, 1.5)))
+                           = std::uniform_real_distribution<>(0.5, 10.5)))
           ^ bdata::xrange(10000),
       x,
       y,
@@ -82,14 +86,9 @@ namespace Test {
       index)
   {
     
-    typedef ParticleInfo Particle;
-    typedef DetectorInfo Detector;
-    
     // a detector with 1 mm Be
-    Detector detector;
-    detector.material = berilium;
-    detector.thickness = 1 * Acts::units::_mm;
-
+    Acts::MaterialProperties detector(berilium, 1.*Acts::units::_mm);
+    
     // create the particle and set the momentum
     /// position at 0.,0.,0
     Acts::Vector3D position{0.,0.,0.};
@@ -113,12 +112,6 @@ namespace Test {
     
     BOOST_CHECK(hsr != 0.);
     
-    // write out a csv file 
-    if (write_csv){
-      if (!index) 
-        os << " p,highland,gaussian_mixture,general_mixture" << '\n';
-      os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
-    }
     
     // Run the Scatterer as a plug-in process
     Scattering<Highland> hsScattering;
@@ -127,15 +120,22 @@ namespace Test {
 
     // Run the Scatterer as a physics list
     typedef Selector All;
-    std::vector<ParticleInfo> outgoing;
+    std::vector<Particle> outgoing;
     typedef Process< Scattering<Highland>, All, All, All > HighlandProcess;
     PhysicsList< HighlandProcess > hsPhysicsList;
     hsPhysicsList(generator, detector, particle, outgoing);
     BOOST_CHECK(!outgoing.size());
+         
+    // write out a csv file 
+    if (write_csv){
+      if (!index) 
+        os << "p,highland,gaussian_mixture,general_mixture" << '\n';
+      os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
+    }
     
   }
   
   
-} // end of namespace Test
+} // namespace Test
 
-} // end of namespace Fatras
+} // namespace Fatras

@@ -95,7 +95,7 @@ namespace casts {
     }
   };
 
-} // end of namespace casts
-} // end of namespace Fatras
+} // namespace casts
+} // namespace Fatras
 
 #endif // FATRAS_SELECTORS_KINEAMTICCASTS_HPP
