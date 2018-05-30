@@ -6,8 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
-#define FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
+#pragma once
 
 #include "Acts/Utilities/detail/MPL/type_collector.hpp"
 #include <type_traits>
@@ -46,8 +45,7 @@ struct selector_list_signature_check
 template <typename T, typename detector_t, typename particle_t>
 constexpr bool selector_list_signature_check_v =
     selector_list_signature_check<T, detector_t, particle_t>::value;
+
 } // namespace detail
 
 } // namespace Fatras
-
-#endif // FATRAS_SELECTOR_SIGNATURE_CHECK_HPP

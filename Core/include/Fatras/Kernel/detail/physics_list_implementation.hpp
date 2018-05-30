@@ -6,8 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef FATRAS_PHYSICS_LIST_IMPLEMENTATION_HPP
-#define FATRAS_PHYSICS_LIST_IMPLEMENTATION_HPP
+#pragma once
 
 namespace Fatras {
 
@@ -64,4 +63,3 @@ template <> struct physics_list_impl<> {
 } // namespace detail
 
 } // namespace Acts
-#endif // FATRAS_PHYSICS_LIST_IMPLEMENTATION_HPP

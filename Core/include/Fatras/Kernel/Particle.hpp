@@ -38,9 +38,9 @@ template <typename TruthParticleLink_type = VoidTruthLink> struct ParticleInfo {
   // kinematic section
   Acts::Vector3D position = Acts::Vector3D(0., 0., 0.); //!< particle position
   Acts::Vector3D momentum = Acts::Vector3D(0., 0., 0.); //!< particle momentum
-  double q = 0.;                                        //!< the charge
   double m = 0.;                                        //!< particle mass
   double E = 0.;                                        //!< total energy
+  double q = 0.;                                        //!< the charge
   double beta = 0.;  //!< relativistic beta factor
   double gamma = 1.; //!< relativistic gamma factor
   double p = 0.;     //!< momentum magnitude
@@ -65,13 +65,14 @@ template <typename TruthParticleLink_type = VoidTruthLink> struct ParticleInfo {
   ///
   /// @param pposition The curren particle position
   /// @param pmomentum The curren particle momentum
+  /// @param pm The particle mass
   /// @param pq The partilce charge
   /// @param pbarcode The particle barcode
   /// @param ptruthLink The (optional) link to a truth tree
   ParticleInfo(const Acts::Vector3D pposition, const Acts::Vector3D &pmomentum,
-               double pq, double pm, int ppdg = 0, int pbarcode = 0,
+               double pm, double pq, int ppdg = 0, int pbarcode = 0,
                TruthParticleLink_type ptruthLink = TruthParticleLink_type())
-      : position(pposition), momentum(pmomentum), q(pq), m(pm),
+      : position(pposition), momentum(pmomentum), m(pm), q(pq),
         p(pmomentum.mag()), pT(pmomentum.perp()), pdg(ppdg), barcode(pbarcode),
         truthLink(std::move(ptruthLink)) {
     E = std::sqrt(p * p + m * m);
