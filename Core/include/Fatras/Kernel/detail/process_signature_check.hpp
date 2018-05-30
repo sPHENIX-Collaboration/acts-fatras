@@ -6,8 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef FATRAS_PROCESS_SIGNATURE_CHECK_HPP
-#define FATRAS_PROCESS_SIGNATURE_CHECK_HPP
+#pragma once
 
 #include "Acts/Utilities/detail/MPL/type_collector.hpp"
 #include <type_traits>
@@ -56,5 +55,3 @@ constexpr bool process_signature_check_v =
 } // namespace detail
 
 } // namespace Fatras
-
-#endif // FATRAS_PROCESS_SIGNATURE_CHECK_HPP
