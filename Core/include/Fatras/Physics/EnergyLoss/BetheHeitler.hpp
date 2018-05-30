@@ -9,8 +9,8 @@
 #ifndef FATRAS_SAMPLER_BETHEHEITLER_HPP
 #define FATRAS_SAMPLER_BETHEHEITLER_HPP
 
-#include "ACTS/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/MaterialInteraction.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -45,7 +45,7 @@ namespace Fatras {
                particle_t& particle) const 
     {      
 
-      double tInX0 = detector.thickness/detector.material;
+      double tInX0 = detector.thickness()/detector.material().X0();
 
       // Take a random gamma-distributed value
       GammaDist gDist( tInX0/log_2, 1.);
@@ -75,6 +75,6 @@ namespace Fatras {
           
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_BETHEHEITLER_HPP

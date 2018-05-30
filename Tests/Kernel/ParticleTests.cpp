@@ -18,10 +18,10 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
-#include "ACTS/Material/Material.hpp"
-#include "ACTS/Utilities/Units.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
+#include "Acts/Material/Material.hpp"
+#include "Acts/Utilities/Units.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt    = boost::test_tools;
@@ -30,24 +30,8 @@ namespace Fatras {
 
 namespace Test {
   
-  // This tests the implementation of the detector info 
-  BOOST_AUTO_TEST_CASE(DetectorInfo_tests)
-  {
-    
-    Acts::Material mat(1.,2.,3.,4.,5.);
-    double pathlength = 0.5;
-  
-    DetectorInfo detector;
-    detector.material   = mat;
-    detector.thickness = pathlength;
-    
-    // This is a simple container 
-    BOOST_TEST(detector.material == mat);
-    BOOST_TEST(detector.thickness == pathlength);    
-  }
-
   // This tests the implementation of the particle info 
-  BOOST_AUTO_TEST_CASE(ParticleInfo_tests)
+  BOOST_AUTO_TEST_CASE(Particle_tests)
   {
     
     /// position at 0.,0.,0
@@ -59,7 +43,7 @@ namespace Test {
     double m = 105.658367 * Acts::units::_MeV;  // muon mass
     
     // create the particle 
-    ParticleInfo particle(position,momentum,q,m,13,1);
+    Particle particle(position,momentum,q,m,13,1);
 
     // test the energy conservation
     BOOST_CHECK_CLOSE(particle.E,1.0055663531150525*Acts::units::_GeV,10e-5);

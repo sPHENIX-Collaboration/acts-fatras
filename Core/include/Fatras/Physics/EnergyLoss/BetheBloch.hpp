@@ -9,8 +9,8 @@
 #ifndef FATRAS_SAMPLER_BETHEBLOCH_HPP
 #define FATRAS_SAMPLER_BETHEBLOCH_HPP
 
-#include "ACTS/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/MaterialInteraction.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -41,10 +41,10 @@ namespace Fatras {
     {      
 
       // Evaluate the energy loss and its sigma
-      auto eLoss = Acts::ionizationEnergyLoss_mop(particle.p,
+      auto eLoss = Acts::ionizationEnergyLossMpv(particle.p,
                                                   particle.m,
-                                                  detector.material,
-                                                  detector.thickness);
+                                                  detector.material(),
+                                                  detector.thickness());
       double energyLoss = eLoss.first;
       // the uncertainty of the mean energy loss
       double energyLossSigma = eLoss.second;
@@ -73,6 +73,6 @@ namespace Fatras {
           
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_BETHEBLOCH_HPP

@@ -9,8 +9,8 @@
 #ifndef FATRAS_PHYSICS_SCATTERING_HIGHLAND_HPP
 #define FATRAS_PHYSICS_SCATTERING_HIGHLAND_HPP
 
-#include "ACTS/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Acts/Utilities/MaterialInteraction.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -32,7 +32,7 @@ namespace Fatras {
                 bool log_include=true) 
   {
     // thickness in X0 
-    double tInX0 = detector.thickness/detector.material.X0();    
+    double tInX0 = detector.thickness()/detector.material().X0();    
     // get the sigma from 
     double sigma = Acts::sigmaMS(tInX0, particle.p, particle.beta);
 
@@ -86,6 +86,6 @@ namespace Fatras {
           
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_HIGHLAND_HPP

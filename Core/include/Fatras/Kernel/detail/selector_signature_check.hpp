@@ -10,7 +10,7 @@
 #define FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
 
 #include <type_traits>
-#include "ACTS/Utilities/detail/MPL/type_collector.hpp"
+#include "Acts/Utilities/detail/MPL/type_collector.hpp"
 
 namespace Fatras {
 

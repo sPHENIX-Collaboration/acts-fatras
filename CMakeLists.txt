@@ -29,4 +29,4 @@ install(
 install(
   EXPORT FatrasTargets
   NAMESPACE Fatras::
-  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")  
+  DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")

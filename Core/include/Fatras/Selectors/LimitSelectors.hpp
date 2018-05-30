@@ -9,28 +9,27 @@
 #ifndef FATRAS_SELECTORS_LIMITSELECTORS_HPP
 #define FATRAS_SELECTORS_LIMITSELECTORS_HPP
 
-
 namespace Fatras {
 
-  struct X0LimitReached {
+  struct X0Limit {
         
     /// Return true if the limit in X0 is reached
     /// @todo modify, return what's left from the detector: nees non-const detector
     template <typename detector_t, typename particle_t>
     bool
     operator()(const detector_t& detector, const particle_t& particle) const 
-    { return particle.pathInX0 + detector.thickness/detector.material.X0() > particle.limitInX0;}
+    { return particle.pathInX0 + detector.thickness()/detector.material().X0() >= particle.limitInX0;}
   
   };
 
-  struct L0LimitReached {
+  struct L0Limit {
         
     /// Return true if the limit in X0 is reached
     /// @todo modify, return what's left from the detector: nees non-const detector
     template <typename detector_t, typename particle_t>
     bool
     operator()(const detector_t& detector, const particle_t& particle) const 
-    { return particle.pathInL0 + detector.thickness/detector.material.L0() > particle.limitInL0;}
+    { return particle.pathInL0 + detector.thickness()/detector.material().L0() >= particle.limitInL0;}
   
   };
   

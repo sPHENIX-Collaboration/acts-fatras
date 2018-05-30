@@ -9,7 +9,7 @@
 #ifndef FATRAS_SAMPLER_PARAMETRICNI_HPP
 #define FATRAS_SAMPLER_PARAMETRICNI_HPP
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -48,6 +48,6 @@ namespace Fatras {
           
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_PARAMETRICNI_HPP

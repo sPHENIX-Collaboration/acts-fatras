@@ -17,7 +17,7 @@ namespace Fatras {
   template <typename CAST>
   struct Min {
   
-    CAST   _cast;      
+    CAST   cast;      
     double valMin = 0.;
           
     /// Return true for all particles with transverse momentum
@@ -26,7 +26,7 @@ namespace Fatras {
     bool
     operator()(const detector_t&, const particle_t& particle) const 
     { 
-      double val = _cast(particle);
+      double val = cast(particle);
       return (val >= valMin); 
     }
   };
@@ -34,7 +34,7 @@ namespace Fatras {
   template <typename CAST>
   struct Max {    
 
-    CAST   _cast;      
+    CAST   cast;      
     double valMax = std::numeric_limits<double>::max();
         
     /// Return true for all particles with transverse momentum
@@ -43,7 +43,7 @@ namespace Fatras {
     bool
     operator()(const detector_t&, const particle_t& particle) const 
     { 
-      double val = _cast(particle);
+      double val = cast(particle);
       return (val <= valMax); 
     }
   };
@@ -51,7 +51,7 @@ namespace Fatras {
   template <typename CAST>
   struct Range {
 
-    CAST   _cast;      
+    CAST   cast;      
     double valMin = 0.;
     double valMax = std::numeric_limits<double>::max();
           
@@ -61,7 +61,7 @@ namespace Fatras {
     bool
     operator()(const detector_t&, const particle_t& particle) const 
     { 
-      double val = _cast(particle);
+      double val = cast(particle);
       return (val >= valMin && val <= valMax); 
     }
   }; 

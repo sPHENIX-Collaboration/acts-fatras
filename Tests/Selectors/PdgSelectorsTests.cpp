@@ -18,7 +18,8 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Selectors/PdgSelectors.hpp"
 
@@ -27,20 +28,20 @@ namespace tt    = boost::test_tools;
 
 namespace Fatras {
 
-typedef DetectorInfo Detector;
-typedef ParticleInfo Particle;
-
 namespace Test {
-  
-  Detector detector;
-  
+
   double m_muon = 0.51099891 * Acts::units::_MeV;  // electron mass
   double m_e    = 105.658367 * Acts::units::_MeV;  // muon mass
   double m_pion = 134.9766 * Acts::units::_MeV;    // pi0 rest mass
 
+  struct Detector {
+  };
+
   // This tests the implementation of the pdg selcetors
   BOOST_AUTO_TEST_CASE(PdgSelectors_test)
   {
+
+    Detector detector;
 
     Acts::Vector3D position(0.,0.,0.);
     Acts::Vector3D momentum(1500.,0.,0);
@@ -96,7 +97,7 @@ namespace Test {
   }
   
   
-} // end of namespace Test
+} // namespace Test
 
-} // end of namespace Fatras
+} // namespace Fatras
 

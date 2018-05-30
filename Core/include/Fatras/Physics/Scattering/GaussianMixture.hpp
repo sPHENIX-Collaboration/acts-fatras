@@ -9,7 +9,7 @@
 #ifndef FATRAS_SAMPLER_GAUSSIANMIXTURE_HPP
 #define FATRAS_SAMPLER_GAUSSIANMIXTURE_HPP
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
 
@@ -20,7 +20,7 @@ namespace Fatras {
   struct GaussianMixture {
   
     /// Steering parameter
-    bool log_include = true;
+    bool log_include         = true;
   
     double gausMixSigma1_a0  = 8.471e-1;
     double gausMixSigma1_a1  = 3.347e-2;
@@ -55,35 +55,39 @@ namespace Fatras {
       Fatras::GaussDist gaussDist(0., 1.);
       Fatras::UniformDist uniformDist(0.,1.);
       
+      // 
       double sigma = highlandSigma(detector,particle,log_include);
       double sigma2 = sigma*sigma;
       
-      // Now correct for the tail fraction 
-      // d_0'
-      double beta2      = particle.beta*particle.beta;
-      double dprime     = detector.thickness/(detector.material.X0() * beta2);
-      double log_dprime = std::log(dprime);
-      // d_0''
-      double log_dprimeprime 
-        = std::log(std::pow(detector.material.Z(), 2.0 / 3.0) * dprime);
-      // get epsilon
-      double epsilon = log_dprimeprime < 0.5
-          ? gausMixEpsilon_a0
-              + gausMixEpsilon_a1 * log_dprimeprime
-              + gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
-          : gausMixEpsilon_b0
-              + gausMixEpsilon_b1 * log_dprimeprime
-              + gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
-      // the standard sigma
-      double sigma1square = gausMixSigma1_a0
-          + gausMixSigma1_a1 * log_dprime
-          + gausMixSigma1_a2 * log_dprime * log_dprime;
-      // G4 optimised / native double Gaussian model
-      if (!optGaussianMixtureG4) 
-        sigma2 = 225. * dprime / (particle.p * particle.p);
-      // throw the random number core/tail
-      if (uniformDist(generator) < epsilon) 
-        sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;
+        // Now correct for the tail fraction
+        // d_0'
+        double beta2      = particle.beta*particle.beta;
+        double dprime     = detector.thickness()/(detector.material().X0() * beta2);
+        double log_dprime = std::log(dprime);
+        // d_0''
+        double log_dprimeprime 
+          = std::log(std::pow(detector.material().Z(), 2.0 / 3.0) * dprime);  
+                    
+        // get epsilon
+        double epsilon = log_dprimeprime < 0.5
+            ? gausMixEpsilon_a0
+                + gausMixEpsilon_a1 * log_dprimeprime
+                + gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
+            : gausMixEpsilon_b0
+                + gausMixEpsilon_b1 * log_dprimeprime
+                + gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
+        
+        // the standard sigma
+        double sigma1square = gausMixSigma1_a0
+            + gausMixSigma1_a1 * log_dprime
+            + gausMixSigma1_a2 * log_dprime * log_dprime;
+        
+        // G4 optimised / native double Gaussian model
+        if (optGaussianMixtureG4) 
+          sigma2 = 225. * dprime / (particle.p * particle.p);
+        // throw the random number core/tail
+        if (uniformDist(generator) < epsilon) 
+          sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;
       
       // return back to the 
       return M_SQRT2 * sqrt(sigma2) * gaussDist(generator);
@@ -91,6 +95,6 @@ namespace Fatras {
     
   };
 
-} // end of namespace Fatras
+} // namespace Fatras
 
 #endif // FATRAS_SAMPLER_GAUSSIANMIXTURE_HPP

@@ -9,10 +9,10 @@
 #ifndef FATRAS_SELECTOR_LIST_HPP
 #define FATRAS_SELECTOR_LIST_HPP
 
-#include "ACTS/Utilities/detail/Extendable.hpp"
-#include "ACTS/Utilities/detail/MPL/all_of.hpp"
-#include "ACTS/Utilities/detail/MPL/has_duplicates.hpp"
-#include "ACTS/Utilities/detail/MPL/type_collector.hpp"
+#include "Acts/Utilities/detail/Extendable.hpp"
+#include "Acts/Utilities/detail/MPL/all_of.hpp"
+#include "Acts/Utilities/detail/MPL/has_duplicates.hpp"
+#include "Acts/Utilities/detail/MPL/type_collector.hpp"
 #include "Fatras/Kernel/detail/selector_list_implementation.hpp"
 #include "Fatras/Kernel/detail/selector_signature_check.hpp"
 
@@ -28,7 +28,7 @@ struct SelectorListAXOR : private Acts::detail::Extendable<selectors...>
 {
 private:
   static_assert(not Acts::detail::has_duplicates_v<selectors...>,
-                "same action type specified several times");
+                "same selector type specified several times");
 
   using Acts::detail::Extendable<selectors...>::tuple;
 

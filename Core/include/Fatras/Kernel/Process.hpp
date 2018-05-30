@@ -6,14 +6,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef FATRAS_PROCESSES_ENERGYLOSS_HPP
-#define FATRAS_PROCESSES_ENERGYLOSS_HPP
+#ifndef FATRAS_PROCESSES_HPP
+#define FATRAS_PROCESSES_HPP
 
 #include <cmath>
 
-#include "Fatras/Kernel/FatrasDefinitions.hpp"
+#include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
-#include "ACTS/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 
 namespace Fatras {
 
@@ -77,6 +77,6 @@ namespace Fatras {
   
   };
   
-}  // end of namespace
+}  // namespace
 
-#endif  // FATRAS_PROCESSES_SCATTERING_HPP
+#endif  // FATRAS_PROCESSES_HPP
