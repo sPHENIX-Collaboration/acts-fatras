@@ -18,42 +18,41 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/Kernel/Particle.hpp"
 #include "Acts/Material/Material.hpp"
-#include "Acts/Utilities/Units.hpp"
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Units.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 
 namespace bdata = boost::unit_test::data;
-namespace tt    = boost::test_tools;
+namespace tt = boost::test_tools;
 
 namespace Fatras {
 
 namespace Test {
-  
-  // This tests the implementation of the particle info 
-  BOOST_AUTO_TEST_CASE(Particle_tests)
-  {
-    
-    /// position at 0.,0.,0
-    Acts::Vector3D position{0.,0.,0.};
-    // pT of 1 GeV 
-    Acts::Vector3D momentum{1.*Acts::units::_GeV,0.,0.};
-    // positively charged
-    double q = 1.;
-    double m = 105.658367 * Acts::units::_MeV;  // muon mass
-    
-    // create the particle 
-    Particle particle(position,momentum,q,m,13,1);
 
-    // test the energy conservation
-    BOOST_CHECK_CLOSE(particle.E,1.0055663531150525*Acts::units::_GeV,10e-5);
-    // test the beta factof
-    BOOST_CHECK_CLOSE(particle.beta, 0.9944644596571782, 10e-5);
-    
-    // test magnitude of momentum
-    BOOST_TEST(particle.pT == 1000.*Acts::units::_MeV);
-    BOOST_TEST(particle.pT == particle.p);  
-  }
- 
-}  // namespace Test
-}  // namespace Fatras
+// This tests the implementation of the particle info
+BOOST_AUTO_TEST_CASE(Particle_tests) {
+
+  /// position at 0.,0.,0
+  Acts::Vector3D position{0., 0., 0.};
+  // pT of 1 GeV
+  Acts::Vector3D momentum{1. * Acts::units::_GeV, 0., 0.};
+  // positively charged
+  double q = 1.;
+  double m = 105.658367 * Acts::units::_MeV; // muon mass
+
+  // create the particle
+  Particle particle(position, momentum, q, m, 13, 1);
+
+  // test the energy conservation
+  BOOST_CHECK_CLOSE(particle.E, 1.0055663531150525 * Acts::units::_GeV, 10e-5);
+  // test the beta factof
+  BOOST_CHECK_CLOSE(particle.beta, 0.9944644596571782, 10e-5);
+
+  // test magnitude of momentum
+  BOOST_TEST(particle.pT == 1000. * Acts::units::_MeV);
+  BOOST_TEST(particle.pT == particle.p);
+}
+
+} // namespace Test
+} // namespace Fatras

@@ -21,101 +21,83 @@
 #include "Fatras/Kernel/PhysicsList.hpp"
 
 namespace bdata = boost::unit_test::data;
-namespace tt    = boost::test_tools;
+namespace tt = boost::test_tools;
 
 namespace Fatras {
 
 namespace Test {
 
-  /// needed are :  generator, detector, particle  
-  struct Generator_type 
-  {
-  };
-  
-  struct Detector_type
-  {
-  };
-  
-  struct Particle_type
-  {
-  };
-  
-  /// Physics process that does not trigger a break
-  struct SterileProcess {
+/// needed are :  generator, detector, particle
+struct Generator_type {};
 
-    int some_parameter = 0;
+struct Detector_type {};
 
-    /// call operator 
-    template <typename generator_t,
-              typename detector_t,
-              typename particle_t>
-    bool
-    operator()(generator_t&,
-               const detector_t&,
-               particle_t&,             
-               std::vector<particle_t>&) const 
-    { return false; }
-  
-  };
-  
-  
-  /// Physics process that DOES trigger a break
-  struct FatalProcess {
+struct Particle_type {};
 
-    /// call operator 
-    template <typename generator_t,
-              typename detector_t,
-              typename particle_t>
-    bool
-    operator()(generator_t&,
-               const detector_t&,
-               particle_t&,             
-               std::vector<particle_t>&) const 
-    { return true; }
-  
-  };
-  
-  // This tests the implementation of the physics list 
-  BOOST_AUTO_TEST_CASE(PhysicsLists_test)
-  {
-    Generator_type             generator;
-    Detector_type               detector;
-    Particle_type              in;
-    std::vector<Particle_type> out;
-    
-    /// empty physics_list
-    typedef PhysicsList<> ProcessLess;
-    ProcessLess emptyList;
-    
-    /// sterile test should never send the abort command
-    BOOST_TEST(!emptyList(generator,detector,in,out));
-    
-    // now create a single sterile process
-    typedef PhysicsList<SterileProcess> SterileList;
-    SterileList sterileProcess;
-    
-    // try to set this parameter 
-    auto& sp = sterileProcess.get<SterileProcess>();
-    sp.some_parameter = 2;
-    BOOST_TEST(sterileProcess.get<SterileProcess>().some_parameter == 2);
-      
-    /// sterile test should not send the abort command
-    BOOST_TEST(!sterileProcess(generator,detector,in,out));
-    
-    // now create a single fatal process
-    typedef PhysicsList<FatalProcess> FatalList;
-    FatalList fatalProcess;
-    
-    /// fatal test should send  abort command
-    BOOST_TEST(fatalProcess(generator,detector,in,out));
-    
-    // now create a list of a sterile and fatal process
-    typedef PhysicsList<SterileProcess,FatalProcess> SterileFatalList;
-    SterileFatalList stfaProcess;
-    
-    /// fatal test should send  abort command
-    BOOST_TEST(stfaProcess(generator,detector,in,out));
+/// Physics process that does not trigger a break
+struct SterileProcess {
+
+  int some_parameter = 0;
+
+  /// call operator
+  template <typename generator_t, typename detector_t, typename particle_t>
+  bool operator()(generator_t &, const detector_t &, particle_t &,
+                  std::vector<particle_t> &) const {
+    return false;
   }
+};
 
-}  // namespace Test
-}  // namespace Fatras
+/// Physics process that DOES trigger a break
+struct FatalProcess {
+
+  /// call operator
+  template <typename generator_t, typename detector_t, typename particle_t>
+  bool operator()(generator_t &, const detector_t &, particle_t &,
+                  std::vector<particle_t> &) const {
+    return true;
+  }
+};
+
+// This tests the implementation of the physics list
+BOOST_AUTO_TEST_CASE(PhysicsLists_test) {
+  Generator_type generator;
+  Detector_type detector;
+  Particle_type in;
+  std::vector<Particle_type> out;
+
+  /// empty physics_list
+  typedef PhysicsList<> ProcessLess;
+  ProcessLess emptyList;
+
+  /// sterile test should never send the abort command
+  BOOST_TEST(!emptyList(generator, detector, in, out));
+
+  // now create a single sterile process
+  typedef PhysicsList<SterileProcess> SterileList;
+  SterileList sterileProcess;
+
+  // try to set this parameter
+  auto &sp = sterileProcess.get<SterileProcess>();
+  sp.some_parameter = 2;
+  BOOST_TEST(sterileProcess.get<SterileProcess>().some_parameter == 2);
+
+  /// sterile test should not send the abort command
+  BOOST_TEST(!sterileProcess(generator, detector, in, out));
+
+  // now create a single fatal process
+  typedef PhysicsList<FatalProcess> FatalList;
+  FatalList fatalProcess;
+
+  /// fatal test should send  abort command
+  BOOST_TEST(fatalProcess(generator, detector, in, out));
+
+  // now create a list of a sterile and fatal process
+  typedef PhysicsList<SterileProcess, FatalProcess> SterileFatalList;
+  SterileFatalList stfaProcess;
+
+  /// fatal test should send  abort command
+  BOOST_TEST(stfaProcess(generator, detector, in, out));
+}
+
+} // namespace Test
+} // namespace Fatras

@@ -9,8 +9,8 @@
 #ifndef FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
 #define FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
 
-#include <type_traits>
 #include "Acts/Utilities/detail/MPL/type_collector.hpp"
+#include <type_traits>
 
 namespace Fatras {
 
@@ -27,34 +27,27 @@ namespace Fatras {
 /// @endcode
 namespace detail {
 
-  namespace {    
-    template <typename T,
-              typename detector_t,
-              typename particle_t,
-              typename = decltype(std::declval<T>().
-                                  operator()(std::declval<const detector_t&>(),
-                                             std::declval<const particle_t&>()))>
-                
-    std::true_type
-    test_selector_list(int);
+namespace {
+template <typename T, typename detector_t, typename particle_t,
+          typename = decltype(
+              std::declval<T>().operator()(std::declval<const detector_t &>(),
+                                           std::declval<const particle_t &>()))>
 
-    template <typename, typename, typename>
-    std::false_type
-    test_selector_list(...);
-    
-    template <typename T, typename detector_t, typename particle_t>
-    struct selector_list_signature_check
-        : decltype(test_selector_list<T,detector_t,particle_t>(0))
-    {
-    };
+std::true_type test_selector_list(int);
 
-  }  // end of anonymous namespace
+template <typename, typename, typename> std::false_type test_selector_list(...);
 
-  template <typename T, typename detector_t, typename particle_t>
-  constexpr bool selector_list_signature_check_v
-      = selector_list_signature_check<T, detector_t, particle_t>::value;
-}  // namespace detail
+template <typename T, typename detector_t, typename particle_t>
+struct selector_list_signature_check
+    : decltype(test_selector_list<T, detector_t, particle_t>(0)) {};
 
-}  // namespace Fatras
+} // end of anonymous namespace
 
-#endif  // FATRAS_SELECTOR_SIGNATURE_CHECK_HPP
+template <typename T, typename detector_t, typename particle_t>
+constexpr bool selector_list_signature_check_v =
+    selector_list_signature_check<T, detector_t, particle_t>::value;
+} // namespace detail
+
+} // namespace Fatras
+
+#endif // FATRAS_SELECTOR_SIGNATURE_CHECK_HPP

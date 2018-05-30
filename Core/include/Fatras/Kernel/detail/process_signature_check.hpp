@@ -9,8 +9,8 @@
 #ifndef FATRAS_PROCESS_SIGNATURE_CHECK_HPP
 #define FATRAS_PROCESS_SIGNATURE_CHECK_HPP
 
-#include <type_traits>
 #include "Acts/Utilities/detail/MPL/type_collector.hpp"
+#include <type_traits>
 
 namespace Fatras {
 
@@ -21,49 +21,40 @@ namespace Fatras {
 ///  bool
 ///  operator()(generator_t& generator,
 ///             const detector_t& detector,
-///             const particle_t& in,             
+///             const particle_t& in,
 ///             std::vector<particle_t>& out) const { return false; }
 ///
 /// @endcode
 namespace detail {
 
-  namespace {    
-    template <typename T,
-              typename generator_t,
-              typename detector_t,
-              typename particle_t,
-              typename = decltype(std::declval<T>().
-                                  operator()(std::declval<generator_t&>(),
-                                             std::declval<const detector_t&>(),
-                                             std::declval<particle_t&>(),
-                                             std::declval<std::vector<particle_t>&>()))>
-                
-    std::true_type
-    test_physics_list(int);
+namespace {
+template <typename T, typename generator_t, typename detector_t,
+          typename particle_t,
+          typename = decltype(std::declval<T>().operator()(
+              std::declval<generator_t &>(), std::declval<const detector_t &>(),
+              std::declval<particle_t &>(),
+              std::declval<std::vector<particle_t> &>()))>
 
-    template <typename, typename, typename, typename>
-    std::false_type
-    test_physics_list(...);
-    
-    template <typename T, 
-              typename generator_t, typename detector_t, typename particle_t>
-    struct process_signature_check
-        : decltype(test_physics_list<T, generator_t,
-                                        detector_t,
-                                        particle_t>(0))
-    {
-    };
+std::true_type test_physics_list(int);
 
-    // clang-format on
-  }  // end of anonymous namespace
+template <typename, typename, typename, typename>
+std::false_type test_physics_list(...);
 
-  template <typename T, 
-            typename generator_t, typename detector_t, typename particle_t>
-  constexpr bool process_signature_check_v
-      = process_signature_check<T, generator_t, detector_t, particle_t>::value;
-                                     
-}  // namespace detail
+template <typename T, typename generator_t, typename detector_t,
+          typename particle_t>
+struct process_signature_check
+    : decltype(test_physics_list<T, generator_t, detector_t, particle_t>(0)) {};
 
-}  // namespace Fatras
+// clang-format on
+} // end of anonymous namespace
 
-#endif  // FATRAS_PROCESS_SIGNATURE_CHECK_HPP
+template <typename T, typename generator_t, typename detector_t,
+          typename particle_t>
+constexpr bool process_signature_check_v =
+    process_signature_check<T, generator_t, detector_t, particle_t>::value;
+
+} // namespace detail
+
+} // namespace Fatras
+
+#endif // FATRAS_PROCESS_SIGNATURE_CHECK_HPP

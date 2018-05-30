@@ -24,80 +24,74 @@
 #include "Fatras/Selectors/PdgSelectors.hpp"
 
 namespace bdata = boost::unit_test::data;
-namespace tt    = boost::test_tools;
+namespace tt = boost::test_tools;
 
 namespace Fatras {
 
 namespace Test {
 
-  double m_muon = 0.51099891 * Acts::units::_MeV;  // electron mass
-  double m_e    = 105.658367 * Acts::units::_MeV;  // muon mass
-  double m_pion = 134.9766 * Acts::units::_MeV;    // pi0 rest mass
+double m_muon = 0.51099891 * Acts::units::_MeV; // electron mass
+double m_e = 105.658367 * Acts::units::_MeV;    // muon mass
+double m_pion = 134.9766 * Acts::units::_MeV;   // pi0 rest mass
 
-  struct Detector {
-  };
+struct Detector {};
 
-  // This tests the implementation of the pdg selcetors
-  BOOST_AUTO_TEST_CASE(PdgSelectors_test)
-  {
+// This tests the implementation of the pdg selcetors
+BOOST_AUTO_TEST_CASE(PdgSelectors_test) {
 
-    Detector detector;
+  Detector detector;
 
-    Acts::Vector3D position(0.,0.,0.);
-    Acts::Vector3D momentum(1500.,0.,0);
+  Acts::Vector3D position(0., 0., 0.);
+  Acts::Vector3D momentum(1500., 0., 0);
 
-    Particle electron(position, momentum, -1., m_e);
-    electron.pdg = 11;
-    
-    Particle positron(position, momentum, -1., m_e);
-    positron.pdg = -11;
-    
-    Particle muon(position, momentum, -1., m_muon);
-    muon.pdg     = 13;
+  Particle electron(position, momentum, -1., m_e);
+  electron.pdg = 11;
 
-    Particle antimuon(position, momentum, 1., m_muon);
-    antimuon.pdg = -13;
-    
-    AbsPdgSelector<11> epSelector;
-    
-    BOOST_CHECK(epSelector(detector,electron));
-    BOOST_CHECK(epSelector(detector,positron));
-    BOOST_CHECK(!epSelector(detector,muon));
-    BOOST_CHECK(!epSelector(detector,antimuon));
-    
-    PdgSelector<13> muSelector;
+  Particle positron(position, momentum, -1., m_e);
+  positron.pdg = -11;
 
-    BOOST_CHECK(!muSelector(detector,electron));
-    BOOST_CHECK(!muSelector(detector,positron));
-    BOOST_CHECK(muSelector(detector,muon));
-    BOOST_CHECK(!muSelector(detector,antimuon));
-    
-    AbsPdgExcluder<11> epExcluder;
-    
-    BOOST_CHECK(!epExcluder(detector,electron));
-    BOOST_CHECK(!epExcluder(detector,positron));
-    BOOST_CHECK(epExcluder(detector,muon));
-    BOOST_CHECK(epExcluder(detector,antimuon));
-    
-    PdgExcluder<13> muExcluder;
+  Particle muon(position, momentum, -1., m_muon);
+  muon.pdg = 13;
 
-    BOOST_CHECK(muExcluder(detector,electron));
-    BOOST_CHECK(muExcluder(detector,positron));
-    BOOST_CHECK(!muExcluder(detector,muon));
-    BOOST_CHECK(muExcluder(detector,antimuon));
-    
-    SelectorListOR<PdgSelector<13>,PdgSelector<11>> emuSelection;
-    
-    BOOST_CHECK(emuSelection(detector,electron));
-    BOOST_CHECK(emuSelection(detector,muon));
-    BOOST_CHECK(!emuSelection(detector,positron));
-    BOOST_CHECK(!emuSelection(detector,antimuon));
-    
-    
-  }
-  
-  
+  Particle antimuon(position, momentum, 1., m_muon);
+  antimuon.pdg = -13;
+
+  AbsPdgSelector<11> epSelector;
+
+  BOOST_CHECK(epSelector(detector, electron));
+  BOOST_CHECK(epSelector(detector, positron));
+  BOOST_CHECK(!epSelector(detector, muon));
+  BOOST_CHECK(!epSelector(detector, antimuon));
+
+  PdgSelector<13> muSelector;
+
+  BOOST_CHECK(!muSelector(detector, electron));
+  BOOST_CHECK(!muSelector(detector, positron));
+  BOOST_CHECK(muSelector(detector, muon));
+  BOOST_CHECK(!muSelector(detector, antimuon));
+
+  AbsPdgExcluder<11> epExcluder;
+
+  BOOST_CHECK(!epExcluder(detector, electron));
+  BOOST_CHECK(!epExcluder(detector, positron));
+  BOOST_CHECK(epExcluder(detector, muon));
+  BOOST_CHECK(epExcluder(detector, antimuon));
+
+  PdgExcluder<13> muExcluder;
+
+  BOOST_CHECK(muExcluder(detector, electron));
+  BOOST_CHECK(muExcluder(detector, positron));
+  BOOST_CHECK(!muExcluder(detector, muon));
+  BOOST_CHECK(muExcluder(detector, antimuon));
+
+  SelectorListOR<PdgSelector<13>, PdgSelector<11>> emuSelection;
+
+  BOOST_CHECK(emuSelection(detector, electron));
+  BOOST_CHECK(emuSelection(detector, muon));
+  BOOST_CHECK(!emuSelection(detector, positron));
+  BOOST_CHECK(!emuSelection(detector, antimuon));
+}
+
 } // namespace Test
 
 } // namespace Fatras
-
