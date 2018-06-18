@@ -38,7 +38,6 @@ constexpr double log_RossiGreisen = 0.125;
 /// The information to be writtern out per hit surface
 /// - this is the bare information on a surface
 struct SensitiveHit {
-
   const Acts::Surface *surface = nullptr;
   Acts::Vector3D position;
   Acts::Vector3D direction;

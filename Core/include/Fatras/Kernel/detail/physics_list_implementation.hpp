@@ -17,7 +17,7 @@ namespace {
 template <typename... processes> struct physics_list_impl;
 
 /// Recursive call pattern
-/// - make sure it bails out
+/// - make sure it bails out if one process triggers a stop
 template <typename first, typename... others>
 struct physics_list_impl<first, others...> {
   template <typename T, typename generator_t, typename detector_t,

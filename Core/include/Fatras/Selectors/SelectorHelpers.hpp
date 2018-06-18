@@ -13,9 +13,9 @@
 namespace Fatras {
 
 // static selectors
-template <typename CAST> struct Min {
+template <typename cast_t> struct Min {
 
-  CAST cast;
+  cast_t cast;
   double valMin = 0.;
 
   /// Return true for all particles with transverse momentum
@@ -27,9 +27,9 @@ template <typename CAST> struct Min {
   }
 };
 
-template <typename CAST> struct Max {
+template <typename cast_t> struct Max {
 
-  CAST cast;
+  cast_t cast;
   double valMax = std::numeric_limits<double>::max();
 
   /// Return true for all particles with transverse momentum
@@ -41,9 +41,9 @@ template <typename CAST> struct Max {
   }
 };
 
-template <typename CAST> struct Range {
+template <typename cast_t> struct Range {
 
-  CAST cast;
+  cast_t cast;
   double valMin = 0.;
   double valMax = std::numeric_limits<double>::max();
 
