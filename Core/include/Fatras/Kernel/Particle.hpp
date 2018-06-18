@@ -95,9 +95,9 @@ template <typename Particle_type> struct VertexInfo {
   /// The vertex position
   Acts::Vector3D position = Acts::Vector3D(0., 0., 0.);
   /// The ingoing particles in the vertex
-  std::vector<Particle_type> ingoingParticles = {};
+  std::vector<Particle_type> in = {};
   /// The outgoing particles from the vertex
-  std::vector<Particle_type> outgoingParticles = {};
+  std::vector<Particle_type> out = {};
   /// An optional process code
   process_code processCode = 9;
   /// An optional time stamp
@@ -109,17 +109,19 @@ template <typename Particle_type> struct VertexInfo {
   /// @brief construct a particle consistently
   ///
   /// @param vertex The vertex position
-  /// @param ingoing The ingoing particles - copy
-  /// @param outgoing The outgoing particles (std::move!)
+  /// @param in The ingoing particles - copy
+  /// @param out The outgoing particles (copy - can we do a move ?)
   /// @param vprocess The process code
   /// @param time The time stamp of this vertex
   VertexInfo(const Acts::Vector3D &vertex,
              const std::vector<Particle_type> &ingoing = {},
              std::vector<Particle_type> outgoing = {}, process_code process = 0,
              double time = 0.)
-      : position(vertex), ingoingParticles(ingoing),
-        outgoingParticles(std::move(outgoing)), processCode(process),
-        timeStamp(time) {}
+      : position(vertex)
+      , in(ingoing)
+      , out(outgoing)
+      , processCode(process)
+      , timeStamp(time) {}
 };
 
 /// typedef for particle w/o external truth link
