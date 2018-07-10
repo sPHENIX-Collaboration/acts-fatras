@@ -58,12 +58,17 @@ struct Interactor {
   physics_list_t physicsList;
 
   /// Simple result struct to be returned
+  Particle initialParticle;
+    
   ///
   /// It mainly acts as an internal state cache which is
   /// created for every propagation/extrapolation step
   struct this_result {
 
-    /// The current particle - can be updated
+    /// result initialization
+    bool initialized = false;
+
+    /// The current particle - updated along the way
     Particle particle;
   
     /// The outgoing particles due to physics processes
@@ -94,11 +99,22 @@ struct Interactor {
   template <typename propagator_state_t>
   void operator()(propagator_state_t &state, 
                   result_type &result) const {
-
+                    
     // If we are on target, everything should have been done
     if (state.navigation.targetReached)
       return;
-
+    
+    // Initialize the result, the state is thread local
+    if (!result.initialized){
+      // set the initial particle parameters
+      result.particle    = initialParticle;
+      result.initialized = true;
+    }
+    // set the stepping position to the particle
+    result.particle.position = state.stepping.position();
+    result.particle.momentum = state.stepping.momentum();
+    result.particle.q        = state.stepping.charge();
+      
     // Check if the current surrface a senstive one
     bool isSensitive = state.navigation.currentSurface
                            ? sensitiveSelector(*state.navigation.currentSurface)
@@ -121,12 +137,12 @@ struct Interactor {
                                      result.outgoing);
       }
     }
-    // update the stepper cache with the current particle parameters
-    state.stepping.pos       = result.particle.position;
-    state.stepping.dir       = result.particle.momentum.unit();
-    state.stepping.p         = result.particle.momentum.mag();
-    state.stepping.charge    = result.particle.q;
 
+    // update the stepper cache with the current particle parameters
+     state.stepping.update(result.particle.position,
+                           result.particle.momentum.unit(),
+                           result.particle.momentum.mag());
+     
     // create the SensitiveHit and store it
     if (isSensitive) {
       // create and fill the hit

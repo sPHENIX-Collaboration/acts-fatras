@@ -11,8 +11,10 @@
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/detail/DebugOutputActor.hpp"
+#include "Acts/Propagator/detail/StandardAbortConditions.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/NeutralParameters.hpp"
+#include "Acts/Utilities/Logger.hpp"
 
 namespace Fatras {
 
@@ -43,7 +45,8 @@ namespace Fatras {
     Simulator(charged_propagator_t chpropagator,
               neutral_propagator_t npropagator) :
       chargedPropagator(std::move(chpropagator)),
-      neutralPropagator(std::move(npropagator))
+      neutralPropagator(std::move(npropagator)),
+      mlogger(Acts::getDefaultLogger("Simulator", Acts::Logging::INFO))
     {} 
     
     charged_propagator_t      chargedPropagator;
@@ -56,7 +59,16 @@ namespace Fatras {
     
     VoidDetector              detector;
     
+    std::shared_ptr<const Acts::Logger> mlogger = nullptr;
+    
     bool debug = false; 
+  
+   /// Private access to the logging instance
+   const Acts::Logger&
+   logger() const
+   {
+     return *mlogger;
+   }
         
     /// @brief call operator to the simulator
     ///
@@ -81,13 +93,13 @@ namespace Fatras {
 
       // Action list, abort list and options
       typedef Acts::ActionList<charged_interactor_t, DebugOutput> ChargedActionList;
-      typedef Acts::AbortList<> ChargedAbortList;
+      typedef Acts::AbortList<Acts::detail::EndOfWorldReached> ChargedAbortList;
       typedef typename charged_propagator_t::template Options<ChargedActionList,
                                                      ChargedAbortList> ChargedOptions;
 
       // Action list, abort list and 
       typedef Acts::ActionList<neutral_interactor_t, DebugOutput> NeutralActionList;
-      typedef Acts::AbortList<> NeutralAbortList;
+      typedef Acts::AbortList<Acts::detail::EndOfWorldReached> NeutralAbortList;
       typedef typename neutral_propagator_t::template Options<NeutralActionList,
                                                      NeutralAbortList> NeutralOptions;
 
@@ -101,7 +113,7 @@ namespace Fatras {
                   ++particle){
           //charged particle detected and selected
           if (chargedSelector(detector,*particle)){
-            // For particle parallelism this might have to shift to inner loop
+            // Need to construct them per call to set the particle
             // Options and configuration
             ChargedOptions chargedOptions;
             chargedOptions.debug = debug;
@@ -113,7 +125,7 @@ namespace Fatras {
             // set the generator to guarantee event consistent entires
             chargedInteractor.generator = &fatrasGenerator;
             // put all the additional information into the interactor
-            //chargedInteractor.particle = particle;
+            chargedInteractor.initialParticle = (*particle);
             // create the kinematic start parameters
             Acts::CurvilinearParameters start(nullptr, 
                                               particle->position, 
@@ -131,7 +143,11 @@ namespace Fatras {
             // b) deal with the particles
             const auto& simparticles = fatrasResult.outgoing;
             event.out.insert(particle,simparticles.begin(),simparticles.end());
-            
+            // c) screen output if requested
+            if (debug){
+              auto& fatrasDebug = result.template get<DebugOutput::result_type>();
+              ACTS_INFO(fatrasDebug.debugString);
+            }
           } else if (neutralSelector(detector,*particle)){
             // Options and configuration
             NeutralOptions neutralOptions;
@@ -144,7 +160,7 @@ namespace Fatras {
             // set the generator to guarantee event consistent entires
             neutralInteractor.generator = &fatrasGenerator;
             // put all the additional information into the interactor
-            // neutralInteractor.particle = particle;
+            neutralInteractor.initialParticle = (*particle);
             // create the kinematic start parameters
             Acts::NeutralCurvilinearParameters start(nullptr, 
                                               particle->position, 
@@ -152,10 +168,14 @@ namespace Fatras {
             const auto& result = neutralPropagator.propagate(start,
                                                              neutralOptions);
             auto& fatrasResult = result.template get<NeutralResult>();
+            // a) deal with the particles
             const auto& simparticles = fatrasResult.outgoing;
-            // deal with the particles
             event.out.insert(particle,simparticles.begin(),simparticles.end());
-         
+            // b) screen output if requested
+            if (debug){
+              auto& fatrasDebug = result.template get<DebugOutput::result_type>();
+              ACTS_INFO(fatrasDebug.debugString);
+            }
           } // neutral processing
          } // loop over particles
       } // loop over events
