@@ -26,10 +26,11 @@ constexpr double ka_BetheBloch = 30.7075;
 /// Fine structure constexprant
 constexpr double alpha = 1. / 137.;
 
-/// Multiple scattering parameters
+/// Multiple scattering parameters for MIPS
 constexpr double main_RutherfordScott = 13.6;
 constexpr double log_RutherfordScott = 0.038;
 
+/// Multiple scattering parameters for electrons
 constexpr double main_RossiGreisen = 17.5;
 constexpr double log_RossiGreisen = 0.125;
 
