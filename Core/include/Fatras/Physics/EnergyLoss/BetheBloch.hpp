@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,20 +8,33 @@
 
 #pragma once
 
-#include "Acts/Utilities/MaterialInteraction.hpp"
+#include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
-// The struct for the EnergyLoss physics list
+/// @brief The struct for the EnergyLoss physics list
+///
+/// This generates the energy loss according to the Bethe-Bloch
+/// description, applying a landau generated enery loss
+///
+/// It follows the interface of EnergyLoss samplers in Fatras
+/// that could return radiated photons for further processing,
+/// however, for the Bethe-Bloch application the return vector
+/// is always 0.
 struct BetheBloch {
 
-  /// MOP / Sigma scaling
+  /// Scaling for most probable value
   double scaleFactorMPV = 1.;
+
+  /// Scaling for Sigma
   double scaleFactorSigma = 1.;
 
-  /// Call operator
+  /// Bethe-Bloch Ionisation loss formula
+  Acts::detail::IonisationLoss ionisationLoss;
+
+  /// @brief Call operator for the Bethe Bloch energy loss
   ///
   /// @tparam generator_t is a random number generator type
   /// @tparam detector_t is the detector information type
@@ -31,22 +44,23 @@ struct BetheBloch {
   /// @param[in] detector the detector information
   /// @param[in] particle the particle which is being scattered
   ///
-  /// @return empty vector for BetheBloch
+  /// @return empty vector for BetheBloch - no secondaries created
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
 
-    // Evaluate the energy loss and its sigma
-    auto eLoss = Acts::ionizationEnergyLossMpv(
-        particle.p, particle.m, detector.material(), detector.thickness());
+    // Create a random landau distribution between in the intervall [0,1]
+    LandauDist landauDist = LandauDist(0., 1.);
+    double landau = landauDist(generator);
+
+    auto eLoss = ionisationLoss(particle.m, particle.beta, particle.gamma,
+                                detector, detector.thickness(), false);
+    // the actual energy loss
     double energyLoss = eLoss.first;
     // the uncertainty of the mean energy loss
     double energyLossSigma = eLoss.second;
 
-    // Create a random landau distribution between in the intervall [0,1]
-    Fatras::LandauDist landauDist(0., 1.);
-    double landau = landauDist(generator);
     // Simulate the energy loss
     double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
                     scaleFactorSigma * energyLossSigma * landau;
@@ -58,6 +72,7 @@ struct BetheBloch {
       particle.pT = 0.;
       particle.momentum = Acts::Vector3D(0., 0., 0.);
     } else {
+      // updatet the parameters
       particle.E -= deltaE;
       particle.p = std::sqrt(particle.E * particle.E - particle.m * particle.m);
       particle.momentum = particle.p * particle.momentum.unit();

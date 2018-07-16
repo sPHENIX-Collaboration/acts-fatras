@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -117,11 +117,8 @@ template <typename Particle_type> struct VertexInfo {
              const std::vector<Particle_type> &ingoing = {},
              std::vector<Particle_type> outgoing = {}, process_code process = 0,
              double time = 0.)
-      : position(vertex)
-      , in(ingoing)
-      , out(outgoing)
-      , processCode(process)
-      , timeStamp(time) {}
+      : position(vertex), in(ingoing), out(outgoing), processCode(process),
+        timeStamp(time) {}
 };
 
 /// typedef for particle w/o external truth link

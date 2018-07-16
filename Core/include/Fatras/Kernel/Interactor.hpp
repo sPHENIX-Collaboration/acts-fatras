@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -11,10 +11,10 @@
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Material/SurfaceMaterial.hpp"
-#include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Propagator/ActionList.hpp"
-#include "Fatras/Kernel/Particle.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
+#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "RandomNumberDistributions.hpp"
 #include <climits>
@@ -25,9 +25,8 @@
 namespace Fatras {
 
 struct VoidSelector {
-  
-  bool operator()(const Acts::Surface& ) const { return false;}
 
+  bool operator()(const Acts::Surface &) const { return false; }
 };
 
 /// The Fatras Simulator
@@ -43,8 +42,7 @@ struct VoidSelector {
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
-template <typename generator_t,
-          typename sensitive_selector_t = VoidSelector,
+template <typename generator_t, typename sensitive_selector_t = VoidSelector,
           typename physics_list_t = PhysicsList<>>
 struct Interactor {
 
@@ -59,7 +57,7 @@ struct Interactor {
 
   /// Simple result struct to be returned
   Particle initialParticle;
-    
+
   ///
   /// It mainly acts as an internal state cache which is
   /// created for every propagation/extrapolation step
@@ -70,13 +68,12 @@ struct Interactor {
 
     /// The current particle - updated along the way
     Particle particle;
-  
+
     /// The outgoing particles due to physics processes
     std::vector<Particle> outgoing;
-    
+
     /// The simulated hits created along the way
     std::vector<SensitiveHit> simulatedHits;
-
   };
 
   typedef this_result result_type;
@@ -97,24 +94,23 @@ struct Interactor {
   /// return value is void as it is a standard actor in the
   /// propagation
   template <typename propagator_state_t>
-  void operator()(propagator_state_t &state, 
-                  result_type &result) const {
-                    
+  void operator()(propagator_state_t &state, result_type &result) const {
+
     // If we are on target, everything should have been done
     if (state.navigation.targetReached)
       return;
-    
+
     // Initialize the result, the state is thread local
-    if (!result.initialized){
+    if (!result.initialized) {
       // set the initial particle parameters
-      result.particle    = initialParticle;
+      result.particle = initialParticle;
       result.initialized = true;
     }
     // set the stepping position to the particle
     result.particle.position = state.stepping.position();
     result.particle.momentum = state.stepping.momentum();
-    result.particle.q        = state.stepping.charge();
-      
+    result.particle.q = state.stepping.charge();
+
     // Check if the current surrface a senstive one
     bool isSensitive = state.navigation.currentSurface
                            ? sensitiveSelector(*state.navigation.currentSurface)
@@ -127,30 +123,28 @@ struct Interactor {
       // get the surface material and the corresponding material properties
       auto sMaterial = state.navigation.currentSurface->associatedMaterial();
       auto mProperties = sMaterial->material(state.stepping.position());
-      
+
       bool breakIndicator = false;
       if (mProperties) {
-        // run the Fatras physics list - only when there's material 
-        breakIndicator = physicsList(*generator, 
-                                     *mProperties,
-                                     result.particle, 
+        // run the Fatras physics list - only when there's material
+        breakIndicator = physicsList(*generator, *mProperties, result.particle,
                                      result.outgoing);
       }
     }
 
     // update the stepper cache with the current particle parameters
-     state.stepping.update(result.particle.position,
-                           result.particle.momentum.unit(),
-                           result.particle.momentum.mag());
-     
+    state.stepping.update(result.particle.position,
+                          result.particle.momentum.unit(),
+                          result.particle.momentum.mag());
+
     // create the SensitiveHit and store it
     if (isSensitive) {
       // create and fill the hit
       SensitiveHit senHit;
-      senHit.surface   = state.navigation.currentSurface;
-      senHit.position  = state.stepping.position();
+      senHit.surface = state.navigation.currentSurface;
+      senHit.position = state.stepping.position();
       senHit.direction = state.stepping.direction();
-      senHit.value     = depositedEnergy;
+      senHit.value = depositedEnergy;
       result.simulatedHits.push_back(std::move(senHit));
     }
   }

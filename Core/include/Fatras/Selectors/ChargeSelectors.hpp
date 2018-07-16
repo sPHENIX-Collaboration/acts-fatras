@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -26,12 +26,11 @@ struct NeutralSelector {
   }
 };
 
-
 struct PositiveSelector {
   /// Return true for all particles with charge > 0.
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q  > 0.);
+    return (particle.q > 0.);
   }
 };
 
