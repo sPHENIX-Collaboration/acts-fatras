@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,26 +15,6 @@
 #include <cmath>
 
 namespace Fatras {
-
-namespace constants {
-
-// @todo multiply with units
-
-/// KOverA factor in Bethe-Bloch equation [MeV*cm2/gram]
-constexpr double ka_BetheBloch = 30.7075;
-
-/// Fine structure constexprant
-constexpr double alpha = 1. / 137.;
-
-/// Multiple scattering parameters for MIPS
-constexpr double main_RutherfordScott = 13.6;
-constexpr double log_RutherfordScott = 0.038;
-
-/// Multiple scattering parameters for electrons
-constexpr double main_RossiGreisen = 17.5;
-constexpr double log_RossiGreisen = 0.125;
-
-} // namespace constants
 
 /// The information to be writtern out per hit surface
 /// - this is the bare information on a surface

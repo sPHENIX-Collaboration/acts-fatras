@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Acts/Utilities/MaterialInteraction.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
@@ -23,10 +24,13 @@ struct GeneralMixture {
   /// Steering parameter
   bool log_include = true;
 
-  // allows to scale the mixture level
+  //- Scale the mixture level
   double genMixtureScalor = 1.;
 
-  /// Call operator to perform this scattering
+  /// The Highland formula as a fallback for electrons
+  Acts::detail::HighlandScattering highlandForumla;
+
+  /// @brief Call operator to perform this scattering
   ///
   /// @tparam generator_t is a random number generator type
   /// @tparam detector_t is the detector information type
@@ -40,9 +44,6 @@ struct GeneralMixture {
   template <typename generator_t, typename detector_t, typename particle_t>
   double operator()(generator_t &generator, const detector_t &detector,
                     particle_t &particle) const {
-    // Gauss distribution
-    Fatras::GaussDist gaussDist(0., 1.);
-    Fatras::UniformDist uniformDist(0., 1.);
 
     // scale the path length to the radiation length
     double tInX0 = detector.thickness() / detector.material().X0();
@@ -53,6 +54,10 @@ struct GeneralMixture {
     double theta(0.);
 
     if (std::abs(particle.pdg) != 11) {
+
+      /// Uniform distribution, will be sampled with generator
+      UniformDist uniformDist = UniformDist(0., 1.);
+
       //----------------------------------------------------------------------------
       // see Mixture models of multiple scattering: computation and simulation.
       // -
@@ -82,8 +87,14 @@ struct GeneralMixture {
         theta = semigauss(uniformDist, generator, scattering_params_sg);
       }
     } else {
+
+      /// Gauss distribution, will be sampled with generator
+      GaussDist gaussDist = GaussDist(0., 1.);
+
       // for electrons we fall back to the Highland (extension)
-      theta = highlandSigma(detector, particle, log_include);
+      // return projection factor times sigma times gauss random
+      theta = highlandForumla(particle.p, particle.beta, tInX0, true) *
+              gaussDist(generator);
     }
     // return scaled by sqare root of two
     return M_SQRT2 * theta;
@@ -146,6 +157,14 @@ struct GeneralMixture {
     return scattering_params;
   }
 
+  /// @brief Retrieve the gaussian mixture
+  ///
+  /// @tparam generator_t Type of the generator
+  ///
+  /// @param udist The uniform distribution handed over by the call operator
+  /// @param scattering_params the tuned parameters for the generation
+  ///
+  /// @return a double value that represents the gaussian mixture
   template <typename generator_t>
   double gaussmix(UniformDist &udist, generator_t &generator,
                   const std::array<double, 4> &scattering_params) const {
@@ -161,6 +180,14 @@ struct GeneralMixture {
       return std::sqrt(var2) * std::sqrt(-2 * std::log(u)) * sigma_tot;
   }
 
+  /// @brief Retrieve the semi-gaussian mixture
+  ///
+  /// @tparam generator_t Type of the generator
+  ///
+  /// @param udist The uniform distribution handed over by the call operator
+  /// @param scattering_params the tuned parameters for the generation
+  ///
+  /// @return a double value that represents the gaussian mixture
   template <typename generator_t>
   double semigauss(UniformDist &udist, generator_t &generator,
                    const std::array<double, 6> &scattering_params) const {

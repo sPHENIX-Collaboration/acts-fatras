@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -39,8 +39,6 @@ template <typename Formula> struct Scattering {
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &gen, const detector_t &det,
                                      particle_t &in) const {
-    /// uniform distribution
-    UniformDist uniformDist = UniformDist(0., 1.);
 
     // 3D scattering angle
     double angle3D = angle(gen, det, in);
@@ -58,7 +56,7 @@ template <typename Formula> struct Scattering {
       double numDetlaPhi = 0.; //??
       double deltaPhi = projectionFactor * numDetlaPhi / sinTheta;
 
-      // use bound parameter
+      // @todo: use bound parameter
       // (i) phi
       phi += deltaPhi;
       if (phi >= M_PI)
@@ -81,6 +79,10 @@ template <typename Formula> struct Scattering {
       in.momentum = in.p * Acts::Vector3D(cphi * stheta, sphi * stheta, ctheta);
 
     } else {
+
+      /// uniform distribution
+      UniformDist uniformDist = UniformDist(0., 1.);
+
       // Create a random uniform distribution between in the intervall [0,1]
       double psi = 2. * M_PI * uniformDist(gen);
 

@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -42,12 +42,8 @@ public:
   /// @param[in,out] outgoing are the (eventually) outgoing particles
   ///
   /// @return indicator which would trigger an abort
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
-  bool operator()(generator_t &gen, 
-                  const detector_t &det, 
-                  particle_t &in,
+  template <typename generator_t, typename detector_t, typename particle_t>
+  bool operator()(generator_t &gen, const detector_t &det, particle_t &in,
                   std::vector<particle_t> &out) const {
     // clang-format off
     static_assert(Acts::detail::all_of_v<detail::process_signature_check_v<processes, generator_t, detector_t, particle_t>...>,

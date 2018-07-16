@@ -1,6 +1,6 @@
-// This file is part of the ACTS project.
+// This file is part of the Acts project.
 //
-// Copyright (C) 2018 ACTS project team
+// Copyright (C) 2018 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -24,9 +24,10 @@ const double log_2 = std::log(2.);
 ///
 struct BetheHeitler {
 
+  /// A scaling factor to
   double scaleFactor = 1.;
 
-  /// Call operator
+  /// @brief Call operator for the Bethe-Heitler energy loss
   ///
   /// @tparam generator_t is a random number generator type
   /// @tparam detector_t is the detector information type
@@ -43,12 +44,10 @@ struct BetheHeitler {
                                      particle_t &particle) const {
 
     double tInX0 = detector.thickness() / detector.material().X0();
-
-    // Take a random gamma-distributed value
-    GammaDist gDist(tInX0 / log_2, 1.);
+    // Take a random gamma-distributed value - depending on t/X0
+    GammaDist gDist = GammaDist(tInX0 / log_2, 1.);
 
     double u = gDist(generator);
-
     double z = std::exp(-1. * u);
     double deltaE = std::abs(scaleFactor * particle.E * (z - 1.));
 
