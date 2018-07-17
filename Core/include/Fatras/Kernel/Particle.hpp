@@ -81,7 +81,19 @@ template <typename TruthParticleLink_type = VoidTruthLink> struct ParticleInfo {
 
   /// boost the particle
   /// @todo implement boost definition
-  /// void boost()
+  /// Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boost(double bx, double by, double bz)
+  void boost(Acts::Vector3D boostVector)
+  {
+		double b2 = boostVector.squaredNorm();
+		double ggamma = 1.0 / std::sqrt(1.0 - b2);
+		double bp = boostVector.x() * momentum.x() + boostVector.y() * momentum.y() + boostVector.z() * momentum.z();
+		double gamma2 = b2 > 0 ? (ggamma - 1.0) / b2 : 0.0;
+		
+		momentum = {momentum.x() + gamma2 * bp * boostVector.x() + ggamma * boostVector.x() * E,
+					momentum.y() + gamma2 * bp * boostVector.y() + ggamma * boostVector.y() * E,
+					momentum.z() + gamma2 * bp * boostVector.z() + ggamma * boostVector.z() * E};
+		E = ggamma * (E + bp);
+	}
 };
 
 /// @Particle information struct for phsycis process samplers:

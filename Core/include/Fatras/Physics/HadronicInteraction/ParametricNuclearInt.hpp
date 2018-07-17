@@ -10,6 +10,8 @@
 
 #include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Acts/Utilities/Units.hpp"
+#include <math.h>
 
 namespace Fatras {
 
@@ -22,6 +24,8 @@ struct Config()
 {
 	bool m_hadronInteractionFromX0;
 	double m_hadronInteractionProbabilityScale;
+	unsigned int MAXHADINTCHILDREN;
+	double m_minimumHadOutEnergy;
 }
 
 /// @brief Constructor with given configuration
@@ -71,10 +75,45 @@ template <typename material_t, typename particle_t>
 double 
 absorptionLength(const material_t* matertial, particle_t& particle) const;
 
-// TODO
+/// @brief Dices the number of particle candidates that leave the detector
+///
+/// @tparam generator_t data type of the random number generator
+/// @tparam particle_t data type of the particle
+/// @param [in] generator random number generator
+/// @param [in] particle ingoing particle
+/// @return number of outgoing candidates
 template<typename generator_t, typename particle_t>
 int
 diceNumberOfParticles(generator_t& generator, particle_t& particle) const;
+
+/// @brief Creates the particle candidates that leave the detector
+///
+/// @tparam generator_t data type of the random number generator
+/// @tparam particle_t data type of the particle
+/// @param [in] generator random number generator
+/// @param [in] particle ingoing particle
+/// @param [in] particles list of created particles
+template<typename generator_t, typename particle_t>
+void
+createMultiplicity(generator_t& generator, particle_t& particle, std::vector<particle_t>& particles) const;
+
+/// @brief Creates the kinematics of a list of particles
+///
+/// @tparam generator_t data type of the random number generator
+/// @tparam particle_t data type of the particle
+/// @param [in] generator random number generator
+/// @param [in] particles list of created particles
+template<typename generator_t, typename particle_t>
+void
+kinematics(generator_t& generator, std::vector<particle_t>& particles) const;
+
+/// @brief Selects created particles if they fulfill the criteria
+///
+/// @tparam particle_t data type of the particle
+/// @param [in] particles list of created particles
+template<typename particle_t>
+void
+selectionOfCollection(std::vector<particle_t> particles) const;
 
 /// @brief Calculates the hadron interactions of a particle
 ///
@@ -88,6 +127,8 @@ diceNumberOfParticles(generator_t& generator, particle_t& particle) const;
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 getHadronState(generator_t& generator, double time, particle_t& particle) const;
+
+// TODO: funktion waere geil, die eine vertex list ausgibt
 
 // Configuration storage
 Config m_cfg;
@@ -106,7 +147,7 @@ ParametricNuclearInt::absorptionLength(const material_t* matertial, particle_t& 
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == 111 || particle.pdg == 311) // TODO: nur K^+?
     al *= 1. / (1. + exp(-0.5 * (particle.p - 270.) * (particle.p - 270.) / 3600.)); // TODO: da kann man sicherlich noch etwas optimieren
 
-  if(particle.pdg == 2212 || particle.pdg == 2212) al *= 0.7;
+  if(particle.pdg == 2212 || particle.pdg == 2112) al *= 0.7;
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 111) al *= 0.9;
 
   return al;
@@ -114,7 +155,7 @@ ParametricNuclearInt::absorptionLength(const material_t* matertial, particle_t& 
 
 template<typename generator_t, typename particle_t>
 int
-diceNumberOfParticles(generator_t& generator, particle_t& particle) const
+ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& particle) const
 {
   // sampling of hadronic interaction
   double E = sqrt(particle.p * particle.p + particle.m * particle.m);
@@ -148,226 +189,194 @@ diceNumberOfParticles(generator_t& generator, particle_t& particle) const
 }
 
 template<typename generator_t, typename particle_t>
-std::vector<particle_t> 
-ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particle) const
-{  
-	std::vector<particle_t> chDef; 
-  
-  int Npart = diceNumberOfParticles(generator, particle);
-  
-  // protection against Npart < 3
-  if (Npart < 3)
-    return chDef;
-  
-  // create the genParticles
-  
-  // validation if needed 
-	// TODO: bookkeeping via vertex oder einfach weglassen?
-  
-  if (m_cutChain && ( parent->barcode()>100000 || parent->barcode()==0 ) ) {
-    if (m_hadIntValidationTree) m_hadIntValidationTree->Fill();
-    return chDef;
-  }
-  
-  int gen_part = 0; // TODO: wird erst am ende benoetigt
-    
+void
+ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& particle, std::vector<particle_t>& particles) const
+{    
   // new sampling: sample particle type and energy in the CMS frame of outgoing particles
   // creation of shower particles
   double chargedist = 0.;
-  std::vector<double> charge(Npart);
-  std::vector<Trk::ParticleHypothesis> childType(Npart);
-  std::vector<double> newm(Npart);
-  std::vector<int> pdgid(Npart);    
   
-  // children type sampling  : simplified
-  //double pif = 0.19;
-  //double nef = 0.20;
-  //double prf = 0.20;
-
   // sample heavy particles (alpha) but don't save  
   double pif = 0.10; 
   double nef = 0.30;
   double prf = 0.30;
   
-  if ( particle == Trk::pion || particle == Trk::kaon || particle == Trk::pi0 || particle == Trk::k0 ) {
+  // TODO: K^- muss noch rein
+  if(particle.pdg == 211 || particle.pdg == -211 || particle == 321 || particle.pdg == 111 || particle.pdg == 311) 
+  { // TODO: hier muss wohl ein else fuer andere particles her
       pif = 0.15;
       nef = 0.25;
       prf = 0.25;
-    }
-  if ( particle == Trk::proton ) {
+  }
+  if(particle.pdg == 2212 ) 
+  {
     pif = 0.06;
     nef = 0.25;
     prf = 0.35;
   }
-  if ( particle == Trk::neutron ) {
+  if(particle.pdg == 2112 ) 
+  {
     pif = 0.03;
     nef = 0.35;
     prf = 0.17;
   }
   
-  for (int i=0; i<Npart; i++) {
-    chargedist  = CLHEP::RandFlat::shoot(m_randomEngine);
-    if (chargedist<pif) {
-      charge[i]=0.;
-      childType[i]=Trk::pi0;
-      newm[i]=s_particleMasses.mass[Trk::pi0]; // MeV
-      pdgid[i]=111;
-      continue;
+  // Source of masses: Geant4
+  for(int i=0; i<Npart; i++) {
+    chargedist  = generator();
+    if(chargedist < pif) 
+    {
+		particles[i].q = 0.
+		particles[i].pdg = 111;
+		particles[i].m = 0.1349766 * Acts::units::_GeV;
+		continue;
     }
-    if ( chargedist<2*pif) {
-      charge[i]=1.;
-      childType[i]=Trk::pion;
-      newm[i]=s_particleMasses.mass[Trk::pion]; // MeV
-      pdgid[i]=211;
-      continue;
+    if(chargedist < 2 * pif) 
+    {
+		particles[i].q = Acts::units::_e;
+		particles[i].pdg = 211;
+		particles[i].m = 0.1395701 * Acts::units::_GeV;
+		continue;
     }
-    if (chargedist<3*pif) {
-      charge[i]=-1.;
-      childType[i]=Trk::pion;
-      newm[i]=s_particleMasses.mass[Trk::pion]; // MeV
-      pdgid[i]=-211;
-      continue;
+    if(chargedist < 3 * pif) 
+    {
+		particles[i].q = -Acts::units::_e;
+		particles[i].pdg = -211;
+		particles[i].m = 0.1395701 * Acts::units::_GeV;
+		continue;
     }
-    if (chargedist<3*pif+nef) {
-      charge[i]=0.;
-      childType[i]=Trk::neutron;
-      newm[i]=939.565; // MeV
-      pdgid[i]=2112; // neutron
-      continue;
+    if(chargedist < 3 * pif + nef) 
+    {
+		particles[i].q = 0.;
+		particles[i].pdg = 2112;
+		particles[i].m = 939.56563 * Acts::units::_MeV;
+		continue;
     }
-    if (chargedist<3*pif+nef+prf) {
-      charge[i]=1.;
-      childType[i]=Trk::proton;
-      newm[i]=s_particleMasses.mass[Trk::proton]; // MeV
-      pdgid[i]=2212;
-      continue;
+    if(chargedist < 3 * pif + nef + prf) 
+    {
+		particles[i].q = Acts::units::_e;
+		particles[i].pdg = 2212;
+		particles[i].m = 938.27231 * Acts::units::_MeV;
+		continue;
     }
-    charge[i]=2.;
-    childType[i]=Trk::proton;
-    newm[i]=4000.;
-    pdgid[i]=20000;
+    particles[i].q = 2.;
+    particles[i].pdg = 20000;
+    particles[i].m = 4. * Acts::units::_GeV;
   }
 
   // move the incoming particle type forward
-  if ( childType[0] != particle ) {
-    for (int i=1; i<Npart; i++) {
-      if (childType[i]==particle) {
-        childType[i]=childType[0];
-        childType[0]=particle;
-        double cho = charge[i];
-        charge[i]=charge[0];
-        charge[0]=parent ? parent->charge() : cho;
-	newm[i]=s_particleMasses.mass[childType[i]]; // MeV
-	newm[0]=s_particleMasses.mass[childType[0]]; // MeV
+  if(particles[0].pdg != particle.pdg) 
+    for(int i = 1; i < particles.size(); i++)
+      if(particles[i].pdg == particle.pdg)
+      {
+        particles[i] = particles[0];
+        particles[0] = particle;
         break;
       }
-    }
-  }
+}
 
-//////////////////////////////// hier ist ein semantischer cut
-
-  /*
-  // sample momentum of daughters in CMS frame of outgoing particles  [ exp(-par/p) ]
-  std::vector<double> mom;
-  mom.clear();mom.reserve(Npart);
-  double mom_n = 0.;  
-  for (int _npart=0; _npart<Npart; _npart++) {
-    rand1  = CLHEP::RandFlat::shoot(m_randomEngine);
-    mom_n = -log(rand1)/m_childMomParam * p;
-    int ipos = _npart;
-    while ( ipos>0 && mom_n>mom[ipos-1]) ipos--;
-    mom.insert(mom.begin()+ipos,mom_n);
-  }  
-  
-  // check if configuration acceptable - if not, resample hardest mom
-  double momR = 0.;
-  for (int i=1; i<Npart; i++) momR += mom[i];
-  if (momR < mom[0]) mom[0] = mom[1]+rand1*(momR-mom[1]);
-  */
-
+template<typename generator_t, typename particle_t>
+void
+ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_t& particle) const
+{
+	unsigned int Npart = particles.size();
   std::vector<double> mom(Npart);
   std::vector<double> th(Npart);
   std::vector<double> ph(Npart);
 
   // sample first particle energy fraction and random momentum direction
-  double eps = 2./Npart;
-  double rnd  = CLHEP::RandFlat::shoot(m_randomEngine);
-  mom[0] = 0.5*pow(eps,rnd);          
-  th[0]  = acos( 2*CLHEP::RandFlat::shoot(m_randomEngine)-1.);
-  ph[0]  = 2*M_PI*CLHEP::RandFlat::shoot(m_randomEngine);
+  double eps = 2. / Npart;
+  double rnd  = generator();
+  mom[0] = 0.5 * pow(eps, rnd);          
+  th[0]  = acos(2 * generator() - 1.);
+  ph[0]  = 2 * M_PI * generator();
   
   // toss particles around in a way which preserves the total momentum (0.,0.,0.) at this point
   // TODO shoot first particle along the impact direction preferentially
 
-  Amg::Vector3D ptemp(mom[0]*sin(th[0])*cos(ph[0]),mom[0]*sin(th[0])*sin(ph[0]),mom[0]*cos(th[0]));
+  Acts::Vector3D ptemp(mom[0]*sin(th[0])*cos(ph[0]),mom[0]*sin(th[0])*sin(ph[0]),mom[0]*cos(th[0]));
   double ptot = mom[0];
   
   double theta = 0.; double phi = 0.; 
-  for (int i=1; i<Npart-2; i++) {
-    eps = 1./(Npart-i); 
-    //mom[i] = pow(eps,CLHEP::RandFlat::shoot(m_randomEngine))*(1-ptot);
-    mom[i] = ( eps + CLHEP::RandFlat::shoot(m_randomEngine)*(1-eps))*(1-ptot); 
-    if (ptemp.mag()<1-ptot) {
-      while ( fabs(ptemp.mag()-mom[i])>1-ptot-mom[i] ){
-	mom[i] =  ( eps + CLHEP::RandFlat::shoot(m_randomEngine)*(1-eps))*(1-ptot);      
-      }
-    }
+  for (int i = 1; i < Npart - 2; i++) 
+  {
+    eps = 1. / (Npart - i); 
+    mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot); 
+    if(ptemp.mag() < 1 - ptot) 
+      while(fabs(ptemp.mag() - mom[i]) > 1 - ptot - mom[i])
+		mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot);
+    
     // max p remaining
-    double p_rem=1-ptot-mom[i];
+    double p_rem = 1 - ptot-mom[i];
     double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
-    //if (cthmax<-1.) std::cout <<"problem in theta sampling:p_rem:ptot:pcurr:"<<p_rem<<","<<ptemp.mag()<<","<<mom[i]<< std::endl;
-    double rnd  = CLHEP::RandFlat::shoot(m_randomEngine);
+    double rnd  = generator();
     theta = acos( (cthmax+1.)*rnd-1.);          
-    phi = 2*M_PI*CLHEP::RandFlat::shoot(m_randomEngine);
-    HepGeom::Vector3D<double> test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-    HepGeom::Vector3D<double> dnewHep = HepGeom::RotateZ3D(ptemp.phi())*HepGeom::RotateY3D(ptemp.theta())*test;
-    Amg::Vector3D dnew( dnewHep.x(), dnewHep.y(), dnewHep.z() );
-    th[i]=dnew.theta();    
-    ph[i]=dnew.phi();          
-    ptemp += mom[i]*dnew;
+    phi = 2 * M_PI * generator();
+    Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+    Acts::RotationMatrix3D rotY, rotZ;
+    rotY << cos(ptemp.theta()) << 0. << sin(ptemp.theta())
+		 << 0. << 1. << 0.
+		 << -sin(ptemp.theta()) << 0. << cos(ptemp.theta());
+	rotZ << cos(ptemp.phi()) << -sin(ptemp.phi()) << 0.
+		 << sin(ptemp.phi() << cos(ptemp.phi()) << 0.
+		 << 0. << 0. << 1.;
+    Acts::Vector3D dnewHep = rotZ * rotY * test;
+    Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
+    th[i] = dnew.theta();    
+    ph[i] = dnew.phi();          
+    ptemp += mom[i] * dnew;
     ptot += mom[i];
   }
   
   eps = 0.5; 
-  mom[Npart-2] = pow(eps,CLHEP::RandFlat::shoot(m_randomEngine))*(1-ptot);
-  mom[Npart-1] = 1-ptot-mom[Npart-2];
+  mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
+  mom[Npart-1] = 1 - ptot - mom[Npart - 2];
   
-  if (ptemp.mag()<1-ptot) {
-    while (mom[Npart-1]+mom[Npart-2]<ptemp.mag()) { 
-      mom[Npart-2] = pow(eps,CLHEP::RandFlat::shoot(m_randomEngine))*(1-ptot);
-      mom[Npart-1] = 1-ptot-mom[Npart-2];
+  if(ptemp.mag() < 1 - ptot) 
+    while(mom[Npart-1]+mom[Npart-2]<ptemp.mag()) 
+    { 
+      mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
+      mom[Npart-1] = 1 - ptot - mom[Npart - 2];
     }
-  }
+    
   if (ptemp.mag()<fabs(mom[Npart-1]-mom[Npart-2]) ) {
-    double diff = ptemp.mag()*CLHEP::RandFlat::shoot(m_randomEngine);
-    double sum = mom[Npart-1]-mom[Npart-2];
-    mom[Npart-2]=0.5*(sum+diff);  
-    mom[Npart-1]=0.5*(sum-diff);  
+    double diff = ptemp.mag() * generator();
+    double sum = mom[Npart - 1] - mom[Npart - 2];
+    mom[Npart - 2] = 0.5 * (sum + diff);  
+    mom[Npart - 1] = 0.5 * (sum - diff);  
   }
   double cth =(-ptemp.mag()*ptemp.mag()-mom[Npart-2]*mom[Npart-2]+mom[Npart-1]*mom[Npart-1])/2/ptemp.mag()/mom[Npart-2];
   if (fabs(cth)>1.) cth = (cth>0.) ? 1. : -1.;
   
   theta = acos(cth);
-  phi = 2*M_PI*CLHEP::RandFlat::shoot(m_randomEngine);
-  HepGeom::Vector3D<double> test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-  HepGeom::Vector3D<double> dnewHep = HepGeom::RotateZ3D(ptemp.phi())*HepGeom::RotateY3D(ptemp.theta())*test;
-  Amg::Vector3D dnew( dnewHep.x(), dnewHep.y(), dnewHep.z() );
+  phi = 2 * M_PI * generator();
+  Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+    Acts::RotationMatrix3D rotY, rotZ;
+    rotY << cos(ptemp.theta()) << 0. << sin(ptemp.theta())
+		 << 0. << 1. << 0.
+		 << -sin(ptemp.theta()) << 0. << cos(ptemp.theta());
+	rotZ << cos(ptemp.phi()) << -sin(ptemp.phi()) << 0.
+		 << sin(ptemp.phi() << cos(ptemp.phi()) << 0.
+		 << 0. << 0. << 1.;
+  Acts::Vector3D dnewHep = rotZ * rotY * test;
+  Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
   
-  th[Npart-2]=dnew.theta();    
-  ph[Npart-2]=dnew.phi();    
-  ptemp += mom[Npart-2]*dnew;
-  Amg::Vector3D dlast = -ptemp;
-  th[Npart-1]=dlast.theta(); 
-  ph[Npart-1]=dlast.phi();    
+  th[Npart - 2]=dnew.theta();    
+  ph[Npart - 2]=dnew.phi();    
+  ptemp += mom[Npart - 2] * dnew;
+  Acts::Vector3D dlast = -ptemp;
+  th[Npart - 1] = dlast.theta(); 
+  ph[Npart - 1] = dlast.phi();
+  
   
   // particle sampled, rotate, boost and save final state
-  //CLHEP::HepLorentzVector bv(p*particleDir.unit().x(),p*particleDir.unit().y(),p*particleDir.unit().z(),s_currentGenParticle->momentum().e()+mtot);  
   double etot = 0.;
-  for (int i=0;i<Npart; i++) etot += sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
+  for (int i=0;i<Npart; i++) 
+	etot += sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
   double summ = 0.;
-  for (int i=0;i<Npart; i++) summ += newm[i];
+  for (int i=0;i<Npart; i++) 
+	summ += newm[i];
 
-  // std::cout <<"hadronic interaction: current energy, expected :"<< etot <<","<< sqrt(summ*summ+2*summ*p+m*m)<< std::endl;
   // rescale (roughly) to the expected energy
   float scale = sqrt(summ*summ+2*summ*p+m*m)/etot;
   etot = 0.;
@@ -375,116 +384,76 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
     mom[i] *= scale;
     etot += sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
   }
-
   
-  CLHEP::HepLorentzVector bv(p*particleDir.unit().x(),p*particleDir.unit().y(),p*particleDir.unit().z(),sqrt(etot*etot+p*p));  
+  // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
+  Acts::Vector3D bv = particle.momentum / sqrt(etot*etot+p*p); // TODO: Why such an energy term?
+
   std::vector<CLHEP::HepLorentzVector> childBoost(Npart);
   
-  //std::cout <<"boost vector:"<<p<<","<<bv.e()<<","<<bv.m()<<std::endl;
-  //std::cout <<"etot, mother E,m:"<<etot<<","<<E<<","<<m<<std::endl;
-  
-  Amg::Vector3D in(0.,0.,0.); 
-  Amg::Vector3D fin(0.,0.,0.); 
-  
-  for (int i=0; i<Npart; i++) {
-    Amg::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
-    //Amg::Vector3D rotDirCms=HepGeom::RotateZ3D(particleDir.phi())*HepGeom::RotateY3D(particleDir.theta())*dirCms; 
-    Amg::Vector3D childP = mom[i]*dirCms;
-    in += childP;
-    CLHEP::HepLorentzVector newp(childP.x(),childP.y(),childP.z(),sqrt(mom[i]*mom[i]+newm[i]*newm[i]));
-    CLHEP::HepLorentzVector childPB = newp.boost(bv.boostVector());
-    childBoost[i]=childPB;
-    fin += Amg::Vector3D(childPB.x(),childPB.y(),childPB.z());
-  } 
-  
-  double eout = 0.;
-  
+  for (int i = 0; i < Npart; i++) 
+  {
+    Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
+    particles[i].momentum = mom[i] * dirCms;
+    particles[i].E = sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
+	particles[i].boost(bv);
+  }   
+}
+
+template<typename particle_t>
+void
+ParametricNuclearInt::selectionOfCollection(std::vector<particle_t> particles) const
+{
   // child particle vector for TruthIncident
   //  Reserve space for as many paricles as created due to hadr. int.
   //  However, the number of child particles for TruthIncident might be
   //  smaller due to (momentum) cuts
-  ISF::ISFParticleVector           children(Npart);
-  ISF::ISFParticleVector::iterator childrenIt = children.begin();
-  unsigned short                numChildren = 0;
+  unsigned int m_hadIntChildren = 0;
   
   for (int i=0; i<Npart; i++) {
-    if (pdgid[i]<10000) {
-      Amg::Vector3D childP = Amg::Vector3D(childBoost[i].x(),childBoost[i].y(),childBoost[i].z());
-      Amg::Vector3D chP = Amg::Vector3D(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i]));
-      
-      eout += childBoost[i].e();     
+    if (particles[i].pdg < 10000) {
+      Acts::Vector3D childP = particles[i].momentum;
+      double th = particles[i].momentum.theta();
+      double phi = particles[i].momentum.phi();
+      Acts::Vector3D chP = Acts::Vector3D(sin(th)*cos(ph),sin(th)*sin(ph),cos(th));
       
       // validation if needed
-      if (m_hadIntValidationTree && m_hadIntChildren < MAXHADINTCHILDREN){
-	m_hadIntChildPdg[m_hadIntChildren]      = pdgid[i];   
-	m_hadIntChildP[m_hadIntChildren]        = childP.mag();
-	m_hadIntChildPcms[m_hadIntChildren]     = mom[i];
-	m_hadIntChildTh[m_hadIntChildren]        = childP.unit().dot(particleDir);
-	m_hadIntChildThc[m_hadIntChildren]       =chP.dot(particleDir);
-	m_hadIntChildPhi[m_hadIntChildren]      = childP.phi();
-	m_hadIntChildEta[m_hadIntChildren]      = childP.eta();
-	double deltaPhi = m_hadIntMotherPhi - m_hadIntChildPhi[m_hadIntChildren];
-	// rescale the deltaPhi
-	deltaPhi -= deltaPhi > M_PI ? M_PI : 0.;
-	deltaPhi += deltaPhi < -M_PI ? M_PI : 0.;		 
-	m_hadIntChildDeltaPhi[m_hadIntChildren] = deltaPhi;
-	m_hadIntChildDeltaEta[m_hadIntChildren] = m_hadIntMotherEta - m_hadIntChildEta[m_hadIntChildren];
-	++m_hadIntChildren;
+      if (m_hadIntChildren < m_cfg.MAXHADINTCHILDREN){
+		double deltaPhi = m_hadIntMotherPhi - m_hadIntChildPhi[m_hadIntChildren]; // TODO: die winkel fehlen noch; vllt sollten die ein bestandteil des particles sein
+		// rescale the deltaPhi
+		deltaPhi -= deltaPhi > M_PI ? M_PI : 0.;
+		deltaPhi += deltaPhi < -M_PI ? M_PI : 0.;		 
+		m_hadIntChildDeltaPhi[m_hadIntChildren] = deltaPhi;
+		m_hadIntChildDeltaEta[m_hadIntChildren] = m_hadIntMotherEta - m_hadIntChildEta[m_hadIntChildren];
+		++m_hadIntChildren;
       }      
       
-      if (childP.mag()> m_minimumHadOutEnergy) {
-	// get the new particle    
-	double mass = s_particleMasses.mass[ childType[i] ];
-	
-	// create the particle
-	ISF::ISFParticle *child = new ISF::ISFParticle ( vertex,
-							 childP,
-							 mass,
-							 charge[i],
-							 pdgid[i],
-							 time, 
-							 *parent );
-	// in the validation mode, add process info
-	if (m_validationMode) {
-	  ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
-	  validInfo->setProcess(m_processCode);
-	  if (parent->getUserInformation()) validInfo->setGeneration(parent->getUserInformation()->generation()+1);
-	  else validInfo->setGeneration(1);     // assume parent is a primary track
-	  child->setUserInformation(validInfo);
-	}
-	// record child for TruthIncident
-	*childrenIt = child;
-	++childrenIt; numChildren++;
-      }
-      
-      gen_part++;
+      if (childP.mag() < m_cfg.m_minimumHadOutEnergy)
+		particles.erase(particle.begin() + i);
     }
   } // particle loop
-  
-  children.resize(numChildren);
-  ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),
-			       children,
-			       m_processCode,
-			       parent->nextGeoID(),
-			       ISF::fKillsPrimary );
-  m_truthRecordSvc->registerTruthIncident( truth);
+}
 
-  // save info for validation
-  if (m_validationMode && m_validationTool) {
-    Amg::Vector3D* nMom = 0;
-    m_validationTool->saveISFVertexInfo(m_processCode,vertex,*parent,p*particleDir,nMom,children);
-    delete nMom;
-  }
-
+template<typename generator_t, typename particle_t>
+std::vector<particle_t> 
+ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particle) const
+{  
+	std::vector<particle_t> chDef; 
   
-  m_hadIntChildE = eout;
+  // Calculate multiplicity
+  int Npart = diceNumberOfParticles(generator, particle);
   
-  if (m_hadIntValidationTree) m_hadIntValidationTree->Fill();
+  // protection against Npart < 3
+  if (Npart < 3)
+    return chDef;
+  else
+	chDef.resize(Npart);
+	
+	createMultiplicity(generator, particle, chDef);
+	
+	kinematics(generator, chDef, particle);
+	selectionOfCollection(chDef);
   
-  ATH_MSG_VERBOSE( "[ had ] it was kinematically possible to create " << gen_part << " shower particles " ); 
-  
-  return children;
-
+  return chDef;
 }
 
 template <typename generator_t, typename material_t, typename particle_t>
