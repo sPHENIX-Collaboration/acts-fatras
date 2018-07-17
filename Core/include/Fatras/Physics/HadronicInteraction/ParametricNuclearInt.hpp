@@ -144,8 +144,9 @@ ParametricNuclearInt::absorptionLength(const material_t* matertial, particle_t& 
 {
   double al = material->l0();
 
-  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == 111 || particle.pdg == 311) // TODO: nur K^+?
-    al *= 1. / (1. + exp(-0.5 * (particle.p - 270.) * (particle.p - 270.) / 3600.)); // TODO: da kann man sicherlich noch etwas optimieren
+  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311)
+    //~ al *= 1./(1.+ exp(-0.5*(p-270.)*(p-270.)/60./60.));
+    al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.));
 
   if(particle.pdg == 2212 || particle.pdg == 2112) al *= 0.7;
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 111) al *= 0.9;
@@ -201,8 +202,7 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
   double nef = 0.30;
   double prf = 0.30;
   
-  // TODO: K^- muss noch rein
-  if(particle.pdg == 211 || particle.pdg == -211 || particle == 321 || particle.pdg == 111 || particle.pdg == 311) 
+  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311) 
   { // TODO: hier muss wohl ein else fuer andere particles her
       pif = 0.15;
       nef = 0.25;
@@ -410,26 +410,8 @@ ParametricNuclearInt::selectionOfCollection(std::vector<particle_t> particles) c
   unsigned int m_hadIntChildren = 0;
   
   for (int i=0; i<Npart; i++) {
-    if (particles[i].pdg < 10000) {
-      Acts::Vector3D childP = particles[i].momentum;
-      double th = particles[i].momentum.theta();
-      double phi = particles[i].momentum.phi();
-      Acts::Vector3D chP = Acts::Vector3D(sin(th)*cos(ph),sin(th)*sin(ph),cos(th));
-      
-      // validation if needed
-      if (m_hadIntChildren < m_cfg.MAXHADINTCHILDREN){
-		double deltaPhi = m_hadIntMotherPhi - m_hadIntChildPhi[m_hadIntChildren]; // TODO: die winkel fehlen noch; vllt sollten die ein bestandteil des particles sein
-		// rescale the deltaPhi
-		deltaPhi -= deltaPhi > M_PI ? M_PI : 0.;
-		deltaPhi += deltaPhi < -M_PI ? M_PI : 0.;		 
-		m_hadIntChildDeltaPhi[m_hadIntChildren] = deltaPhi;
-		m_hadIntChildDeltaEta[m_hadIntChildren] = m_hadIntMotherEta - m_hadIntChildEta[m_hadIntChildren];
-		++m_hadIntChildren;
-      }      
-      
-      if (childP.mag() < m_cfg.m_minimumHadOutEnergy)
+    if (particles[i].pdg > 10000 || childP.mag() < m_cfg.m_minimumHadOutEnergy)
 		particles.erase(particle.begin() + i);
-    }
   } // particle loop
 }
 
