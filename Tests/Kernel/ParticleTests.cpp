@@ -42,12 +42,16 @@ BOOST_AUTO_TEST_CASE(Particle_tests) {
   double m = 105.658367 * Acts::units::_MeV; // muon mass
 
   // create the particle
-  Particle particle(position, momentum, q, m, 13, 1);
+  Particle particle(position, momentum, m, q, 13, 1);
 
   // test the energy conservation
   BOOST_CHECK_CLOSE(particle.E, 1.0055663531150525 * Acts::units::_GeV, 10e-5);
-  // test the beta factof
+  // test the beta factor
   BOOST_CHECK_CLOSE(particle.beta, 0.9944644596571782, 10e-5);
+  // test the mass
+  BOOST_CHECK_EQUAL(particle.m, m);
+  // test the pdg id
+  BOOST_CHECK_EQUAL(particle.pdg, 13);
 
   // test magnitude of momentum
   BOOST_TEST(particle.pT == 1000. * Acts::units::_MeV);

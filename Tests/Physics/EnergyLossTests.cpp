@@ -31,6 +31,7 @@
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
+namespace au = Acts::units;
 
 namespace Fatras {
 
@@ -43,7 +44,8 @@ typedef std::mt19937 Generator;
 Generator generator;
 
 // some material
-Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
+Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4.,
+                                         1.848 / (au::_cm * au::_cm * au::_cm));
 
 /// The selector
 struct Selector {
@@ -78,7 +80,7 @@ BOOST_DATA_TEST_CASE(
         bdata::xrange(10000),
     x, y, z, p, index) {
 
-  Acts::MaterialProperties detector(berilium, 1. * Acts::units::_mm);
+  Acts::MaterialProperties detector(berilium, 10. * Acts::units::_mm);
 
   // create the particle and set the momentum
   /// position at 0.,0.,0
@@ -88,25 +90,36 @@ BOOST_DATA_TEST_CASE(
       p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit();
   // positively charged
   double q = -1.;
-  double m = 105.658367 * Acts::units::_MeV; // muon mass
+  double m = 105.658367 * Acts::units::_MeV;        // muon mass
+  const double me = 0.51099891 * Acts::units::_MeV; // electron mass
 
   // create the particle
-  Particle particle(position, momentum, q, m, 13, 1);
+  Particle particle(position, momentum, m, q, 13, 1);
+  BOOST_CHECK_EQUAL(particle.m, m);
+  BOOST_CHECK_EQUAL(particle.pdg, 13);
 
   // make the highland scatterer
   BetheBloch bbloch;
   BetheHeitler bheitler;
   double E = particle.E;
+
   auto bbr = bbloch(generator, detector, particle);
   double eloss_io = E - particle.E;
-  BOOST_CHECK(E > particle.E);
+
+  BOOST_CHECK(E >= particle.E);
   BOOST_CHECK(bbr.size() == 0);
+
+  // recreate the particle as an electron
+  particle = Particle(position, momentum, me, q, 11, 1);
+  BOOST_CHECK_EQUAL(particle.m, me);
+  BOOST_CHECK_EQUAL(particle.pdg, 11);
+
   E = particle.E;
 
   auto bhr = bheitler(generator, detector, particle);
   double eloss_rad = E - particle.E;
-  // BOOST_CHECK(E >= particle.E);
-  // BOOST_CHECK(bhr.size()==0);
+  BOOST_CHECK(E >= particle.E);
+  BOOST_CHECK(bhr.size() == 0);
 
   // write out a csv file
   if (write_csv) {
