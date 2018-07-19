@@ -185,7 +185,7 @@ ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& 
   }
   
   randx *= (1.2 - 0.4 * exp(-0.001 * particle.p));     // trying to adjust
-  
+
   return (int)randx;
 }
 
@@ -392,9 +392,10 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   {
     Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
     particles[i].momentum = mom[i] * dirCms;
+    particles[i].p = particles[i].momentum.mag();
     particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
 	particles[i].boost(bv);
-  }   
+  }
 }
 
 template<typename particle_t>
@@ -404,13 +405,12 @@ ParametricNuclearInt::selectionOfCollection(std::vector<particle_t>& particles) 
   // child particle vector for TruthIncident
   //  Reserve space for as many paricles as created due to hadr. int.
   //  However, the number of child particles for TruthIncident might be
-  //  smaller due to (momentum) cuts
-  unsigned int m_hadIntChildren = 0;
+  //  smaller due to (momentum) cuts  
+  std::vector<particle_t> filteredParticles;
+  filteredParticles.reserve(particles.size());
   
-  for (int i = 0; i < particles.size(); i++) {
-    if (particles[i].pdg > 10000 || particles[i].p < m_cfg.m_minimumHadOutEnergy)
-		particles.erase(particles.begin() + i);
-  } // particle loop
+  std::copy_if(particles.begin(), particles.end(), std::back_inserter(filteredParticles), [&](particle_t& p){return (p.pdg < 10000 && p.p > m_cfg.m_minimumHadOutEnergy);});
+	particles = filteredParticles;
 }
 
 template<typename generator_t, typename particle_t>
@@ -427,7 +427,7 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
     return chDef;
   else
 	chDef.resize(Npart);
-	
+
 	createMultiplicity(generator, particle, chDef);
 	
 	kinematics(generator, chDef, particle);
@@ -456,12 +456,12 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 	else 
 		// using approximation lambda = 0.37 * Z * X0 instead -- giving a warning message
 		prob = exp(-material.thicknessInX0() / (0.37 * material.averageZ()));
-  
+
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
-	if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale) 
+	if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale)
 		return getHadronState(generator, particle);
-  
+ 
 	// no hadronic interactions were computed
 	return {};  
 }
