@@ -13,7 +13,7 @@ namespace Fatras {
 struct X0Limit {
 
   /// Return true if the limit in X0 is reached
-  /// @todo modify, return what's left from the detector: nees non-const
+  /// @todo modify, return what's left from the detector: needs non-const
   /// detector
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &detector,
@@ -26,8 +26,8 @@ struct X0Limit {
 
 struct L0Limit {
 
-  /// Return true if the limit in X0 is reached
-  /// @todo modify, return what's left from the detector: nees non-const
+  /// Return true if the limit in L0 is reached
+  /// @todo modify, return what's left from the detector: needs non-const
   /// detector
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &detector,

@@ -6,7 +6,7 @@ project(Fatras LANGUAGES CXX)
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
 if(NOT TARGET Acts::Core)
-  find_package(Acts REQUIRED COMPONENTS Core)
+  find_package(Acts REQUIRED COMPONENTS Core Legacy)
 endif()
 
 # require C++14 globally
@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include(GNUInstallDirs)
 
+include(CTest)
 add_subdirectory(Core)
 add_subdirectory(Tests)
   
@@ -30,4 +31,6 @@ install(
   EXPORT FatrasTargets
   NAMESPACE Fatras::
   DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake/Fatras")
+
+
   
