@@ -20,13 +20,13 @@ namespace Fatras {
 ///
 struct ParametricNuclearInt {
 
-struct Config()
+struct Config
 {
 	bool m_hadronInteractionFromX0;
 	double m_hadronInteractionProbabilityScale;
 	unsigned int MAXHADINTCHILDREN;
 	double m_minimumHadOutEnergy;
-}
+};
 
 /// @brief Constructor with given configuration
 /// @param [in] cfg Configuration file
@@ -39,11 +39,10 @@ ParametricNuclearInt(Config& cfg);
 /// @tparam particle_t data type of the particle
 /// @param generator random number generator
 /// @param material penetrated material
-/// @param pathCorrection scaling factor for the passed material
 /// @param particle penetrating particle
 template <typename generator_t, typename material_t, typename particle_t>
 std::vector<particle_t> 
-hadronicInteraction(generator_t& generator, const material_t& material, double pathCorrection, particle_t& particle) const;
+hadronicInteraction(generator_t& generator, const material_t& material, particle_t& particle) const;
 
   /// Call operator
   ///
@@ -108,7 +107,7 @@ createMultiplicity(generator_t& generator, particle_t& particle, std::vector<par
 /// @param [in] particles list of created particles
 template<typename generator_t, typename particle_t>
 void
-kinematics(generator_t& generator, std::vector<particle_t>& particles) const;
+kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_t& particle) const;
 
 /// @brief Selects created particles if they fulfill the criteria
 ///
@@ -123,13 +122,12 @@ selectionOfCollection(std::vector<particle_t>& particles) const;
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
-/// @param [in] time starting time of the evolution
 /// @param [in] particle particle that interacts
 ///
 /// @return vector of outgoing particles
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
-getHadronState(generator_t& generator, double time, particle_t& particle) const;
+getHadronState(generator_t& generator, particle_t& particle) const;
 
 // TODO: funktion waere geil, die eine vertex list ausgibt
 // TODO: renaming von templates
@@ -143,9 +141,9 @@ ParametricNuclearInt::ParametricNuclearInt(ParametricNuclearInt::Config& cfg) : 
 
 template <typename material_t, typename particle_t>
 double 
-ParametricNuclearInt::absorptionLength(const material_t* matertial, particle_t& particle) const 
+ParametricNuclearInt::absorptionLength(const material_t* material, particle_t& particle) const 
 {
-  double al = material->l0();
+  double al = material->thicknessInL0();
 
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311)
     al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
@@ -186,7 +184,7 @@ ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& 
     if (randy < arg && randx > 3 && randx < multiplicity_max) break;
   }
   
-  randx *= (1.2 - 0.4 * exp(-0.001 * p));     // trying to adjust
+  randx *= (1.2 - 0.4 * exp(-0.001 * particle.p));     // trying to adjust
   
   return (int)randx;
 }
@@ -210,13 +208,13 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
       nef = 0.25;
       prf = 0.25;
   }
-  if(particle.pdg == 2212 ) 
+  if(particle.pdg == 2212) 
   {
     pif = 0.06;
     nef = 0.25;
     prf = 0.35;
   }
-  if(particle.pdg == 2112 ) 
+  if(particle.pdg == 2112) 
   {
     pif = 0.03;
     nef = 0.35;
@@ -224,11 +222,11 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
   }
   
   // Source of masses: Geant4
-  for(int i=0; i<Npart; i++) {
+  for(int i = 0; i < particles.size(); i++) {
     chargedist  = generator();
     if(chargedist < pif) 
     {
-		particles[i].q = 0.
+		particles[i].q = 0.;
 		particles[i].pdg = 111;
 		particles[i].m = 0.1349766 * Acts::units::_GeV;
 		continue;
@@ -316,12 +314,12 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
     phi = 2 * M_PI * generator();
     Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
     Acts::RotationMatrix3D rotY, rotZ;
-    rotY << cos(ptemp.theta()) << 0. << sin(ptemp.theta())
-		 << 0. << 1. << 0.
-		 << -sin(ptemp.theta()) << 0. << cos(ptemp.theta());
-	rotZ << cos(ptemp.phi()) << -sin(ptemp.phi()) << 0.
-		 << sin(ptemp.phi() << cos(ptemp.phi()) << 0.
-		 << 0. << 0. << 1.;
+    rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
+		0., 1., 0.,
+		-sin(ptemp.theta()), 0., cos(ptemp.theta());
+	rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
+		sin(ptemp.phi()), cos(ptemp.phi()), 0.,
+		0., 0., 1.;
     Acts::Vector3D dnewHep = rotZ * rotY * test;
     Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
     th[i] = dnew.theta();    
@@ -354,12 +352,12 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   phi = 2 * M_PI * generator();
   Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
     Acts::RotationMatrix3D rotY, rotZ;
-    rotY << cos(ptemp.theta()) << 0. << sin(ptemp.theta())
-		 << 0. << 1. << 0.
-		 << -sin(ptemp.theta()) << 0. << cos(ptemp.theta());
-	rotZ << cos(ptemp.phi()) << -sin(ptemp.phi()) << 0.
-		 << sin(ptemp.phi() << cos(ptemp.phi()) << 0.
-		 << 0. << 0. << 1.;
+    rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
+		 0., 1., 0.,
+		 -sin(ptemp.theta()), 0., cos(ptemp.theta());
+	rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
+		 sin(ptemp.phi()), cos(ptemp.phi()), 0.,
+		 0., 0., 1.;
   Acts::Vector3D dnewHep = rotZ * rotY * test;
   Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
   
@@ -374,36 +372,34 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   // particle sampled, rotate, boost and save final state
   double etot = 0.;
   for (int i=0;i<Npart; i++) 
-	etot += sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
+	etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
   double summ = 0.;
   for (int i=0;i<Npart; i++) 
-	summ += newm[i];
+	summ += particles[i].m;
 
   // rescale (roughly) to the expected energy
-  float scale = sqrt(summ*summ+2*summ*p+m*m)/etot;
+  float scale = sqrt(summ*summ+2*summ*particle.p+particle.m*particle.m)/etot;
   etot = 0.;
   for (int i=0;i<Npart; i++) {
     mom[i] *= scale;
-    etot += sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
+    etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
   }
   
   // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
-  Acts::Vector3D bv = particle.momentum / sqrt(etot*etot+p*p); // TODO: Why such an energy term?
-
-  std::vector<CLHEP::HepLorentzVector> childBoost(Npart);
+  Acts::Vector3D bv = particle.momentum / sqrt(etot * etot + particle.p * particle.p); // TODO: Why such an energy term?
   
   for (int i = 0; i < Npart; i++) 
   {
     Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
     particles[i].momentum = mom[i] * dirCms;
-    particles[i].E = sqrt(mom[i]*mom[i]+newm[i]*newm[i]);
+    particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
 	particles[i].boost(bv);
   }   
 }
 
 template<typename particle_t>
 void
-ParametricNuclearInt::selectionOfCollection(std::vector<particle_t> particles) const
+ParametricNuclearInt::selectionOfCollection(std::vector<particle_t>& particles) const
 {
   // child particle vector for TruthIncident
   //  Reserve space for as many paricles as created due to hadr. int.
@@ -411,9 +407,9 @@ ParametricNuclearInt::selectionOfCollection(std::vector<particle_t> particles) c
   //  smaller due to (momentum) cuts
   unsigned int m_hadIntChildren = 0;
   
-  for (int i=0; i<Npart; i++) {
-    if (particles[i].pdg > 10000 || childP.mag() < m_cfg.m_minimumHadOutEnergy)
-		particles.erase(particle.begin() + i);
+  for (int i = 0; i < particles.size(); i++) {
+    if (particles[i].pdg > 10000 || particles[i].p < m_cfg.m_minimumHadOutEnergy)
+		particles.erase(particles.begin() + i);
   } // particle loop
 }
 
@@ -442,7 +438,7 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
 
 template <typename generator_t, typename material_t, typename particle_t>
 std::vector<particle_t> 
-ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material_t& material, double pathCorrection, particle_t& particle) const
+ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material_t& material, particle_t& particle) const
 {
 	const material_t* extMprop = dynamic_cast<const material_t*>(&material);
 	double prob = 0.;
@@ -453,17 +449,17 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 		double al = absorptionLength(extMprop, particle);  // in mm
 	
 	    if (al > 0.) 
-			prob = exp(-pathCorrection * extMprop->thickness() / al);
+			prob = exp(-extMprop->thickness() / al);
 	    else
-			prob = exp(-pathCorrection * extMprop->thicknessInL0());
+			prob = exp(-extMprop->thicknessInL0());
 	} 
 	else 
 		// using approximation lambda = 0.37 * Z * X0 instead -- giving a warning message
-		prob = exp(-pathCorrection * mprop.thicknessInX0() / (0.37 * mprop.averageZ()));
+		prob = exp(-material.thicknessInX0() / (0.37 * material.averageZ()));
   
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
-	if (generator() < (1. - prob) * m_hadronInteractionProbabilityScale) 
+	if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale) 
 		return getHadronState(generator, particle);
   
 	// no hadronic interactions were computed

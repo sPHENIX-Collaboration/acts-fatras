@@ -22,6 +22,7 @@
 #include "Acts/Material/MaterialProperties.hpp"
 
 #include "Fatras/Kernel/Particle.hpp"
+#include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
 //~ #include "Fatras/Kernel/PhysicsList.hpp"
 
 #include <fstream>
@@ -33,25 +34,25 @@ namespace tt = boost::test_tools;
 namespace Fatras {
 
 namespace Test {
-/**
+
 // the generator
 typedef std::mt19937 Generator; // TODO: range?
 
 // standard generator
 Generator generator;
 
-/// The Interactor
-struct ParametricNuclearInt {
+//~ /// The Interactor
+//~ struct ParametricNuclearInt {
 
-  /// call operator
-  template <typename generator_t, typename detector_t, typename particle_t>
-  std::vector<particle_t> operator()(generator_t &generator,
-                                     const detector_t &detector,
-                                     particle_t &particle) const
-	{
-		return {};
-	}
-};
+  //~ /// call operator
+  //~ template <typename generator_t, typename detector_t, typename particle_t>
+  //~ std::vector<particle_t> operator()(generator_t &generator,
+                                     //~ const detector_t &detector,
+                                     //~ particle_t &particle) const
+	//~ {
+		//~ return {};
+	//~ }
+//~ };
 
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
@@ -62,22 +63,22 @@ Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
                  //~ std::ofstream::out | std::ofstream::trunc);
 
 /// Test the scattering implementation
-//~ BOOST_DATA_TEST_CASE(
-    //~ HighlandScattering_test_,
-    //~ bdata::random(
-        //~ (bdata::seed = 20,
-         //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random(
-            //~ (bdata::seed = 21,
-             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random(
-            //~ (bdata::seed = 22,
-             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random((bdata::seed = 23,
-                       //~ bdata::distribution =
-                           //~ std::uniform_real_distribution<>(0.5, 10.5))) ^
-        //~ bdata::xrange(10000),
-    //~ x, y, z, p, index) {
+BOOST_DATA_TEST_CASE(
+    ParamNucularInt_test_,
+    bdata::random(
+        (bdata::seed = 20,
+         bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        bdata::random(
+            (bdata::seed = 21,
+             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        bdata::random(
+            (bdata::seed = 22,
+             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        bdata::random((bdata::seed = 23,
+                       bdata::distribution =
+                           std::uniform_real_distribution<>(0.5, 10.5))) ^
+        bdata::xrange(1),
+    x, y, z, p, index) {
 
   // a detector with 1 mm Be
   Acts::MaterialProperties detector(berilium, 1. * Acts::units::_mm);
@@ -87,46 +88,27 @@ Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
   Acts::Vector3D position{0., 0., 0.};
   // p of 1 GeV
   Acts::Vector3D momentum =
-      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit(); // TODO: die zahlen beziehen sich auf den BOOST TEST
+      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit();
   // positively charged
   double q = -1.;
-  double m = 134.9766 * Acts::units::_MeV; // muon mass
+  double m = 134.9766 * Acts::units::_MeV; // pion mass
 
   // create the particle
-  Particle particle(position, momentum, q, m, 211, 1);
+  Particle particle(position, momentum, q, m, -211, 1);
 
-  // make the highland scatterer
-  Highland hscat;
-  GaussianMixture gamscat;
-  GeneralMixture genscat;
+ParametricNuclearInt::Config cfg;
+cfg.m_hadronInteractionFromX0 = false; // TODO: this flag can also be used with true;
+cfg.m_hadronInteractionProbabilityScale = 1.;
+cfg.MAXHADINTCHILDREN = 100000;
+cfg.m_minimumHadOutEnergy = 0.;
+ParametricNuclearInt paramNuclInt(cfg);
 
-  double hsr = hscat(generator, detector, particle);
-  double gamr = gamscat(generator, detector, particle);
-  double genr = genscat(generator, detector, particle);
+std::vector<Particle> par = paramNuclInt(generator, detector, particle);
+std::cout << par.size() << std::endl;
 
-  BOOST_CHECK(hsr != 0.);
-
-  // Run the Scatterer as a plug-in process
-  Scattering<Highland> hsScattering;
-  auto out = hsScattering(generator, detector, particle);
-  BOOST_CHECK(!out.size());
-
-  // Run the Scatterer as a physics list
-  typedef Selector All;
-  std::vector<Particle> outgoing;
-  typedef Process<Scattering<Highland>, All, All, All> HighlandProcess;
-  PhysicsList<HighlandProcess> hsPhysicsList;
-  hsPhysicsList(generator, detector, particle, outgoing);
-  BOOST_CHECK(!outgoing.size());
-
-  // write out a csv file
-  if (write_csv) {
-    if (!index)
-      os << "p,highland,gaussian_mixture,general_mixture" << '\n';
-    os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
-  }
+// TODO: Process and PhysicsList test
 }
-**/
+
 } // namespace Test
 
 } // namespace Fatras
