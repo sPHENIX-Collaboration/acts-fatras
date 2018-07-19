@@ -103,7 +103,7 @@ BOOST_DATA_TEST_CASE(
   double m = 105.658367 * Acts::units::_MeV; // muon mass
 
   // create the particle
-  Particle particle(position, momentum, q, m, 13, 1);
+  Particle particle(position, momentum, m, q, 13, 1);
 
   // outgoing particles (always none for scattering)
   std::vector<Particle> outgoing;
