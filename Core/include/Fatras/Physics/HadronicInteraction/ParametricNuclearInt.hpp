@@ -59,7 +59,10 @@ hadronicInteraction(generator_t& generator, const material_t& material, double p
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
-                                     particle_t &particle) const;
+                                     particle_t &particle) const
+	{
+		return hadronicInteraction(generator, detector, particle);
+	}
                                      
 private:
 
@@ -113,7 +116,7 @@ kinematics(generator_t& generator, std::vector<particle_t>& particles) const;
 /// @param [in] particles list of created particles
 template<typename particle_t>
 void
-selectionOfCollection(std::vector<particle_t> particles) const;
+selectionOfCollection(std::vector<particle_t>& particles) const;
 
 /// @brief Calculates the hadron interactions of a particle
 ///
@@ -129,7 +132,7 @@ std::vector<particle_t>
 getHadronState(generator_t& generator, double time, particle_t& particle) const;
 
 // TODO: funktion waere geil, die eine vertex list ausgibt
-
+// TODO: renaming von templates
 // Configuration storage
 Config m_cfg;
 };
@@ -145,8 +148,7 @@ ParametricNuclearInt::absorptionLength(const material_t* matertial, particle_t& 
   double al = material->l0();
 
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311)
-    //~ al *= 1./(1.+ exp(-0.5*(p-270.)*(p-270.)/60./60.));
-    al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.));
+    al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
 
   if(particle.pdg == 2212 || particle.pdg == 2112) al *= 0.7;
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 111) al *= 0.9;
