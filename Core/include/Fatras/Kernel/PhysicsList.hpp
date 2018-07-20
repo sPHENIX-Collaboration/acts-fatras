@@ -29,7 +29,7 @@ private:
 public:
   using Acts::detail::Extendable<processes...>::get;
 
-  /// Call operator that is that broadcasts the call to the tuple()
+  /// Call operator that broadcasts the call to the tuple()
   /// members of the list
   ///
   /// @tparam generator_t is the random number generator type
@@ -37,9 +37,9 @@ public:
   /// @tparam particle_t is the particle type used in simulation
   ///
   /// @param[in] gen is the generator object
-  /// @param[in] detector is the necessary detector information
-  /// @param[in] ingoig is the ingoing particle (can be modified)
-  /// @param[in,out] outgoing are the (eventually) outgoing particles
+  /// @param[in] det is the necessary detector information
+  /// @param[in] in is the ingoing particle (can be modified)
+  /// @param[in,out] out are the (eventually) outgoing particles
   ///
   /// @return indicator which would trigger an abort
   template <typename generator_t, typename detector_t, typename particle_t>

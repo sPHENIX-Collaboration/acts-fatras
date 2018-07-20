@@ -45,7 +45,7 @@ struct Process {
   /// This is the scattering call operator
   template <typename generator_t, typename detector_t, typename particle_t>
   bool operator()(generator_t &gen, const detector_t &det, particle_t &in,
-                  std::vector<particle_t> &out) const {
+                  std::vector<particle_t> &out) const {  
     // check if the process applies
     if (selectorIn(det, in)) {
       // apply energy loss and get eventual children
@@ -53,11 +53,11 @@ struct Process {
       if (children.size()) {
         // copy the children that comply with the child selector
         std::copy_if(
-            children.begin(), children.end(), out.begin(),
+            children.begin(), children.end(), std::back_inserter(out),
             [this, det](const particle_t &p) { return selectorChild(det, p); });
       }
     }
-    // check if this killed the partilce,
+    // check if this killed the particle,
     // or pushed below threshold
     return (!selectorOut(det, in));
   }
