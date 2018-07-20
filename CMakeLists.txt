@@ -6,8 +6,20 @@ project(Fatras LANGUAGES CXX)
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
 if(NOT TARGET Acts::Core)
-  find_package(Acts REQUIRED COMPONENTS Core Legacy)
+  find_package(Acts REQUIRED COMPONENTS Core Legacy MaterialPlugin)
 endif()
+
+# simplify handling of optional components
+# all arguments after the path are evaluated in the if(...) context
+function(add_subdirectory_if path)
+  file(RELATIVE_PATH _name ${PROJECT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/${path}")
+  if(${ARGN})
+    add_subdirectory(${path})
+    message(STATUS "Enable component '${_name}'")
+  else()
+    message(STATUS "Disable component '${_name}'")
+  endif()
+endfunction()
 
 # require C++14 globally
 set(CMAKE_CXX_STANDARD 14)
@@ -18,7 +30,15 @@ include(GNUInstallDirs)
 include(CTest)
 add_subdirectory(Core)
 add_subdirectory(Tests)
-  
+
+# Geant4 specific configuration
+option(USE_GEANT4 "Build Geant4-based code" on)
+if(USE_GEANT4)
+  set(Geant4_CONFIG_DEBUG on)
+  find_package(Geant4 REQUIRED gdml)
+endif()
+add_subdirectory(Plugins)
+
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
