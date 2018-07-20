@@ -23,7 +23,8 @@
 
 #include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
-//~ #include "Fatras/Kernel/PhysicsList.hpp"
+#include "Fatras/Kernel/Process.hpp"
+#include "Fatras/Kernel/PhysicsList.hpp"
 
 #include <fstream>
 #include <random>
@@ -38,7 +39,7 @@ namespace Test {
 // the generator
 typedef std::mt19937 Generator; // TODO: range?
 
-/// Generator [0,1]
+/// Generator in [0,1]
 struct MyGenerator {
 
 MyGenerator(int samen)
@@ -55,32 +56,45 @@ Generator generator;
 	}
 };
 
+/// The selector
+struct MySelector {
+
+  /// call operator
+  template <typename detector_t, typename particle_t>
+  bool operator()(const detector_t &, const particle_t &) const {
+    return true;
+  }
+};
+
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
 
-//~ bool write_csv = true;
+bool writeOut = true;
 
-//~ std::ofstream os("ScatteringAngles.csv",
-                 //~ std::ofstream::out | std::ofstream::trunc);
+std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
 
 /// Test the scattering implementation
-BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_,
-    bdata::random(
-        (bdata::seed = 20,
-         bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random(
-            (bdata::seed = 21,
-             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random(
-            (bdata::seed = 22,
-             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random((bdata::seed = 23,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.5, 10.5))) ^
-        bdata::xrange(100),
-    x, y, z, p, index) {
+//~ BOOST_DATA_TEST_CASE(
+    //~ ParamNucularInt_test_,
+    //~ bdata::random(
+        //~ (bdata::seed = 20,
+         //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        //~ bdata::random(
+            //~ (bdata::seed = 21,
+             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        //~ bdata::random(
+            //~ (bdata::seed = 22,
+             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
+        //~ bdata::random((bdata::seed = 23,
+                       //~ bdata::distribution =
+                           //~ std::uniform_real_distribution<>(0.5, 10.5))) ^
+        //~ bdata::xrange(10000),
+    //~ x, y, z, p, index) {
 		
+BOOST_DATA_TEST_CASE(
+    ParamNucularInt_test_, bdata::xrange(10000), index) {
+	
+	double x = 0., y = 0., z = 1., p = 10.;
 MyGenerator mg(index);
 
   // a detector with 1 mm Be
@@ -97,23 +111,24 @@ MyGenerator mg(index);
   double m = 134.9766 * Acts::units::_MeV; // pion mass
 
   // create the particle
-  Particle particle(position, momentum, q, m, -211, 1);
+  Particle particle(position, momentum, m, q, -211, 1);
 
-ParametricNuclearInt::Config cfg;
-cfg.m_hadronInteractionFromX0 = false; // TODO: this flag can also be used with true;
-cfg.m_hadronInteractionProbabilityScale = 1.;
-cfg.MAXHADINTCHILDREN = 100000;
-cfg.m_minimumHadOutEnergy = 0.;
-ParametricNuclearInt paramNuclInt(cfg);
+ParametricNuclearInt paramNuclInt;
 
 std::vector<Particle> par = paramNuclInt(mg, detector, particle);
-std::cout << "#particles: " << par.size() << std::endl;
-for(size_t i = 0; i < par.size(); i++)
-	std::cout << par[i].pdg << "\t" << par[i].E << std::endl;
-	
+//~ ofs << index << "\t" << par.size() << std::endl;
+//~ for(size_t i = 0; i < par.size(); i++)
+	//~ ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
+		//~ << par[i].p << "\t" << par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" 
+		//~ << par[i].momentum.z() << std::endl;
 
 
-// TODO: Process and PhysicsList test
+  typedef MySelector All;
+  std::vector<Particle> outgoing;
+  typedef Process<ParametricNuclearInt, All, All, All> HadronProcess;
+  PhysicsList<HadronProcess> hsPhysicsList;
+  hsPhysicsList(mg, detector, particle, outgoing);
+  
 }
 
 } // namespace Test

@@ -22,15 +22,14 @@ struct ParametricNuclearInt {
 
 struct Config
 {
-	bool m_hadronInteractionFromX0;
-	double m_hadronInteractionProbabilityScale;
-	unsigned int MAXHADINTCHILDREN;
-	double m_minimumHadOutEnergy;
+	double m_hadronInteractionProbabilityScale = 1.; // TODO: tuning parameter?
+	unsigned int MAXHADINTCHILDREN = 100000; // TODO: Job of selector
+	double m_minimumHadOutEnergy = 0.; // TODO: Job of selector
 };
 
-/// @brief Constructor with given configuration
-/// @param [in] cfg Configuration file
-ParametricNuclearInt(Config& cfg);
+//~ /// @brief Constructor with given configuration
+//~ /// @param [in] cfg Configuration file
+//~ ParametricNuclearInt(Config& cfg);
 
 /// @brief Calculates the hadronic with a given probability given by the properties of the material and the incoming particle
 ///
@@ -135,9 +134,9 @@ getHadronState(generator_t& generator, particle_t& particle) const;
 Config m_cfg;
 };
 
-ParametricNuclearInt::ParametricNuclearInt(ParametricNuclearInt::Config& cfg) : m_cfg(cfg)
-{
-}
+//~ ParametricNuclearInt::ParametricNuclearInt(ParametricNuclearInt::Config& cfg) : m_cfg(cfg)
+//~ {
+//~ }
 
 template <typename material_t, typename particle_t>
 double 
@@ -443,19 +442,13 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 	const material_t* extMprop = dynamic_cast<const material_t*>(&material);
 	double prob = 0.;
 
-	// m_hadIntProbScale is used later, not here
-	if (extMprop && !m_cfg.m_hadronInteractionFromX0) 
-	{	  
 		double al = absorptionLength(extMprop, particle);  // in mm
 	
 	    if (al > 0.) 
 			prob = exp(-extMprop->thickness() / al);
 	    else
 			prob = exp(-extMprop->thicknessInL0());
-	} 
-	else 
-		// using approximation lambda = 0.37 * Z * X0 instead -- giving a warning message
-		prob = exp(-material.thicknessInX0() / (0.37 * material.averageZ()));
+
 
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
