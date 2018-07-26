@@ -26,6 +26,14 @@
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 
+#include "include/B1DetectorConstruction.hh"
+#include "include/B1ActionInitialization.hh"
+#include "G4RunManager.hh"
+#include "G4UImanager.hh"
+#include "QBBC.hh"
+#include "G4VisExecutive.hh"
+#include "Randomize.hh"
+
 #include <fstream>
 #include <random>
 
@@ -37,7 +45,7 @@ namespace Fatras {
 namespace Test {
 
 // the generator
-typedef std::mt19937 Generator; // TODO: range?
+typedef std::mt19937 Generator;
 
 /// Generator in [0,1]
 struct MyGenerator {
@@ -92,8 +100,24 @@ std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
     //~ x, y, z, p, index) {
 		
 BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(10000), index) {
-	
+    ParamNucularInt_test_, bdata::xrange(1), index) {
+
+{
+  G4Random::setTheEngine(new CLHEP::RanecuEngine);
+  G4RunManager* runManager = new G4RunManager;
+  runManager->SetUserInitialization(new B1DetectorConstruction());
+  G4VModularPhysicsList* physicsList = new QBBC;
+  physicsList->SetVerboseLevel(1);
+  runManager->SetUserInitialization(physicsList);
+  runManager->SetUserInitialization(new B1ActionInitialization());
+  G4VisManager* visManager = new G4VisExecutive;
+  visManager->Initialize();
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
+  UImanager->ApplyCommand("/control/execute run1.mac");
+  
+  delete visManager;
+  delete runManager;
+}  
 	double x = 0., y = 0., z = 1., p = 10.;
 MyGenerator mg(index);
 

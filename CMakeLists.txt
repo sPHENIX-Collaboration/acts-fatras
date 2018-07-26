@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.7)
 
 project(Fatras LANGUAGES CXX)
 
+option(USE_GEANT4 "Build Geant4-based code" on)
+
 # could be included in a larger project, e.g. acts-framework, that also
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
 if(NOT TARGET Acts::Core)
-  find_package(Acts REQUIRED COMPONENTS Core Legacy MaterialPlugin)
+  find_package(Acts REQUIRED COMPONENTS Core Legacy MaterialPlugin) #TODO: MaterialPlugin should be optional (only needed by G4)
 endif()
 
 # simplify handling of optional components
@@ -29,15 +31,16 @@ include(GNUInstallDirs)
 
 include(CTest)
 add_subdirectory(Core)
-add_subdirectory(Tests)
+
 
 # Geant4 specific configuration
-option(USE_GEANT4 "Build Geant4-based code" on)
+
 if(USE_GEANT4)
   set(Geant4_CONFIG_DEBUG on)
   find_package(Geant4 REQUIRED gdml)
 endif()
 add_subdirectory(Plugins)
+add_subdirectory(Tests)
 
 # CMake package configuration files
 include(CMakePackageConfigHelpers)

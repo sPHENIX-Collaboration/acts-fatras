@@ -27,10 +27,6 @@ struct Config
 	double m_minimumHadOutEnergy = 0.; // TODO: Job of selector
 };
 
-//~ /// @brief Constructor with given configuration
-//~ /// @param [in] cfg Configuration file
-//~ ParametricNuclearInt(Config& cfg);
-
 /// @brief Calculates the hadronic with a given probability given by the properties of the material and the incoming particle
 ///
 /// @tparam generator_t data type of the random number generator
@@ -129,14 +125,8 @@ std::vector<particle_t>
 getHadronState(generator_t& generator, particle_t& particle) const;
 
 // TODO: funktion waere geil, die eine vertex list ausgibt
-// TODO: renaming von templates
-// Configuration storage
-Config m_cfg;
+Config m_cfg; //TODO: weg damit
 };
-
-//~ ParametricNuclearInt::ParametricNuclearInt(ParametricNuclearInt::Config& cfg) : m_cfg(cfg)
-//~ {
-//~ }
 
 template <typename material_t, typename particle_t>
 double 
@@ -221,7 +211,7 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
   }
   
   // Source of masses: Geant4
-  for(int i = 0; i < particles.size(); i++) {
+  for(unsigned int i = 0; i < particles.size(); i++) {
     chargedist  = generator();
     if(chargedist < pif) 
     {
@@ -265,7 +255,7 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
 
   // move the incoming particle type forward
   if(particles[0].pdg != particle.pdg) 
-    for(int i = 1; i < particles.size(); i++)
+    for(unsigned int i = 1; i < particles.size(); i++)
       if(particles[i].pdg == particle.pdg)
       {
         particles[i] = particles[0];
@@ -297,7 +287,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   double ptot = mom[0];
   
   double theta = 0.; double phi = 0.; 
-  for (int i = 1; i < Npart - 2; i++) 
+  for (unsigned int i = 1; i < Npart - 2; i++) 
   {
     eps = 1. / (Npart - i); 
     mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot); 
@@ -308,7 +298,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
     // max p remaining
     double p_rem = 1 - ptot-mom[i];
     double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
-    double rnd  = generator();
+    rnd  = generator();
     theta = acos( (cthmax+1.)*rnd-1.);          
     phi = 2 * M_PI * generator();
     Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
@@ -370,16 +360,16 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   
   // particle sampled, rotate, boost and save final state
   double etot = 0.;
-  for (int i=0;i<Npart; i++) 
+  for (unsigned int i = 0; i < Npart; i++) 
 	etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
   double summ = 0.;
-  for (int i=0;i<Npart; i++) 
+  for (unsigned int i = 0; i < Npart; i++) 
 	summ += particles[i].m;
 
   // rescale (roughly) to the expected energy
   float scale = sqrt(summ*summ+2*summ*particle.p+particle.m*particle.m)/etot;
   etot = 0.;
-  for (int i=0;i<Npart; i++) {
+  for (unsigned int i = 0; i < Npart; i++) {
     mom[i] *= scale;
     etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
   }
@@ -387,7 +377,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
   Acts::Vector3D bv = particle.momentum / sqrt(etot * etot + particle.p * particle.p); // TODO: Why such an energy term?
   
-  for (int i = 0; i < Npart; i++) 
+  for (unsigned int i = 0; i < Npart; i++) 
   {
     Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
     particles[i].momentum = mom[i] * dirCms;
@@ -422,16 +412,16 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
   int Npart = diceNumberOfParticles(generator, particle);
   
   // protection against Npart < 3
-  if (Npart < 3)
-    return chDef;
-  else
+  if (Npart >= 3)
+	{
+
 	chDef.resize(Npart);
 
 	createMultiplicity(generator, particle, chDef);
 	
 	kinematics(generator, chDef, particle);
 	selectionOfCollection(chDef);
-  
+  }
   return chDef;
 }
 
