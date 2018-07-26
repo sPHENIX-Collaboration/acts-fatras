@@ -11,7 +11,7 @@ add_test (NAME FatrasEnergyLossUnitTest COMMAND FatrasEnergyLossTests)
 include(${Geant4_USE_FILE})
 file(GLOB_RECURSE src_files "src/*.cc" "include/*.hh")
 
-add_executable (FatrasParametricNuclearIntTests ParametricNuclearIntTests.cpp ${src_files} run1.mac) #TODO: better copy of run1.mac
+add_executable (FatrasParametricNuclearIntTests ParametricNuclearIntTests.cpp ${src_files})
 target_include_directories(FatrasParametricNuclearIntTests PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(FatrasParametricNuclearIntTests PUBLIC ${Geant4_INCLUDE_DIRS})
 target_link_libraries(FatrasParametricNuclearIntTests PRIVATE Acts::Core Acts::Legacy Fatras::Core)

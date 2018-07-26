@@ -81,6 +81,11 @@ bool writeOut = true;
 
 std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
 
+  G4RunManager* runManager = new G4RunManager;
+  G4VModularPhysicsList* physicsList = new QBBC;
+  G4VisManager* visManager = new G4VisExecutive;
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
+
 /// Test the scattering implementation
 //~ BOOST_DATA_TEST_CASE(
     //~ ParamNucularInt_test_,
@@ -100,24 +105,23 @@ std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
     //~ x, y, z, p, index) {
 		
 BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(1), index) {
+    ParamNucularInt_test_, bdata::xrange(2), index) {
 
+if(index ==0)
 {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
-  G4RunManager* runManager = new G4RunManager;
   runManager->SetUserInitialization(new B1DetectorConstruction());
-  G4VModularPhysicsList* physicsList = new QBBC;
   physicsList->SetVerboseLevel(1);
   runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new B1ActionInitialization());
-  G4VisManager* visManager = new G4VisExecutive;
-  visManager->Initialize();
-  G4UImanager* UImanager = G4UImanager::GetUIpointer();
-  UImanager->ApplyCommand("/control/execute run1.mac");
-  
-  delete visManager;
-  delete runManager;
-}  
+	visManager->Initialize();
+}
+  UImanager->ApplyCommand("/run/initialize");
+  UImanager->ApplyCommand("/gun/particle pi+");
+  UImanager->ApplyCommand("/gun/energy 10024 MeV");
+  UImanager->ApplyCommand("/tracking/verbose 2");
+  UImanager->ApplyCommand("/run/beamOn 1");
+
 	double x = 0., y = 0., z = 1., p = 10.;
 MyGenerator mg(index);
 
@@ -152,7 +156,6 @@ std::vector<Particle> par = paramNuclInt(mg, detector, particle);
   typedef Process<ParametricNuclearInt, All, All, All> HadronProcess;
   PhysicsList<HadronProcess> hsPhysicsList;
   hsPhysicsList(mg, detector, particle, outgoing);
-  
 }
 
 } // namespace Test
