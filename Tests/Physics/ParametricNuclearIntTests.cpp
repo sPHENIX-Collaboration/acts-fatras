@@ -116,17 +116,11 @@ if(index ==0)
   runManager->SetUserInitialization(new B1ActionInitialization());
 	visManager->Initialize();
 }
-  UImanager->ApplyCommand("/run/initialize");
-  UImanager->ApplyCommand("/gun/particle pi+");
-  UImanager->ApplyCommand("/gun/energy 10024 MeV");
-  UImanager->ApplyCommand("/tracking/verbose 2");
-  UImanager->ApplyCommand("/run/beamOn 1");
 
 	double x = 0., y = 0., z = 1., p = 10.;
-MyGenerator mg(index);
-
-  // a detector with 1 mm Be
-  Acts::MaterialProperties detector(berilium, 1. * Acts::units::_mm);
+	// positively charged
+	double q = -1.;
+	double m = 134.9766 * Acts::units::_MeV; // pion mass
 
   // create the particle and set the momentum
   /// position at 0.,0.,0
@@ -134,9 +128,20 @@ MyGenerator mg(index);
   // p of 1 GeV
   Acts::Vector3D momentum =
       p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit();
-  // positively charged
-  double q = -1.;
-  double m = 134.9766 * Acts::units::_MeV; // pion mass
+      	
+  UImanager->ApplyCommand("/run/initialize");
+  UImanager->ApplyCommand("/gun/particle pi+");
+  UImanager->ApplyCommand("/gun/momentum " + std::to_string(momentum.x()) + " " + std::to_string(momentum.y()) + " " + std::to_string(momentum.z()));
+  UImanager->ApplyCommand("/gun/position 0. 0. 0.");
+  UImanager->ApplyCommand("/gun/time 0.");
+  UImanager->ApplyCommand("/tracking/verbose 2");
+  UImanager->ApplyCommand("/run/beamOn 1");
+
+
+MyGenerator mg(index);
+
+  // a detector with 1 mm Be
+  Acts::MaterialProperties detector(berilium, 1. * Acts::units::_mm);
 
   // create the particle
   Particle particle(position, momentum, m, q, -211, 1);
