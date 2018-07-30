@@ -50,6 +50,15 @@ B1DetectorConstruction::B1DetectorConstruction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+B1DetectorConstruction::B1DetectorConstruction(G4String mat, double thickness)
+: G4VUserDetectorConstruction(),
+  fScoringVolume(0),
+  material(mat),
+  m_thickness(thickness)
+{ }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 B1DetectorConstruction::~B1DetectorConstruction()
 { }
 
@@ -62,21 +71,19 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   
   // Envelope parameters
   //
-  G4double env_sizeXY = 20. * cm, env_sizeZ = 4. * cm;
-  G4Material* env_mat = nist->FindOrBuildMaterial("G4_AIR");
+  G4double env_sizeXY = 20. * cm, env_sizeZ = 2. * m_thickness * cm;
+  G4Material* env_mat = nist->FindOrBuildMaterial("G4_Galactic");
    
   // Option to switch on/off checking of volumes overlaps
   //
   G4bool checkOverlaps = true;
 
-  //     
+  //
   // World
   //
-  //~ G4double world_sizeXY = 1.2*env_sizeXY;
-  //~ G4double world_sizeZ  = 1.2*env_sizeZ;
   G4double world_sizeXY = env_sizeXY;
   G4double world_sizeZ  = env_sizeZ;
-  G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
+  G4Material* world_mat = nist->FindOrBuildMaterial("G4_Galactic");
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
@@ -117,18 +124,8 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     false,                   //no boolean operation
                     0,                       //copy number
                     checkOverlaps);          //overlaps checking
- 
-
-//~ G4Material* matInteractionBox = nist->FindOrBuildMaterial("G4_BONE_COMPACT_ICRU");
-//~ G4ThreeVector posInteraction = G4ThreeVector(0. * cm, 0. * cm, 2. * cm);
-//~ G4double shapeInteractionX = 20. * cm;
-//~ G4double shapeInteractionY = 20. * cm;
-//~ G4double shapeInteractionZ = 2. * cm;
-//~ G4Box* solidInteractionBox = new G4Box("InteractionBox", 0.5 * shapeInteractionX, 0.5 * shapeInteractionY, 0.5 * shapeInteractionZ);
-//~ G4LogicalVolume* logicInteractionBox = new G4LogicalVolume(solidInteractionBox, matInteractionBox, "InteractionBox");
-//~ new G4PVPlacement(0, posInteraction, logicInteractionBox, "InteractionBox", logicEnv, false, 0, checkOverlaps);
               
-G4Material* matDetector = nist->FindOrBuildMaterial("G4_Si");
+G4Material* matDetector = nist->FindOrBuildMaterial(material);
 G4ThreeVector posDetector = G4ThreeVector(0. * cm, 0. * cm, env_sizeZ / 4);
 G4double shapeDetectorX = env_sizeXY;
 G4double shapeDetectorY = env_sizeXY;

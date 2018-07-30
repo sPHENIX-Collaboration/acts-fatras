@@ -37,7 +37,7 @@
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
 
-#include "G4SIunits.hh"
+#include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -80,6 +80,15 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
 		|| fabs(step->GetPostStepPoint()->GetPosition().x()) >= 10. * cm
 		|| fabs(step->GetPostStepPoint()->GetPosition().y()) >= 10. * cm) //Hardcoded, mehr filter!
 	{			
+std::cout << (step->GetPostStepPoint()->GetPosition().z() >= 2. * cm) << "\t" << (step->GetPostStepPoint()->GetPosition().z() < 0. * cm) 
+<< "\t" << (fabs(step->GetPostStepPoint()->GetPosition().x()) >= 10. * cm) << "\t" << (fabs(step->GetPostStepPoint()->GetPosition().y()) >= 10. * cm) << std::endl;
+std::cout << (step->GetPostStepPoint()->GetPosition().z() * mm >= 2. * cm) << "\t" << (step->GetPostStepPoint()->GetPosition().z() * mm < 0. * cm) 
+<< "\t" << (fabs(step->GetPostStepPoint()->GetPosition().x()) * mm >= 10. * cm) << "\t" << (fabs(step->GetPostStepPoint()->GetPosition().y()) * mm >= 10. * cm) << std::endl;
+std::cout << 2. * cm << "\t" << 10. * cm << "\t" << cm << std::endl;
+std::cout << step->GetPostStepPoint()->GetPosition().x() << "\t" << step->GetPostStepPoint()->GetPosition().y() << "\t" << step->GetPostStepPoint()->GetPosition().z() << std::endl;
+std::cout << step->GetTrack()->GetDynamicParticle()->GetPDGcode() << "\t" << step->GetPostStepPoint()->GetTotalEnergy() << std::endl;
+std::cout << step->GetPostStepPoint()->GetMomentum().x() << "\t" << step->GetPostStepPoint()->GetMomentum().y() << "\t" << step->GetPostStepPoint()->GetMomentum().z() << std::endl;
+std::cout << step->GetPostStepPoint()->GetPosition().x() * mm << "\t" << step->GetPostStepPoint()->GetPosition().y() * mm << "\t" << step->GetPostStepPoint()->GetPosition().z() * mm << std::endl;
 		B1particle p;
 		p.position[0] = step->GetPostStepPoint()->GetPosition().x();
 		p.position[1] = step->GetPostStepPoint()->GetPosition().y();

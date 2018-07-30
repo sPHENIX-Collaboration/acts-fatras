@@ -64,7 +64,7 @@ void B1ActionInitialization::Build() const
   
   B1EventAction* eventAction = new B1EventAction(runAction);
   SetUserAction(eventAction);
-std::cout << "Wird gebaut hier!" << std::endl;
+
   SetUserAction(new B1SteppingAction(eventAction));
 }  
 
