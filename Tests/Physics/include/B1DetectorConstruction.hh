@@ -32,7 +32,6 @@
 #define B1DetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
-#include "globals.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -42,7 +41,6 @@ class G4LogicalVolume;
 class B1DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    B1DetectorConstruction();
     B1DetectorConstruction(G4String mat, double thickness);
     virtual ~B1DetectorConstruction();
 

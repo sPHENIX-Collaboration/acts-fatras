@@ -71,10 +71,6 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
       
   // check if we are in scoring volume
   if (volume != fScoringVolume) return;
-
-  // collect energy deposited in this step
-  G4double edepStep = step->GetTotalEnergyDeposit();
-  fEventAction->AddEdep(edepStep);
   
 	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
 		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm

@@ -31,17 +31,13 @@
 #include "../include/B1EventAction.hh"
 #include "../include/B1RunAction.hh"
 
-#include "G4Event.hh"
-#include "G4RunManager.hh"
-
 #include <fstream>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1EventAction::B1EventAction(B1RunAction* runAction)
 : G4UserEventAction(),
-  fRunAction(runAction),
-  fEdep(0.)
+  fRunAction(runAction)
 {} 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -53,16 +49,13 @@ B1EventAction::~B1EventAction()
 
 void B1EventAction::BeginOfEventAction(const G4Event*)
 {
-  fEdep = 0.;
   particles.clear();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void B1EventAction::EndOfEventAction(const G4Event* anEvent)
-{   
-  // accumulate statistics in run action
-  //~ fRunAction->AddEdep(fEdep);
+void B1EventAction::EndOfEventAction(const G4Event*)
+{
 	std::ofstream ofs("geant4out.txt", std::ofstream::app);
 	for(auto& p : particles)
 	{
@@ -73,8 +66,5 @@ void B1EventAction::EndOfEventAction(const G4Event* anEvent)
 	ofs << "-" << std::endl;
 	ofs.close();
 }
-
-
-	int charge, trackid, parentid;
 	
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -120,7 +120,9 @@ if(index ==0)
   
 	ofsResetter.close();
 }
-//TODO: record timings
+// TODO: record timings
+// TODO: G4NistManager could allow access to material properties
+
 	double x = 0., y = 0., z = 1., p = 1.;
 	// positively charged
 	double q = 1.;

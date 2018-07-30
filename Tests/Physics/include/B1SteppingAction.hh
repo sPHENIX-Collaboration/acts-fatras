@@ -32,11 +32,9 @@
 #define B1SteppingAction_h 1
 
 #include "G4UserSteppingAction.hh"
-#include "globals.hh"
 
 class B1EventAction;
 struct B1particle;
-
 class G4LogicalVolume;
 
 /// Stepping action class

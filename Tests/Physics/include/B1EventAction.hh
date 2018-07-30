@@ -32,7 +32,6 @@
 #define B1EventAction_h 1
 
 #include "G4UserEventAction.hh"
-#include "globals.hh"
 
 #include <vector>
 #include <array>
@@ -56,10 +55,8 @@ class B1EventAction : public G4UserEventAction
     B1EventAction(B1RunAction* runAction);
     virtual ~B1EventAction();
 
-    virtual void BeginOfEventAction(const G4Event* event);
-    virtual void EndOfEventAction(const G4Event* event);
-
-    void AddEdep(G4double edep) { fEdep += edep; }
+    virtual void BeginOfEventAction(const G4Event*);
+    virtual void EndOfEventAction(const G4Event*);
     
     void AddParticle(B1particle& p)
     {
@@ -70,7 +67,6 @@ class B1EventAction : public G4UserEventAction
 	std::vector<B1particle> particles;
 	
     B1RunAction* fRunAction;
-    G4double     fEdep;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
