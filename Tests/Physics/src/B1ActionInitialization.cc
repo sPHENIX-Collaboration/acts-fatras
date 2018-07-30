@@ -36,8 +36,9 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1ActionInitialization::B1ActionInitialization()
- : G4VUserActionInitialization()
+B1ActionInitialization::B1ActionInitialization(double thickness)
+ : G4VUserActionInitialization(),
+ m_thickness(thickness)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -65,7 +66,7 @@ void B1ActionInitialization::Build() const
   B1EventAction* eventAction = new B1EventAction(runAction);
   SetUserAction(eventAction);
 
-  SetUserAction(new B1SteppingAction(eventAction));
+  SetUserAction(new B1SteppingAction(eventAction, m_thickness));
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

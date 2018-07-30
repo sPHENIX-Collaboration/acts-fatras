@@ -78,7 +78,7 @@ struct MySelector {
 
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
-double detectorThickness = 2.; // in cm
+double detectorThickness = 3.; // in cm
 //~ bool writeOut = true;
 
 std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
@@ -115,7 +115,7 @@ if(index ==0)
   runManager->SetUserInitialization(new B1DetectorConstruction("G4_Be", detectorThickness));
   physicsList->SetVerboseLevel(1);
   runManager->SetUserInitialization(physicsList);
-  runManager->SetUserInitialization(new B1ActionInitialization());
+  runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
 	ofsResetter.close();
 }
 

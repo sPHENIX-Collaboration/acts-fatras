@@ -38,11 +38,14 @@
 class B1ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    B1ActionInitialization();
+    B1ActionInitialization(double thickness);
     virtual ~B1ActionInitialization();
 
     virtual void BuildForMaster() const;
     virtual void Build() const;
+   
+  protected:
+	double m_thickness;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

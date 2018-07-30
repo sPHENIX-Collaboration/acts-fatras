@@ -41,10 +41,11 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction)
+B1SteppingAction::B1SteppingAction(B1EventAction* eventAction, double thickness)
 : G4UserSteppingAction(),
   fEventAction(eventAction),
-  fScoringVolume(0)
+  fScoringVolume(0),
+  m_thickness(thickness)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -75,20 +76,11 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
   G4double edepStep = step->GetTotalEnergyDeposit();
   fEventAction->AddEdep(edepStep);
   
-	if(step->GetPostStepPoint()->GetPosition().z() >= 2. * cm
+	if(step->GetPostStepPoint()->GetPosition().z() >= m_thickness * cm
 		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm
 		|| fabs(step->GetPostStepPoint()->GetPosition().x()) >= 10. * cm
 		|| fabs(step->GetPostStepPoint()->GetPosition().y()) >= 10. * cm) //Hardcoded, mehr filter!
 	{			
-std::cout << (step->GetPostStepPoint()->GetPosition().z() >= 2. * cm) << "\t" << (step->GetPostStepPoint()->GetPosition().z() < 0. * cm) 
-<< "\t" << (fabs(step->GetPostStepPoint()->GetPosition().x()) >= 10. * cm) << "\t" << (fabs(step->GetPostStepPoint()->GetPosition().y()) >= 10. * cm) << std::endl;
-std::cout << (step->GetPostStepPoint()->GetPosition().z() * mm >= 2. * cm) << "\t" << (step->GetPostStepPoint()->GetPosition().z() * mm < 0. * cm) 
-<< "\t" << (fabs(step->GetPostStepPoint()->GetPosition().x()) * mm >= 10. * cm) << "\t" << (fabs(step->GetPostStepPoint()->GetPosition().y()) * mm >= 10. * cm) << std::endl;
-std::cout << 2. * cm << "\t" << 10. * cm << "\t" << cm << std::endl;
-std::cout << step->GetPostStepPoint()->GetPosition().x() << "\t" << step->GetPostStepPoint()->GetPosition().y() << "\t" << step->GetPostStepPoint()->GetPosition().z() << std::endl;
-std::cout << step->GetTrack()->GetDynamicParticle()->GetPDGcode() << "\t" << step->GetPostStepPoint()->GetTotalEnergy() << std::endl;
-std::cout << step->GetPostStepPoint()->GetMomentum().x() << "\t" << step->GetPostStepPoint()->GetMomentum().y() << "\t" << step->GetPostStepPoint()->GetMomentum().z() << std::endl;
-std::cout << step->GetPostStepPoint()->GetPosition().x() * mm << "\t" << step->GetPostStepPoint()->GetPosition().y() * mm << "\t" << step->GetPostStepPoint()->GetPosition().z() * mm << std::endl;
 		B1particle p;
 		p.position[0] = step->GetPostStepPoint()->GetPosition().x();
 		p.position[1] = step->GetPostStepPoint()->GetPosition().y();
