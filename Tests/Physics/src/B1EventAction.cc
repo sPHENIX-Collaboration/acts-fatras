@@ -62,11 +62,12 @@ void B1EventAction::BeginOfEventAction(const G4Event*)
 void B1EventAction::EndOfEventAction(const G4Event* anEvent)
 {   
   // accumulate statistics in run action
-  fRunAction->AddEdep(fEdep);
+  //~ fRunAction->AddEdep(fEdep);
 	std::ofstream ofs("geant4out.txt", std::ofstream::app);
 	for(auto& p : particles)
 	{
-		ofs << p.pdg << " " << p.mass << " " << p.charge << " " << p.energy << " " 
+		ofs << p.pdg << " " << p.mass << " " << p.charge << " " << p.energy << " "
+			<< p.position[0] << " " << p.position[1] << " " << p.position[2] << " "
 			<< p.momentum[0] << " " << p.momentum[1] << " " << p.momentum[2] << std::endl;
 	}
 	ofs << "-" << std::endl;

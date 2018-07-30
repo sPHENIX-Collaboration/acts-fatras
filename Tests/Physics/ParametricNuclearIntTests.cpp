@@ -79,9 +79,8 @@ struct MySelector {
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
 double detectorThickness = 2.; // in [cm]
-//~ bool writeOut = true;
 
-std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
+std::ofstream ofs("fatrasout.txt");
 std::ofstream ofsResetter("geant4out.txt");
 
   G4RunManager* runManager = new G4RunManager;
@@ -112,14 +111,16 @@ BOOST_DATA_TEST_CASE(
 if(index ==0)
 {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
-  runManager->SetUserInitialization(new B1DetectorConstruction("G4_Be", detectorThickness));
   physicsList->SetVerboseLevel(0);
+  runManager->SetVerboseLevel(0);
+  runManager->SetUserInitialization(new B1DetectorConstruction("G4_Be", detectorThickness));
   runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
-  runManager->SetVerboseLevel(0);
+  
+  
 	ofsResetter.close();
 }
-
+//TODO: record timings
 	double x = 0., y = 0., z = 1., p = 1.;
 	// positively charged
 	double q = 1.;
@@ -132,7 +133,7 @@ if(index ==0)
   // p of 1 GeV
   Acts::Vector3D momentum =
       p * Acts::units::_GeV * direction;
-      	
+	
   UImanager->ApplyCommand("/run/initialize");
   UImanager->ApplyCommand("/gun/particle pi+");
   UImanager->ApplyCommand("/gun/momentum " + std::to_string(p * direction.x()) 
@@ -155,11 +156,11 @@ MyGenerator mg(index);
 ParametricNuclearInt paramNuclInt;
 
 std::vector<Particle> par = paramNuclInt(mg, detector, particle);
-ofs << index << "\t" << par.size() << std::endl;
 for(size_t i = 0; i < par.size(); i++)
 	ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
+		<< par[i].position.x() << "\t" << par[i].position.y() << "\t" << par[i].position.z() << "\t"
 		<< par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" << par[i].momentum.z() << std::endl;
-
+ofs << "-" << std::endl;
 
   typedef MySelector All;
   std::vector<Particle> outgoing;
