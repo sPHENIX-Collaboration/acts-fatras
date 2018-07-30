@@ -78,7 +78,7 @@ struct MySelector {
 
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
-double detectorThickness = 3.; // in cm
+double detectorThickness = 2.; // in [cm]
 //~ bool writeOut = true;
 
 std::ofstream ofs("Nuculars.txt", std::ofstream::out | std::ofstream::app);
@@ -113,9 +113,10 @@ if(index ==0)
 {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
   runManager->SetUserInitialization(new B1DetectorConstruction("G4_Be", detectorThickness));
-  physicsList->SetVerboseLevel(1);
+  physicsList->SetVerboseLevel(0);
   runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
+  runManager->SetVerboseLevel(0);
 	ofsResetter.close();
 }
 
@@ -149,7 +150,7 @@ MyGenerator mg(index);
   Acts::MaterialProperties detector(berilium, detectorThickness * Acts::units::_cm);
 
   // create the particle
-  Particle particle(position, momentum, m, q, -211, 1);
+  Particle particle(position, momentum, m, q, 211, 1);
 
 ParametricNuclearInt paramNuclInt;
 
@@ -157,8 +158,7 @@ std::vector<Particle> par = paramNuclInt(mg, detector, particle);
 ofs << index << "\t" << par.size() << std::endl;
 for(size_t i = 0; i < par.size(); i++)
 	ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
-		<< par[i].p << "\t" << par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" 
-		<< par[i].momentum.z() << std::endl;
+		<< par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" << par[i].momentum.z() << std::endl;
 
 
   typedef MySelector All;
