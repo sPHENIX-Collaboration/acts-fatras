@@ -30,7 +30,6 @@
 
 #include "../include/B1DetectorConstruction.hh"
 
-//~ #include "G4RunManager.hh"
 #include "G4NistManager.hh"
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
@@ -61,8 +60,8 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   // Envelope parameters
   //
   G4double env_sizeXY = 20. * cm, env_sizeZ = 2. * m_thickness * cm;
-  G4Material* env_mat = nist->FindOrBuildMaterial("G4_Galactic");
-   
+  G4Material* env_mat = nist->FindOrBuildMaterial("G4_Galactic");	
+
   // Option to switch on/off checking of volumes overlaps
   //
   G4bool checkOverlaps = true;
@@ -111,6 +110,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     checkOverlaps);          //overlaps checking
               
 G4Material* matDetector = nist->FindOrBuildMaterial(material);
+
 G4ThreeVector posDetector = G4ThreeVector(0., 0., 0.25 * env_sizeZ);
 G4Box* solidDetector = new G4Box("Detector", 0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.25 * env_sizeZ);
 G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, matDetector, "Detector");

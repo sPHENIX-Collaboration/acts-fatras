@@ -41,7 +41,7 @@ class B1RunAction;
 struct B1particle
 {
 	std::array<double, 3> position, momentum;
-	unsigned int pdg;
+	int pdg;
 	double energy, mass;
 	int charge, trackid, parentid;
 };

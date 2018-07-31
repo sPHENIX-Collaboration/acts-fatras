@@ -31,13 +31,13 @@
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "QBBC.hh"
-#include "G4VisExecutive.hh"
 #include "Randomize.hh"
-
+#include "G4NistManager.hh"
 #include "G4SystemOfUnits.hh"
 
 #include <fstream>
 #include <random>
+#include <chrono>
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -76,8 +76,7 @@ struct MySelector {
   }
 };
 
-// some material
-Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
+std::string material = "G4_Be";
 double detectorThickness = 2.; // in [cm]
 
 std::ofstream ofs("fatrasout.txt");
@@ -113,20 +112,24 @@ if(index ==0)
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
   physicsList->SetVerboseLevel(0);
   runManager->SetVerboseLevel(0);
-  runManager->SetUserInitialization(new B1DetectorConstruction("G4_Be", detectorThickness));
+  runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
   runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
-  
-  
 	ofsResetter.close();
 }
 // TODO: record timings
 // TODO: G4NistManager could allow access to material properties
 
+// some material
+  G4NistManager* nist = G4NistManager::Instance();
+G4Material* g4mat = nist->FindOrBuildMaterial(material);
+Acts::Material berilium = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
+
 	double x = 0., y = 0., z = 1., p = 1.;
 	// positively charged
 	double q = 1.;
-	double m = 134.9766 * Acts::units::_MeV; // pion mass
+	//~ double m = 134.9766 * Acts::units::_MeV; // pion mass
+	double m = 139.57 * Acts::units::_MeV; // pion mass
 
   // create the particle and set the momentum
   /// position at 0.,0.,0
@@ -135,7 +138,7 @@ if(index ==0)
   // p of 1 GeV
   Acts::Vector3D momentum =
       p * Acts::units::_GeV * direction;
-	
+
   UImanager->ApplyCommand("/run/initialize");
   UImanager->ApplyCommand("/gun/particle pi+");
   UImanager->ApplyCommand("/gun/momentum " + std::to_string(p * direction.x()) 
@@ -145,7 +148,6 @@ if(index ==0)
   UImanager->ApplyCommand("/gun/time 0.");
   UImanager->ApplyCommand("/tracking/verbose 1");
   UImanager->ApplyCommand("/run/beamOn 1");
-
 
 MyGenerator mg(index);
 
@@ -162,7 +164,7 @@ for(size_t i = 0; i < par.size(); i++)
 	ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
 		<< par[i].position.x() << "\t" << par[i].position.y() << "\t" << par[i].position.z() << "\t"
 		<< par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" << par[i].momentum.z() << std::endl;
-ofs << "-" << std::endl;
+ofs << "*" << std::endl;
 
   typedef MySelector All;
   std::vector<Particle> outgoing;
