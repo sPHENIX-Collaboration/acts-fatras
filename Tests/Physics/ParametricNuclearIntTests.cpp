@@ -77,7 +77,7 @@ struct MySelector {
 };
 
 std::string material = "G4_Be";
-double detectorThickness = 2.; // in [cm]
+double detectorThickness = 0.1; // in [cm]
 
 std::ofstream ofs("fatrasout.txt");
 std::ofstream ofsResetter("geant4out.txt");
@@ -105,7 +105,7 @@ std::ofstream ofsResetter("geant4out.txt");
     //~ x, y, z, p, index) {
 		
 BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(3), index) {
+    ParamNucularInt_test_, bdata::xrange(10000), index) {
 
 if(index ==0)
 {
@@ -121,14 +121,13 @@ if(index ==0)
 // TODO: G4NistManager could allow access to material properties
 
 // some material
-  G4NistManager* nist = G4NistManager::Instance();
+G4NistManager* nist = G4NistManager::Instance();
 G4Material* g4mat = nist->FindOrBuildMaterial(material);
-Acts::Material berilium = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
+Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
 
 	double x = 0., y = 0., z = 1., p = 1.;
 	// positively charged
 	double q = 1.;
-	//~ double m = 134.9766 * Acts::units::_MeV; // pion mass
 	double m = 139.57 * Acts::units::_MeV; // pion mass
 
   // create the particle and set the momentum
@@ -141,9 +140,13 @@ Acts::Material berilium = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearIn
 
   UImanager->ApplyCommand("/run/initialize");
   UImanager->ApplyCommand("/gun/particle pi+");
-  UImanager->ApplyCommand("/gun/momentum " + std::to_string(p * direction.x()) 
-	+ " " + std::to_string(p * direction.y()) 
-	+ " " + std::to_string(p * direction.z()));
+  //~ UImanager->ApplyCommand("/gun/energy " + std::to_string(p) + " GeV");
+  //~ UImanager->ApplyCommand("/gun/direction " + std::to_string(direction.x())
+		//~ + " " + std::to_string(direction.y())
+		//~ + " " + std::to_string(direction.z()));
+  UImanager->ApplyCommand("/gun/momentum " + std::to_string(p * direction.x())
+	+ " " + std::to_string(p * direction.y())
+	+ " " + std::to_string(p * direction.z()) + " GeV");
   UImanager->ApplyCommand("/gun/position 0. 0. 0.");
   UImanager->ApplyCommand("/gun/time 0.");
   UImanager->ApplyCommand("/tracking/verbose 1");
@@ -152,7 +155,9 @@ Acts::Material berilium = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearIn
 MyGenerator mg(index);
 
   // a detector with 1 mm Be
-  Acts::MaterialProperties detector(berilium, detectorThickness * Acts::units::_cm);
+  Acts::MaterialProperties detector(actsMaterial, detectorThickness * Acts::units::_cm);
+
+std::cout << detector << std::endl;
 
   // create the particle
   Particle particle(position, momentum, m, q, 211, 1);
