@@ -132,7 +132,7 @@ template <typename material_t, typename particle_t>
 double 
 ParametricNuclearInt::absorptionLength(const material_t* material, particle_t& particle) const 
 {
-  double al = material->thicknessInL0();
+  double al = material->averageL0();
 
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311)
     al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
@@ -192,7 +192,7 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
   double prf = 0.30;
   
   if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311) 
-  { // TODO: hier muss wohl ein else fuer andere particles her
+  {
       pif = 0.15;
       nef = 0.25;
       prf = 0.25;
@@ -422,6 +422,8 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
 	kinematics(generator, chDef, particle);
 	selectionOfCollection(chDef);
   }
+  else
+	chDef.push_back(particle); // Return at least the leading particle
   return chDef;
 }
 
@@ -429,16 +431,15 @@ template <typename generator_t, typename material_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material_t& material, particle_t& particle) const
 {
-	const material_t* extMprop = dynamic_cast<const material_t*>(&material);
+	const material_t* extMprop = &material;
 	double prob = 0.;
 
 		double al = absorptionLength(extMprop, particle);  // in mm
-	
+
 	    if (al > 0.) 
 			prob = exp(-extMprop->thickness() / al);
 	    else
 			prob = exp(-extMprop->thicknessInL0());
-
 
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
@@ -446,7 +447,7 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 		return getHadronState(generator, particle);
  
 	// no hadronic interactions were computed
-	return {};  
+	return {particle};  // Return the incoming particle
 }
 
 } // namespace Fatras

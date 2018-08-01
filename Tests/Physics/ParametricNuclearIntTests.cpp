@@ -34,7 +34,9 @@
 #include "Randomize.hh"
 #include "G4NistManager.hh"
 #include "G4SystemOfUnits.hh"
-
+#include "G4ParticleDefinition.hh"
+#include "G4ParticleTable.hh"
+    
 #include <fstream>
 #include <random>
 #include <chrono>
@@ -77,7 +79,8 @@ struct MySelector {
 };
 
 std::string material = "G4_Be";
-double detectorThickness = 0.1; // in [cm]
+std::string gunAmmo = "pi+";
+double detectorThickness = 5.; // in [cm]
 
 std::ofstream ofs("fatrasout.txt");
 std::ofstream ofsResetter("geant4out.txt");
@@ -85,7 +88,9 @@ std::ofstream ofsResetter("geant4out.txt");
   G4RunManager* runManager = new G4RunManager;
   G4VModularPhysicsList* physicsList = new QBBC;
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
-
+  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+  G4ParticleDefinition* parDef;
+    
 /// Test the scattering implementation
 //~ BOOST_DATA_TEST_CASE(
     //~ ParamNucularInt_test_,
@@ -116,6 +121,7 @@ if(index ==0)
   runManager->SetUserInitialization(physicsList);
   runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
 	ofsResetter.close();
+	parDef = particleTable->FindParticle(gunAmmo);
 }
 // TODO: record timings
 // TODO: G4NistManager could allow access to material properties
@@ -125,10 +131,8 @@ G4NistManager* nist = G4NistManager::Instance();
 G4Material* g4mat = nist->FindOrBuildMaterial(material);
 Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
 
+
 	double x = 0., y = 0., z = 1., p = 1.;
-	// positively charged
-	double q = 1.;
-	double m = 139.57 * Acts::units::_MeV; // pion mass
 
   // create the particle and set the momentum
   /// position at 0.,0.,0
@@ -139,7 +143,7 @@ Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNucle
       p * Acts::units::_GeV * direction;
 
   UImanager->ApplyCommand("/run/initialize");
-  UImanager->ApplyCommand("/gun/particle pi+");
+  UImanager->ApplyCommand("/gun/particle " + gunAmmo);
   //~ UImanager->ApplyCommand("/gun/energy " + std::to_string(p) + " GeV");
   //~ UImanager->ApplyCommand("/gun/direction " + std::to_string(direction.x())
 		//~ + " " + std::to_string(direction.y())
@@ -152,15 +156,17 @@ Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNucle
   UImanager->ApplyCommand("/tracking/verbose 1");
   UImanager->ApplyCommand("/run/beamOn 1");
 
+
+
 MyGenerator mg(index);
 
-  // a detector with 1 mm Be
+  // a detector
   Acts::MaterialProperties detector(actsMaterial, detectorThickness * Acts::units::_cm);
 
 std::cout << detector << std::endl;
 
   // create the particle
-  Particle particle(position, momentum, m, q, 211, 1);
+  Particle particle(position, momentum, parDef->GetPDGMass() * Acts::units::_MeV, parDef->GetPDGCharge(), parDef->GetPDGEncoding(), 1);
 
 ParametricNuclearInt paramNuclInt;
 
