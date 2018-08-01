@@ -414,7 +414,6 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
   // protection against Npart < 3
   if (Npart >= 3)
 	{
-
 	chDef.resize(Npart);
 
 	createMultiplicity(generator, particle, chDef);
