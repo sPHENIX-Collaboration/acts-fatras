@@ -438,7 +438,7 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 	    if (al > 0.) 
 			prob = exp(-extMprop->thickness() / al);
 	    else
-			prob = exp(-extMprop->thicknessInL0());
+			prob = exp(-extMprop->averageL0());
 
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
