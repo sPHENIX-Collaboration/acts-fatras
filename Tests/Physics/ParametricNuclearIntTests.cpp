@@ -131,7 +131,6 @@ G4NistManager* nist = G4NistManager::Instance();
 G4Material* g4mat = nist->FindOrBuildMaterial(material);
 Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
 
-
 	double x = 0., y = 0., z = 1., p = 1.;
 
   // create the particle and set the momentum

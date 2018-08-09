@@ -442,7 +442,8 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
-	if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale)
+	//~ if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale)
+	if (generator() < (1. - prob) * 0.5)
 		return getHadronState(generator, particle);
  
 	// no hadronic interactions were computed
