@@ -54,8 +54,9 @@ struct BetheBloch {
     LandauDist landauDist = LandauDist(0., 1.);
     double landau = landauDist(generator);
 
-    auto eLoss = ionisationLoss(particle.m, particle.beta, particle.gamma,
-                                detector, detector.thickness(), false);
+    auto eLoss =
+        ionisationLoss(particle.m, particle.beta, particle.gamma,
+                       detector.material(), detector.thickness(), false);
     // the actual energy loss
     double energyLoss = eLoss.first;
     // the uncertainty of the mean energy loss
