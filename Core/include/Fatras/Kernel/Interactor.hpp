@@ -13,8 +13,6 @@
 #include "Acts/Material/SurfaceMaterial.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "detail/RandomNumberDistributions.hpp"
 #include <climits>
@@ -151,7 +149,8 @@ struct Interactor {
     if (isSensitive) {
       // create and fill the hit
       double value = 0.;
-      hit_t simHit = hitCreator(state,value,result.particle);
+      double htime = 0.;
+      hit_t simHit = hitCreator(state,value,htime,result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }
   }

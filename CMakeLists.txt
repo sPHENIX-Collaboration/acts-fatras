@@ -17,7 +17,7 @@ include(GNUInstallDirs)
 include(CTest)
 
 add_subdirectory(Core)
-add_subdirectory(Tests)
+#add_subdirectory(Tests)
   
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
