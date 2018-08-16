@@ -10,7 +10,7 @@
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
@@ -45,7 +45,9 @@ struct BetheBloch {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return empty vector for BetheBloch - no secondaries created
-  template <typename generator_t, typename detector_t, typename particle_t>
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {

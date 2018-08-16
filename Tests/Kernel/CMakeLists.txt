@@ -1,8 +1,3 @@
-add_executable (FatrasParticleTests ParticleTests.cpp)
-target_include_directories (FatrasParticleTests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries (FatrasParticleTests PRIVATE Acts::Core FatrasCore)
-add_test (NAME FatrasParticleUnitTest COMMAND FatrasParticleTests)
-
 add_executable (FatrasPhysicsListTests PhysicsListTests.cpp)
 target_include_directories (FatrasPhysicsListTests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries (FatrasPhysicsListTests PRIVATE Acts::Core FatrasCore)

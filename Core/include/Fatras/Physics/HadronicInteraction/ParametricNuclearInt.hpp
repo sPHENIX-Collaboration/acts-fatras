@@ -8,13 +8,9 @@
 
 #pragma once
 
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
-
 namespace Fatras {
 
 /// The struct for the physics list
-///
 ///
 struct ParametricNuclearInt {
 
@@ -29,7 +25,9 @@ struct ParametricNuclearInt {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return eventually produced photons
-  template <typename generator_t, typename detector_t, typename particle_t>
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {

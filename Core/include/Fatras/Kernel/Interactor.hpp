@@ -16,7 +16,7 @@
 #include "Fatras/Kernel/Definitions.hpp"
 #include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
-#include "RandomNumberDistributions.hpp"
+#include "detail/RandomNumberDistributions.hpp"
 #include <climits>
 #include <cmath>
 #include <sstream>
@@ -35,6 +35,9 @@ struct VoidSelector {
 /// the MaterialInteractor of the reconstruction
 ///
 /// @tparam generator_t Type of the random generator
+/// @tparam particle_t is Type fo the particle
+/// @tparam hit_t Type of the simulated hit
+/// @tparam hit_creator_t Type of the hit creator (does thruth association)
 /// @tparam physics_list_t Type of Extendable physics list that is called
 /// @tparam decay_list_t Type of Extendable decay list that is called
 ///
@@ -42,7 +45,11 @@ struct VoidSelector {
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
-template <typename generator_t, typename sensitive_selector_t = VoidSelector,
+template <typename generator_t, 
+          typename particle_t,
+          typename hit_t,
+          typename hit_creator_t,
+          typename sensitive_selector_t = VoidSelector,
           typename physics_list_t = PhysicsList<>>
 struct Interactor {
 
@@ -56,9 +63,11 @@ struct Interactor {
   physics_list_t physicsList;
 
   /// Simple result struct to be returned
-  Particle initialParticle;
+  particle_t initialParticle;
 
-  ///
+  /// The hit creator helper class
+  hit_creator_t hitCreator;
+  
   /// It mainly acts as an internal state cache which is
   /// created for every propagation/extrapolation step
   struct this_result {
@@ -67,13 +76,13 @@ struct Interactor {
     bool initialized = false;
 
     /// The current particle - updated along the way
-    Particle particle;
+    particle_t particle;
 
     /// The outgoing particles due to physics processes
-    std::vector<Particle> outgoing;
+    std::vector<particle_t> outgoing;
 
     /// The simulated hits created along the way
-    std::vector<SensitiveHit> simulatedHits;
+    std::vector<hit_t> simulatedHits;
   };
 
   typedef this_result result_type;
@@ -107,9 +116,8 @@ struct Interactor {
       result.initialized = true;
     }
     // set the stepping position to the particle
-    result.particle.position = state.stepping.position();
-    result.particle.momentum = state.stepping.momentum();
-    result.particle.q = state.stepping.charge();
+    result.particle.update(state.stepping.position(),
+                           state.stepping.momentum());
 
     // Check if the current surrface a senstive one
     bool isSensitive = state.navigation.currentSurface
@@ -127,7 +135,9 @@ struct Interactor {
       bool breakIndicator = false;
       if (mProperties) {
         // run the Fatras physics list - only when there's material
-        breakIndicator = physicsList(*generator, *mProperties, result.particle,
+        breakIndicator = physicsList(*generator, 
+                                     *mProperties,
+                                     result.particle,
                                      result.outgoing);
       }
     }
@@ -135,17 +145,14 @@ struct Interactor {
     // update the stepper cache with the current particle parameters
     state.stepping.update(result.particle.position,
                           result.particle.momentum.unit(),
-                          result.particle.momentum.mag());
+                          result.particle.p);
 
     // create the SensitiveHit and store it
     if (isSensitive) {
       // create and fill the hit
-      SensitiveHit senHit;
-      senHit.surface = state.navigation.currentSurface;
-      senHit.position = state.stepping.position();
-      senHit.direction = state.stepping.direction();
-      senHit.value = depositedEnergy;
-      result.simulatedHits.push_back(std::move(senHit));
+      double value = 0.;
+      hit_t simHit = hitCreator(state,value,result.particle);
+      result.simulatedHits.push_back(std::move(simHit));
     }
   }
 

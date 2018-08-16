@@ -12,7 +12,7 @@
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
@@ -25,19 +25,22 @@ namespace Fatras {
 /// There's two options to apply the scattering
 /// - a parametric action that relates phi and theta (default: off)
 /// - an actuall out of direction scattering applying two random numbers
-
-template <typename Formula> struct Scattering {
+template <typename formula_t> 
+struct Scattering {
 
   /// Include the log term
   bool parametric = false;
   double projectionFactor = 1. / std::sqrt(2.);
 
   /// The scattering formula
-  Formula angle;
+  formula_t angle;
 
   /// This is the scattering call operator
-  template <typename generator_t, typename detector_t, typename particle_t>
-  std::vector<particle_t> operator()(generator_t &gen, const detector_t &det,
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
+  std::vector<particle_t> operator()(generator_t &gen, 
+                                     const detector_t &det,
                                      particle_t &in) const {
 
     // 3D scattering angle

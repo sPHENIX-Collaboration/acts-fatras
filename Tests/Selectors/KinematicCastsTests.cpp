@@ -30,20 +30,20 @@ namespace Fatras {
 
 namespace Test {
 
-double m_pion = 134.9766 * Acts::units::_MeV; // pi0 rest mass
+double m = 134.9766 * Acts::units::_MeV; 
 
 // This tests the implementation of kinematic cast operators
 BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentum_c(1500., 0., 0);
-  Particle pion_c(position, momentum_c, -1., m_pion);
+  Acts::Vector3D momentumCentral(1500., 0., 0);
+  Particle pionCentral(position, momentumCentral, -1., m);
 
   // a forward pion
-  Acts::Vector3D position_fwd(0., 0., 100.);
-  Acts::Vector3D momentum_fwd(10., 10., 1500.);
-  Particle pion_fwd(position_fwd, momentum_fwd, -1., m_pion);
+  Acts::Vector3D positionFwd(0., 0., 100.);
+  Acts::Vector3D momentumFwd(10., 10., 1500.);
+  Particle pionFwd(positionFwd, momentumFwd, -1., m);
 
   // the list of possible casts
   casts::eta eta_c;
@@ -55,18 +55,18 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   casts::vZ vZ_c;
 
   // test the central
-  BOOST_TEST(eta_c(pion_c), 0.);
-  BOOST_TEST(absEta_c(pion_c), 0.);
-  BOOST_TEST(pT_c(pion_c), 1500.);
-  BOOST_TEST(p_c(pion_c), 1500.);
-  BOOST_CHECK(E_c(pion_c) > p_c(pion_c));
+  BOOST_TEST(eta_c(pionCentral), 0.);
+  BOOST_TEST(absEta_c(pionCentral), 0.);
+  BOOST_TEST(pT_c(pionCentral), 1500.);
+  BOOST_TEST(p_c(pionCentral), 1500.);
+  BOOST_CHECK(E_c(pionCentral) > p_c(pionCentral));
 
-  BOOST_CHECK_CLOSE(vR_c(pion_c), 0., 10e-5);
-  BOOST_CHECK_CLOSE(vZ_c(pion_c), 0., 10e-5);
+  BOOST_CHECK_CLOSE(vR_c(pionCentral), 0., 10e-5);
+  BOOST_CHECK_CLOSE(vZ_c(pionCentral), 0., 10e-5);
 
   // test the forward
-  BOOST_CHECK(eta_c(pion_fwd) > eta_c(pion_c));
-  BOOST_TEST(vZ_c(pion_fwd), 100.);
+  BOOST_CHECK(eta_c(pionFwd) > eta_c(pionCentral));
+  BOOST_TEST(vZ_c(pionFwd), 100.);
 }
 
 } // namespace Test

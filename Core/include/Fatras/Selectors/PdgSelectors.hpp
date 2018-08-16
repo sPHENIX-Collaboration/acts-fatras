@@ -10,10 +10,10 @@
 
 namespace Fatras {
 
-template <int PDG> struct AbsPdgSelector {
+template <int pdg_t> struct AbsPdgSelector {
 
   // absolute Pdg selection
-  const int saPDG = PDG;
+  const int saPDG = pdg_t;
 
   /// Return true for all particles with | pdg | matching
   /// the selection criteria
@@ -23,10 +23,10 @@ template <int PDG> struct AbsPdgSelector {
   }
 };
 
-template <int PDG> struct PdgSelector {
+template <int pdg_t> struct PdgSelector {
 
   // Pdg selection
-  const int saPDG = PDG;
+  const int saPDG = pdg_t;
 
   /// Return true for all particles with pdg matching
   /// the selection criteria
@@ -36,10 +36,10 @@ template <int PDG> struct PdgSelector {
   }
 };
 
-template <int PDG> struct AbsPdgExcluder {
+template <int pdg_t> struct AbsPdgExcluder {
 
   // absolute Pdg selection
-  const int saPDG = PDG;
+  const int saPDG = pdg_t;
 
   /// Return true for all particles with | pdg | matching
   /// the selection criteria
@@ -49,10 +49,10 @@ template <int PDG> struct AbsPdgExcluder {
   }
 };
 
-template <int PDG> struct PdgExcluder {
+template <int pdg_t> struct PdgExcluder {
 
   // Pdg selection
-  const int saPDG = PDG;
+  const int saPDG = pdg_t;
 
   /// Return true for all particles with pdg matching
   /// the selection criteria

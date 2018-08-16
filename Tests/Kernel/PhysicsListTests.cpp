@@ -28,11 +28,11 @@ namespace Fatras {
 namespace Test {
 
 /// needed are :  generator, detector, particle
-struct Generator_type {};
+struct Generator {};
 
-struct Detector_type {};
+struct Detector {};
 
-struct Particle_type {};
+struct Particle {};
 
 /// Physics process that does not trigger a break
 struct SterileProcess {
@@ -60,10 +60,10 @@ struct FatalProcess {
 
 // This tests the implementation of the physics list
 BOOST_AUTO_TEST_CASE(PhysicsLists_test) {
-  Generator_type generator;
-  Detector_type detector;
-  Particle_type in;
-  std::vector<Particle_type> out;
+  Generator generator;
+  Detector detector;
+  Particle in;
+  std::vector<Particle> out;
 
   /// empty physics_list
   typedef PhysicsList<> ProcessLess;

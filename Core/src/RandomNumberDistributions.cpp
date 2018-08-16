@@ -6,7 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 Fatras::LandauDist::param_type::param_type(double mean, double scale)
     : mean(mean), scale(scale) {}

@@ -35,7 +35,7 @@ namespace Test {
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
 
-double m_pion = 134.9766 * Acts::units::_MeV; // pi0 rest mass
+double m = 134.9766 * Acts::units::_MeV; 
 
 // This tests the implementation of kinematic cast operators
 BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
   Acts::Vector3D momentum(1500., 0., 0);
-  Particle pion(position, momentum, -1., m_pion);
+  Particle pion(position, momentum, -1., m);
   // the path of the particle
   pion.pathInX0 = 0.10;
   pion.pathInL0 = 0.34;

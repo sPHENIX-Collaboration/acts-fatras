@@ -69,9 +69,11 @@ struct Simulator {
   /// @param fatrasGenerator is the event-bound random generator
   /// @param fatrasEvent is the truth event collection
   /// @param fatrasHits is the hit collection
-  template <typename generator_t, typename event_collection_t,
+  template <typename generator_t, 
+            typename event_collection_t,
             typename hit_collection_t>
-  void operator()(generator_t &fatrasGenerator, event_collection_t &fatrasEvent,
+  void operator()(generator_t &fatrasGenerator, 
+                  event_collection_t &fatrasEvent,
                   hit_collection_t &fatrasHits) const {
 
     // if screen output is required
@@ -95,10 +97,11 @@ struct Simulator {
 
     // loop over the input events
     // -> new secondaries will just be attached to that
-    for (auto &event : fatrasEvent) {
+    for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
-      for (auto particle = event.out.begin(); particle != event.out.end();
+      for (auto particle = vertex.outgoing_begin(); 
+           particle != vertex.outgoing_end(); 
            ++particle) {
         // charged particle detected and selected
         if (chargedSelector(detector, *particle)) {
@@ -116,8 +119,10 @@ struct Simulator {
           // put all the additional information into the interactor
           chargedInteractor.initialParticle = (*particle);
           // create the kinematic start parameters
-          Acts::CurvilinearParameters start(nullptr, particle->position,
-                                            particle->momentum, particle->q);
+          Acts::CurvilinearParameters start(nullptr, 
+                                            particle->position,
+                                            particle->momentum, 
+                                            particle->q);
           // run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions);
@@ -130,7 +135,7 @@ struct Simulator {
           }
           // b) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
-          event.out.insert(particle, simparticles.begin(), simparticles.end());
+          vertex.outgoing_insert(simparticles);
           // c) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
@@ -157,7 +162,7 @@ struct Simulator {
           auto &fatrasResult = result.template get<NeutralResult>();
           // a) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
-          event.out.insert(particle, simparticles.begin(), simparticles.end());
+          vertex.outgoing_insert(simparticles);
           // b) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();

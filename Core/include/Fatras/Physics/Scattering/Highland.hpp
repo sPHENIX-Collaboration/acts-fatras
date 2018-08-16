@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
@@ -33,14 +33,17 @@ struct Highland {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, typename detector_t, typename particle_t>
-  double operator()(generator_t &generator, const detector_t &detector,
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
+  double operator()(generator_t &generator, 
+                    const detector_t &detector,
                     particle_t &particle) const {
 
     // Gauss distribution, will be sampled sampled with generator
     GaussDist gaussDist = GaussDist(0., 1.);
 
-    // thickness in X0
+    /// thickness in X0
     double dInX0 = detector.thickness() / detector.material().X0();
     bool electron = std::abs(particle.pdg) == 11;
 

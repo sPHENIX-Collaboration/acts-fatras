@@ -11,7 +11,7 @@
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Acts/Utilities/MaterialInteraction.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
@@ -41,11 +41,15 @@ struct GeneralMixture {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, typename detector_t, typename particle_t>
-  double operator()(generator_t &generator, const detector_t &detector,
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
+  double operator()(generator_t &generator, 
+                    const detector_t &detector,
                     particle_t &particle) const {
 
     // scale the path length to the radiation length
+    // @todo path correction factor                  
     double tInX0 = detector.thickness() / detector.material().X0();
 
     // material properties

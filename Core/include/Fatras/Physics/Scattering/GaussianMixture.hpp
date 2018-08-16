@@ -10,7 +10,7 @@
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
 
 namespace Fatras {
@@ -48,8 +48,11 @@ struct GaussianMixture {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, typename detector_t, typename particle_t>
-  double operator()(generator_t &generator, const detector_t &detector,
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
+  double operator()(generator_t &generator, 
+                    const detector_t &detector,
                     particle_t &particle) const {
 
     // thickness in X0

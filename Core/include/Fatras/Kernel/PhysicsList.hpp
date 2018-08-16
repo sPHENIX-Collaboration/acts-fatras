@@ -21,6 +21,8 @@ namespace Fatras {
 ///
 /// Users can add a variable list of processes in order to drive the
 /// physics simulation
+///
+/// The dependency on generator, detector and particle are templated  
 template <typename... processes>
 struct PhysicsList : private Acts::detail::Extendable<processes...> {
 private:

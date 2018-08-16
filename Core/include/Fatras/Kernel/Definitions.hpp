@@ -16,15 +16,6 @@
 
 namespace Fatras {
 
-/// The information to be writtern out per hit surface
-/// - this is the bare information on a surface
-struct SensitiveHit {
-  const Acts::Surface *surface = nullptr;
-  Acts::Vector3D position;
-  Acts::Vector3D direction;
-  double value = 0.;
-};
-
 /// A simple selector to select sensitive surfaces
 /// this is for charged particles
 struct SensitiveSelector {

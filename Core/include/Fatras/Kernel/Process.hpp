@@ -10,13 +10,14 @@
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
 #include <cmath>
 
 namespace Fatras {
 
-/// @class Process
-///
+/// @brief Process class that turns a parameterized or 
+/// tabularized fast simulation module into a process that
+/// can be plugged into the PhysicsList
+/// 
 /// This is plugin for physics processes
 ///  - scattering
 ///  - energy loss
@@ -24,23 +25,23 @@ namespace Fatras {
 ///  - hadronic interaction
 ///  - decay
 ///
-/// To be plugged into the PhysicsList
-///
 /// The type (and actual trigger) of the particle
 /// and interaction is steered via the Selector list
 /// for in and out.
-template <typename Physics, typename SelectorIn, typename SelectorOut,
-          typename SelectorChild>
+template <typename physics_t, 
+          typename selector_in_t, 
+          typename selector_out_t,
+          typename selector_child_t>
 
 struct Process {
 
   /// The actual physics that is happening
-  Physics process;
+  physics_t process;
 
   /// The selector list
-  SelectorIn selectorIn;
-  SelectorOut selectorOut;
-  SelectorChild selectorChild;
+  selector_in_t selectorIn;
+  selector_out_t selectorOut;
+  selector_child_t selectorChild;
 
   /// This is the scattering call operator
   template <typename generator_t, typename detector_t, typename particle_t>

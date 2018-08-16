@@ -10,7 +10,7 @@
 
 #include "Acts/Utilities/MaterialInteraction.hpp"
 #include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
@@ -38,7 +38,9 @@ struct BetheHeitler {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return eventually produced photons
-  template <typename generator_t, typename detector_t, typename particle_t>
+  template <typename generator_t, 
+            typename detector_t, 
+            typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
@@ -64,7 +66,7 @@ struct BetheHeitler {
       particle.momentum = particle.p * particle.momentum.unit();
       particle.pT = particle.momentum.perp();
     }
-    // todo return photons
+    // todo return photons, needs particle_creator_t
     return {};
   }
 };

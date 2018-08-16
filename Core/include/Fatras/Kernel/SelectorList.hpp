@@ -17,7 +17,7 @@
 
 namespace Fatras {
 
-/// This is the SelectorList struct that is used for fast simulation
+/// @brief This is the SelectorList struct that is used for fast simulation
 ///
 /// Users can add a variable list of selectors in order to drive the
 /// physics simulation. Selectors can access particle information and
