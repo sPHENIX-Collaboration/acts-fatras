@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
 
@@ -57,10 +57,10 @@ struct GaussianMixture {
 
     // thickness in X0
     double dInX0 = detector.thickness() / detector.material().X0();
-    bool electron = std::abs(particle.pdg) == 11;
+    bool electron = std::abs(particle.pdg()) == 11;
 
     /// Calculate the highland formula first
-    double sigma = highlandForumla(particle.p, particle.beta, dInX0, electron);
+    double sigma = highlandForumla(particle.p(), particle.beta(), dInX0, electron);
     double sigma2 = sigma * sigma;
 
     // Gauss distribution, will be sampled with generator
@@ -71,7 +71,7 @@ struct GaussianMixture {
 
     // Now correct for the tail fraction
     // d_0'
-    double beta2 = particle.beta * particle.beta;
+    double beta2 = particle.beta() * particle.beta();
     double dprime = detector.thickness() / (detector.material().X0() * beta2);
     double log_dprime = std::log(dprime);
     // d_0''
@@ -92,7 +92,7 @@ struct GaussianMixture {
 
     // G4 optimised / native double Gaussian model
     if (optGaussianMixtureG4)
-      sigma2 = 225. * dprime / (particle.p * particle.p);
+      sigma2 = 225. * dprime / (particle.p() * particle.p());
     // throw the random number core/tail
     if (uniformDist(generator) < epsilon)
       sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;

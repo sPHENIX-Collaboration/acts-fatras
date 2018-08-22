@@ -11,7 +11,7 @@
 #include <cmath>
 
 #include "Acts/Utilities/Definitions.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -50,13 +50,13 @@ struct Scattering {
     if (parametric) {
 
       // the initial values
-      double theta = in.momentum.theta();
-      double phi = in.momentum.phi();
+      double theta = in.momentum().theta();
+      double phi = in.momentum().phi();
       double sinTheta = (sin(theta) * sin(theta) > 10e-10) ? sin(theta) : 1.;
 
       // sample them in an independent way
       double deltaTheta = projectionFactor * angle3D;
-      double numDetlaPhi = 0.; //??
+      double numDetlaPhi = 0.; //?? @THIS IS WRONG HERE !
       double deltaPhi = projectionFactor * numDetlaPhi / sinTheta;
 
       // @todo: use bound parameter
@@ -79,8 +79,9 @@ struct Scattering {
       double ctheta = std::cos(theta);
 
       // assign the new values
-      in.momentum = in.p * Acts::Vector3D(cphi * stheta, sphi * stheta, ctheta);
-
+      in.scatter(in.p() * Acts::Vector3D(cphi * stheta, 
+                                         sphi * stheta, 
+                                         ctheta));
     } else {
 
       /// uniform distribution
@@ -90,7 +91,7 @@ struct Scattering {
       double psi = 2. * M_PI * uniformDist(gen);
 
       // more complex but "more true"
-      Acts::Vector3D pDirection(in.momentum.unit());
+      Acts::Vector3D pDirection(in.momentum().unit());
       double x = -pDirection.y();
       double y = pDirection.x();
       double z = 0.;
@@ -107,7 +108,7 @@ struct Scattering {
       rotation = Acts::AngleAxis3D(psi, pDirection) *
                  Acts::AngleAxis3D(angle3D, deflector);
       // rotate and set a new direction to the cache
-      in.momentum = in.p * rotation * pDirection.unit();
+      in.scatter(in.p() * rotation * pDirection.unit());
     }
     // scattering always returns an empty list
     // - it is a non-distructive process

@@ -20,14 +20,14 @@
 
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
+
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/Scattering/GaussianMixture.hpp"
 #include "Fatras/Physics/Scattering/GeneralMixture.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
 #include "Fatras/Physics/Scattering/Scattering.hpp"
+#include "Particle.hpp"
 #include <fstream>
 #include <random>
 
@@ -124,7 +124,7 @@ BOOST_DATA_TEST_CASE(
   if (write_csv) {
     if (!index)
       os << "p,highland,gaussian_mixture,general_mixture" << '\n';
-    os << particle.p << "," << hsr << "," << gamr << "," << genr << '\n';
+    os << particle.p() << "," << hsr << "," << gamr << "," << genr << '\n';
   }
 }
 

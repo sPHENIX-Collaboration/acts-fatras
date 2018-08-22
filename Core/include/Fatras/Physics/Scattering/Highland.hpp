@@ -45,12 +45,14 @@ struct Highland {
 
     /// thickness in X0
     double dInX0 = detector.thickness() / detector.material().X0();
-    bool electron = std::abs(particle.pdg) == 11;
+    bool electron = std::abs(particle.pdg()) == 11;
 
     // return projection factor times sigma times grauss radnom
     return M_SQRT2 *
-           highlandForumla(particle.p, particle.beta, dInX0, electron) *
-           gaussDist(generator);
+           highlandForumla(particle.p(), 
+                           particle.beta(), 
+                           dInX0, 
+                           electron) * gaussDist(generator);
   }
 };
 

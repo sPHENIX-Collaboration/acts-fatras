@@ -10,7 +10,7 @@
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
 #include "Acts/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -57,7 +57,7 @@ struct GeneralMixture {
 
     double theta(0.);
 
-    if (std::abs(particle.pdg) != 11) {
+    if (std::abs(particle.pdg()) != 11) {
 
       /// Uniform distribution, will be sampled with generator
       UniformDist uniformDist = UniformDist(0., 1.);
@@ -70,14 +70,16 @@ struct GeneralMixture {
       //----------------------------------------------------------------------------
       std::array<double, 4> scattering_params;
       // Decide which mixture is best
-      if (tInX0 / (particle.beta * particle.beta) > 0.6 / std::pow(Z, 0.6)) {
+      double beta2 = (particle.beta() * particle.beta());
+      double tob2 = tInX0 / beta2;
+      if (tob2 > 0.6 / std::pow(Z, 0.6)) {
         // Gaussian mixture or pure Gaussian
-        if (tInX0 / (particle.beta * particle.beta) > 10) {
+        if (tob2 > 10) {
           scattering_params =
-              getGaussian(particle.beta, particle.p, tInX0, genMixtureScalor);
+              getGaussian(particle.beta(), particle.p(), tInX0, genMixtureScalor);
         } else {
           scattering_params =
-              getGaussmix(particle.beta, particle.p, tInX0,
+              getGaussmix(particle.beta(), particle.p(), tInX0,
                           detector.material().Z(), genMixtureScalor);
         }
         // Simulate
@@ -85,7 +87,7 @@ struct GeneralMixture {
       } else {
         // Semigaussian mixture - get parameters
         auto scattering_params_sg =
-            getSemigauss(particle.beta, particle.p, tInX0,
+            getSemigauss(particle.beta(), particle.p(), tInX0,
                          detector.material().Z(), genMixtureScalor);
         // Simulate
         theta = semigauss(uniformDist, generator, scattering_params_sg);
@@ -97,7 +99,7 @@ struct GeneralMixture {
 
       // for electrons we fall back to the Highland (extension)
       // return projection factor times sigma times gauss random
-      theta = highlandForumla(particle.p, particle.beta, tInX0, true) *
+      theta = highlandForumla(particle.p(), particle.beta(), tInX0, true) *
               gaussDist(generator);
     }
     // return scaled by sqare root of two

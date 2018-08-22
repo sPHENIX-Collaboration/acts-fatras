@@ -118,7 +118,7 @@ struct Interactor {
                            state.stepping.momentum());
 
     // Check if the current surrface a senstive one
-    bool isSensitive = state.navigation.currentSurface
+    bool sensitive = state.navigation.currentSurface
                            ? sensitiveSelector(*state.navigation.currentSurface)
                            : false;
     double depositedEnergy = 0.;
@@ -141,15 +141,15 @@ struct Interactor {
     }
 
     // update the stepper cache with the current particle parameters
-    state.stepping.update(result.particle.position,
-                          result.particle.momentum.unit(),
-                          result.particle.p);
+    state.stepping.update(result.particle.position(),
+                          result.particle.momentum().unit(),
+                          result.particle.p());
 
-    // create the SensitiveHit and store it
-    if (isSensitive) {
+    // create the hit on a senstive element
+    if (sensitive) {
       // create and fill the hit
-      double value = 0.;
-      double htime = 0.;
+      double value = 0.; //!< todo fill from depositedEnergy calculation
+      double htime = 0.; //!< todo calculate from delta time
       hit_t simHit = hitCreator(state,value,htime,result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }

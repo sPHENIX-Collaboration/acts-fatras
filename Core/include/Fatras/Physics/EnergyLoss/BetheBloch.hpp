@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -57,8 +57,12 @@ struct BetheBloch {
     double landau = landauDist(generator);
 
     auto eLoss =
-        ionisationLoss(particle.m, particle.beta, particle.gamma,
-                       detector.material(), detector.thickness(), false);
+        ionisationLoss(particle.m(), 
+                       particle.beta(), 
+                       particle.gamma(),
+                       detector.material(), 
+                       detector.thickness(), 
+                       false);
     // the actual energy loss
     double energyLoss = eLoss.first;
     // the uncertainty of the mean energy loss
@@ -67,20 +71,10 @@ struct BetheBloch {
     // Simulate the energy loss
     double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
                     scaleFactorSigma * energyLossSigma * landau;
-    // protection due to straggling
-    // - maximum energy loss is E-m, particle goes to rest
-    if (particle.E - deltaE < particle.m) {
-      particle.E = particle.m;
-      particle.p = 0.;
-      particle.pT = 0.;
-      particle.momentum = Acts::Vector3D(0., 0., 0.);
-    } else {
-      // updatet the parameters
-      particle.E -= deltaE;
-      particle.p = std::sqrt(particle.E * particle.E - particle.m * particle.m);
-      particle.momentum = particle.p * particle.momentum.unit();
-      particle.pT = particle.momentum.perp();
-    }
+    // apply the energy loss
+    particle.energyLoss(energyLoss);
+
+    // return empty children
     return {};
   }
 };

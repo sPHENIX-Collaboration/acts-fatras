@@ -120,9 +120,9 @@ struct Simulator {
           chargedInteractor.initialParticle = (*particle);
           // create the kinematic start parameters
           Acts::CurvilinearParameters start(nullptr, 
-                                            particle->position,
-                                            particle->momentum, 
-                                            particle->q);
+                                            particle->position(),
+                                            particle->momentum(), 
+                                            particle->q());
           // run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions);
@@ -155,8 +155,9 @@ struct Simulator {
           // put all the additional information into the interactor
           neutralInteractor.initialParticle = (*particle);
           // create the kinematic start parameters
-          Acts::NeutralCurvilinearParameters start(nullptr, particle->position,
-                                                   particle->momentum);
+          Acts::NeutralCurvilinearParameters start(nullptr, 
+                                                   particle->position(),
+                                                   particle->momentum());
           const auto &result =
               neutralPropagator.propagate(start, neutralOptions);
           auto &fatrasResult = result.template get<NeutralResult>();

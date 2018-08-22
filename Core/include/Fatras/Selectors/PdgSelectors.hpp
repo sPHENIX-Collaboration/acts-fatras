@@ -19,7 +19,7 @@ template <int pdg_t> struct AbsPdgSelector {
   /// the selection criteria
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.pdg * particle.pdg == saPDG * saPDG);
+    return (particle.pdg() * particle.pdg() == saPDG * saPDG);
   }
 };
 
@@ -32,7 +32,7 @@ template <int pdg_t> struct PdgSelector {
   /// the selection criteria
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.pdg == saPDG);
+    return (particle.pdg() == saPDG);
   }
 };
 
@@ -45,7 +45,7 @@ template <int pdg_t> struct AbsPdgExcluder {
   /// the selection criteria
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return !(particle.pdg * particle.pdg == saPDG * saPDG);
+    return !(particle.pdg() * particle.pdg() == saPDG * saPDG);
   }
 };
 
@@ -58,7 +58,7 @@ template <int pdg_t> struct PdgExcluder {
   /// the selection criteria
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return !(particle.pdg == saPDG);
+    return !(particle.pdg() == saPDG);
   }
 };
 

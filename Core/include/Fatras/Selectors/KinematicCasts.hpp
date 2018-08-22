@@ -19,7 +19,7 @@ struct eta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum.eta();
+    return particle.momentum().eta();
   }
 };
 
@@ -28,25 +28,23 @@ struct absEta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return std::abs(particle.momentum.eta());
+    return std::abs(particle.momentum().eta());
   }
 };
 
 /// The Pt cast operator
 struct pT {
-
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum.perp();
+    return particle.momentum().perp();
   }
 };
 
 /// The P cast operator
 struct p {
-
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum.mag();
+    return particle.momentum().mag();
   }
 };
 
@@ -55,7 +53,7 @@ struct E {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.E;
+    return particle.E();
   }
 };
 
@@ -64,7 +62,7 @@ struct vR {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.position.perp();
+    return particle.position().perp();
   }
 };
 
@@ -73,7 +71,7 @@ struct vZ {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.position.z();
+    return particle.position().z();
   }
 };
 
@@ -82,7 +80,7 @@ struct AbsVz {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return std::abs(particle.position.z());
+    return std::abs(particle.position().z());
   }
 };
 

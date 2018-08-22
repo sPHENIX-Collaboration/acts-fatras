@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Acts/Utilities/Definitions.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include <cmath>
 
 namespace Fatras {

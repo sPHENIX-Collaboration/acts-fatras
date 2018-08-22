@@ -21,4 +21,3 @@ install(
   DIRECTORY include/Fatras
 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Fatras)
 target_include_directories(FatrasCore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-

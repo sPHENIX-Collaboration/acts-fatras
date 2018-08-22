@@ -14,7 +14,7 @@ struct ChargedSelector {
   /// Return true for all particles with charge != 0.
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q * particle.q > 0.);
+    return (particle.q() * particle.q() > 0.);
   }
 };
 
@@ -22,7 +22,7 @@ struct NeutralSelector {
   /// Return true for all particles with charge == 0.
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q == 0.);
+    return (particle.q() == 0.);
   }
 };
 
@@ -30,7 +30,7 @@ struct PositiveSelector {
   /// Return true for all particles with charge > 0.
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q > 0.);
+    return (particle.q() > 0.);
   }
 };
 
@@ -38,7 +38,7 @@ struct NegativeSelector {
   /// Return true for all particles with charge<> 0.
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q * particle.q > 0.);
+    return (particle.q() * particle.q() > 0.);
   }
 };
 

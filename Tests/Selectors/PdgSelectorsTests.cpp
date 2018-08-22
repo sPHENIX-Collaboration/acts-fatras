@@ -18,8 +18,7 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
+#include "Particle.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Selectors/PdgSelectors.hpp"
 
@@ -44,17 +43,10 @@ BOOST_AUTO_TEST_CASE(PdgSelectors_test) {
   Acts::Vector3D position(0., 0., 0.);
   Acts::Vector3D momentum(1500., 0., 0);
 
-  Particle electron(position, momentum, -1., m_e);
-  electron.pdg = 11;
-
-  Particle positron(position, momentum, -1., m_e);
-  positron.pdg = -11;
-
-  Particle muon(position, momentum, -1., m_muon);
-  muon.pdg = 13;
-
-  Particle antimuon(position, momentum, 1., m_muon);
-  antimuon.pdg = -13;
+  Particle electron(position, momentum,  m_e, -1., 11);
+  Particle positron(position, momentum, m_e, 1., -11);
+  Particle muon(position, momentum, m_muon, -1., 13);
+  Particle antimuon(position, momentum, m_muon, 1., -13);
 
   AbsPdgSelector<11> epSelector;
 

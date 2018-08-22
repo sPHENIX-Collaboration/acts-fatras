@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Acts/Utilities/MaterialInteraction.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -46,26 +46,17 @@ struct BetheHeitler {
                                      particle_t &particle) const {
 
     double tInX0 = detector.thickness() / detector.material().X0();
+    
     // Take a random gamma-distributed value - depending on t/X0
     GammaDist gDist = GammaDist(tInX0 / log_2, 1.);
 
     double u = gDist(generator);
     double z = std::exp(-1. * u);
-    double deltaE = std::abs(scaleFactor * particle.E * (z - 1.));
+    double deltaE = std::abs(scaleFactor * particle.E() * (z - 1.));
 
-    // protection due to straggling
-    // - maximum energy loss is E-m, particle goes to rest
-    if (particle.E - deltaE < particle.m) {
-      particle.E = particle.m;
-      particle.p = 0.;
-      particle.pT = 0.;
-      particle.momentum = Acts::Vector3D(0., 0., 0.);
-    } else {
-      particle.E -= deltaE;
-      particle.p = std::sqrt(particle.E * particle.E - particle.m * particle.m);
-      particle.momentum = particle.p * particle.momentum.unit();
-      particle.pT = particle.momentum.perp();
-    }
+    // apply the energy loss
+    particle.energyLoss(deltaE);
+    
     // todo return photons, needs particle_creator_t
     return {};
   }

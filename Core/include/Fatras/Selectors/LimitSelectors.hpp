@@ -18,9 +18,9 @@ struct X0Limit {
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &detector,
                   const particle_t &particle) const {
-    return particle.pathInX0 +
+    return particle.pathInX0() +
                detector.thickness() / detector.material().X0() >=
-           particle.limitInX0;
+           particle.limitInX0();
   }
 };
 
@@ -32,9 +32,9 @@ struct L0Limit {
   template <typename detector_t, typename particle_t>
   bool operator()(const detector_t &detector,
                   const particle_t &particle) const {
-    return particle.pathInL0 +
+    return particle.pathInL0() +
                detector.thickness() / detector.material().L0() >=
-           particle.limitInL0;
+           particle.limitInL0();
   }
 };
 

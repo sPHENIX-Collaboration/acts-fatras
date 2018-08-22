@@ -18,11 +18,10 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Acts/Utilities/Units.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
+#include "Particle.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
 #include "Fatras/Selectors/SelectorHelpers.hpp"
+#include "Acts/Utilities/Units.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -41,23 +40,23 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   Detector detector;
 
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentum_c(1500., 0., 0);
+  Acts::Vector3D momentumCast(1500., 0., 0);
 
   // e central electron
-  Particle pion_c(position, momentum_c, -1., m_pion);
-  Acts::Vector3D position_fwd(0., 0., 100.);
-  Acts::Vector3D momentum_fwd(10., 10., 1500.);
+  Particle pionCast(position, momentumCast, -1., m_pion);
+  Acts::Vector3D positionForward(0., 0., 100. * Acts::units::_mm);
+  Acts::Vector3D momentumForward(10., 10., 1500.* Acts::units::_MeV);
 
-  Particle pion_fwd(position_fwd, momentum_fwd, -1., m_pion);
+  Particle pionForward(positionForward, momentumForward, m_pion, -1.);
 
-  Acts::Vector3D position_bwd(0., 0., 0.);
-  Acts::Vector3D momentum_bwd(10., 10., -1500.);
+  Acts::Vector3D positionBackward(0., 0., 0.);
+  Acts::Vector3D momentumBackward(10., 10., -1500.* Acts::units::_MeV);
 
-  Particle pion_bwd(position_bwd, momentum_bwd, -1., m_pion);
+  Particle pionBackward(positionBackward, momentumBackward, m_pion, -1.);
 
   // the list of possible casts
-  casts::eta eta_c;
-  casts::absEta etaAbs_c;
+  casts::eta etaCast;
+  casts::absEta etaAbsCast;
 
   // A minimum of 0.5 Eta is required
   Min<casts::eta> minEta05;
@@ -67,24 +66,24 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   minEtaAbs05.valMin = 0.5;
 
   // the central will fail both
-  BOOST_CHECK(!minEta05(detector, pion_c));
-  BOOST_CHECK(!minEtaAbs05(detector, pion_c));
+  BOOST_CHECK(!minEta05(detector, pionCast));
+  BOOST_CHECK(!minEtaAbs05(detector, pionCast));
 
   // the forward will satisfy both
-  BOOST_CHECK(minEta05(detector, pion_fwd));
-  BOOST_CHECK(minEtaAbs05(detector, pion_fwd));
+  BOOST_CHECK(minEta05(detector, pionForward));
+  BOOST_CHECK(minEtaAbs05(detector, pionForward));
 
   // A maximum of 0.5 Eta is required
   Max<casts::eta> maxEta05;
   maxEta05.valMax = 0.5;
 
   // the central will satisfy both
-  BOOST_CHECK(maxEta05(detector, pion_c));
-  BOOST_CHECK(maxEta05(detector, pion_c));
+  BOOST_CHECK(maxEta05(detector, pionCast));
+  BOOST_CHECK(maxEta05(detector, pionCast));
 
   // the forward will fail both
-  BOOST_CHECK(!maxEta05(detector, pion_fwd));
-  BOOST_CHECK(!maxEta05(detector, pion_fwd));
+  BOOST_CHECK(!maxEta05(detector, pionForward));
+  BOOST_CHECK(!maxEta05(detector, pionForward));
 
   // a range test
   Range<casts::eta> rangeEtaM0;
@@ -96,16 +95,16 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   rangeEtaM1.valMax = -0.5;
 
   // the central will fail both
-  BOOST_CHECK(!rangeEtaM0(detector, pion_c));
-  BOOST_CHECK(!rangeEtaM1(detector, pion_c));
+  BOOST_CHECK(!rangeEtaM0(detector, pionCast));
+  BOOST_CHECK(!rangeEtaM1(detector, pionCast));
 
   // the forward will fail both
-  BOOST_CHECK(!rangeEtaM0(detector, pion_fwd));
-  BOOST_CHECK(!rangeEtaM1(detector, pion_fwd));
+  BOOST_CHECK(!rangeEtaM0(detector, pionForward));
+  BOOST_CHECK(!rangeEtaM1(detector, pionForward));
 
   // the backeard will satsify the eta cast, not the abs(eta)
-  BOOST_CHECK(rangeEtaM0(detector, pion_bwd));
-  BOOST_CHECK(!rangeEtaM1(detector, pion_bwd));
+  BOOST_CHECK(rangeEtaM0(detector, pionBackward));
+  BOOST_CHECK(!rangeEtaM1(detector, pionBackward));
 }
 
 } // namespace Test

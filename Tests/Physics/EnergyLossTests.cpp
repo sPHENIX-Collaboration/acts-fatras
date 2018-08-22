@@ -20,12 +20,11 @@
 
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/EnergyLoss/BetheBloch.hpp"
 #include "Fatras/Physics/EnergyLoss/BetheHeitler.hpp"
+#include "Particle.hpp"
 #include <fstream>
 #include <random>
 
@@ -98,37 +97,38 @@ BOOST_DATA_TEST_CASE(
 
   // create the particle
   Particle particle(position, momentum, m, q, 13, 1);
-  BOOST_CHECK_EQUAL(particle.m, m);
-  BOOST_CHECK_EQUAL(particle.pdg, 13);
+  BOOST_CHECK_EQUAL(particle.m(), m);
+  BOOST_CHECK_EQUAL(particle.pdg(), 13);
 
   // make the highland scatterer
   BetheBloch bbloch;
   BetheHeitler bheitler;
-  double E = particle.E;
+  double E = particle.E();
 
   auto bbr = bbloch(generator, detector, particle);
-  double eloss_io = E - particle.E;
+  double eloss_io = E - particle.E();
 
-  BOOST_CHECK(E >= particle.E);
+  // Check if the particle actually lost energy
+  BOOST_CHECK(E >= particle.E());
   BOOST_CHECK(bbr.size() == 0);
 
   // recreate the particle as an electron
   particle = Particle(position, momentum, me, q, 11, 1);
-  BOOST_CHECK_EQUAL(particle.m, me);
-  BOOST_CHECK_EQUAL(particle.pdg, 11);
+  BOOST_CHECK_EQUAL(particle.m(), me);
+  BOOST_CHECK_EQUAL(particle.pdg(), 11);
 
-  E = particle.E;
+  E = particle.E();
 
   auto bhr = bheitler(generator, detector, particle);
-  double eloss_rad = E - particle.E;
-  BOOST_CHECK(E >= particle.E);
+  double eloss_rad = E - particle.E();
+  BOOST_CHECK(E >= particle.E());
   BOOST_CHECK(bhr.size() == 0);
 
   // write out a csv file
   if (write_csv) {
     if (!index)
       os << "p,bethe_bloch,bethe_heitler" << '\n';
-    os << particle.p << "," << eloss_io << "," << eloss_rad << '\n';
+    os << particle.p() << "," << eloss_io << "," << eloss_rad << '\n';
   }
 
   // Accept everything

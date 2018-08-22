@@ -18,12 +18,11 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Acts/Utilities/Definitions.hpp"
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/Particle.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
+#include "Acts/Utilities/Definitions.hpp"
+#include "Particle.hpp"
 #include <algorithm>
 #include <random>
 
@@ -60,11 +59,7 @@ struct EnergyDecreaser {
   std::vector<particle_t> operator()(generator_t &, const detector_t &,
                                      particle_t &in) const {
 
-    in.E *= cvalue;
-    in.p = std::sqrt(in.E * in.E - in.m * in.m);
-    in.momentum = in.p * in.momentum.unit();
-    in.pT = in.momentum.perp();
-
+    in.energyLoss((1.-cvalue)*in.E());
     return {};
   }
 };
@@ -117,7 +112,7 @@ BOOST_DATA_TEST_CASE(
   BOOST_CHECK(!cEnergyLoss(generator, detector, particle, outgoing));
 
   // check the the particle momentum magnitude is NOT identical
-  BOOST_CHECK(momentum.mag() != particle.momentum.mag());
+  BOOST_CHECK(momentum.mag() != particle.momentum().mag());
 
   // let's test this as part of a physics list
   PhysicsList<EnergyLoss> energyLossPhysics;
