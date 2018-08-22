@@ -42,7 +42,7 @@ struct NoneSelector {
   /// boolean operator()
   ///
   /// ignores what it needs
-  bool operator()(const Acts::Surface &sf) const { return false; }
+  bool operator()(const Acts::Surface &) const { return false; }
 };
 
 } // namespace Fatras
