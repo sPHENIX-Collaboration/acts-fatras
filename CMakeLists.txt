@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include(GNUInstallDirs)
+include(CTest)
 
 add_subdirectory(Core)
 add_subdirectory(Tests)
