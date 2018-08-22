@@ -5,8 +5,9 @@ project(Fatras LANGUAGES CXX)
 # could be included in a larger project, e.g. acts-framework, that also
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
-if(NOT TARGET ActsCore)
-  find_package(Acts REQUIRED COMPONENTS Core)
+
+if(NOT TARGET Acts::Core)
+  find_package(Acts REQUIRED COMPONENTS Core Legacy)
 endif()
 
 # require C++14 globally

@@ -52,11 +52,11 @@ struct Process {
       if (children.size()) {
         // copy the children that comply with the child selector
         std::copy_if(
-            children.begin(), children.end(), out.begin(),
+            children.begin(), children.end(), std::back_inserter(out),
             [this, det](const particle_t &p) { return selectorChild(det, p); });
       }
     }
-    // check if this killed the partilce,
+    // check if this killed the particle,
     // or pushed below threshold
     return (!selectorOut(det, in));
   }

@@ -43,8 +43,13 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentum(1500. * Acts::units::_MeV, 0., 0);
-  Particle pion(position, momentum, -1., m);
+
+  Acts::Vector3D momentum(1500., 0., 0.);
+  Particle pion(position, momentum, -1., m_pion);
+  // the path of the particle
+  pion.pathInX0 = 0.10;
+  pion.pathInL0 = 0.34;
+
   // the limit of the particle
   pion.setLimits(0.15, 0.45);
   // the path of the particle
@@ -56,7 +61,7 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   BOOST_CHECK(!x0LimitSelector(detector, pion));
   BOOST_CHECK(!l0LimitSelector(detector, pion));
 
-  detector = Acts::MaterialProperties(berilium, 5. * Acts::units::_mm);
+  detector = Acts::MaterialProperties(berilium, 50. * Acts::units::_mm);
 
   // the limit is now reached
   BOOST_CHECK(x0LimitSelector(detector, pion));
