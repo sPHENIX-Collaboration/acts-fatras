@@ -8,7 +8,9 @@ target_include_directories (FatrasEnergyLossTests PRIVATE ${Boost_INCLUDE_DIRS} 
 target_link_libraries (FatrasEnergyLossTests PRIVATE Acts::Core Acts::Legacy Fatras::Core)
 add_test (NAME FatrasEnergyLossUnitTest COMMAND FatrasEnergyLossTests)
 
+message(STATUS ${Geant4_USE_FILE})
 include(${Geant4_USE_FILE})
+
 file(GLOB_RECURSE src_files "src/*.cc" "include/*.hh")
 
 add_executable (FatrasParametricNuclearIntTests ParametricNuclearIntTests.cpp ${src_files})
