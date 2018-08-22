@@ -18,14 +18,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 include(GNUInstallDirs)
 include(CTest)
 
-add_subdirectory(Core)
-add_subdirectory(Tests)
-  
 # Geant4 specific configuration
 if(USE_GEANT4)
   set(Geant4_CONFIG_DEBUG on)
   find_package(Geant4 REQUIRED gdml)
 endif()
+
+add_subdirectory(Core)
+add_subdirectory(Tests)
 
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
