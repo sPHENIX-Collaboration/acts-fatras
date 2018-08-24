@@ -43,10 +43,7 @@ typedef std::mt19937 Generator;
 Generator generator;
 
 // some material
-Acts::Material berilium = Acts::Material(352.8, 
-                                         407., 
-                                         9.012, 
-                                         4.,
+Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4.,
                                          1.848 / (au::_cm * au::_cm * au::_cm));
 
 /// The selector

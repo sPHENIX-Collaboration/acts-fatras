@@ -41,15 +41,12 @@ struct GeneralMixture {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
-  double operator()(generator_t &generator, 
-                    const detector_t &detector,
+  template <typename generator_t, typename detector_t, typename particle_t>
+  double operator()(generator_t &generator, const detector_t &detector,
                     particle_t &particle) const {
 
     // scale the path length to the radiation length
-    // @todo path correction factor                  
+    // @todo path correction factor
     double tInX0 = detector.thickness() / detector.material().X0();
 
     // material properties
@@ -75,8 +72,8 @@ struct GeneralMixture {
       if (tob2 > 0.6 / std::pow(Z, 0.6)) {
         // Gaussian mixture or pure Gaussian
         if (tob2 > 10) {
-          scattering_params =
-              getGaussian(particle.beta(), particle.p(), tInX0, genMixtureScalor);
+          scattering_params = getGaussian(particle.beta(), particle.p(), tInX0,
+                                          genMixtureScalor);
         } else {
           scattering_params =
               getGaussmix(particle.beta(), particle.p(), tInX0,

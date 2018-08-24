@@ -18,10 +18,10 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
+#include "Acts/Utilities/Definitions.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
-#include "Acts/Utilities/Definitions.hpp"
 #include "Particle.hpp"
 #include <algorithm>
 #include <random>
@@ -59,7 +59,7 @@ struct EnergyDecreaser {
   std::vector<particle_t> operator()(generator_t &, const detector_t &,
                                      particle_t &in) const {
 
-    in.energyLoss((1.-cvalue)*in.E());
+    in.energyLoss((1. - cvalue) * in.E());
     return {};
   }
 };

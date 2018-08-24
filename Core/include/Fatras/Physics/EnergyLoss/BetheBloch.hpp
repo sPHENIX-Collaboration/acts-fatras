@@ -45,9 +45,7 @@ struct BetheBloch {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return empty vector for BetheBloch - no secondaries created
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
+  template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
@@ -57,12 +55,8 @@ struct BetheBloch {
     double landau = landauDist(generator);
 
     auto eLoss =
-        ionisationLoss(particle.m(), 
-                       particle.beta(), 
-                       particle.gamma(),
-                       detector.material(), 
-                       detector.thickness(), 
-                       false);
+        ionisationLoss(particle.m(), particle.beta(), particle.gamma(),
+                       detector.material(), detector.thickness(), false);
     // the actual energy loss
     double energyLoss = eLoss.first;
     // the uncertainty of the mean energy loss

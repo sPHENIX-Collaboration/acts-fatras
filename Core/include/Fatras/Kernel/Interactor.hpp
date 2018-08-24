@@ -43,11 +43,8 @@ struct VoidSelector {
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
-template <typename generator_t, 
-          typename particle_t,
-          typename hit_t,
-          typename hit_creator_t,
-          typename sensitive_selector_t = VoidSelector,
+template <typename generator_t, typename particle_t, typename hit_t,
+          typename hit_creator_t, typename sensitive_selector_t = VoidSelector,
           typename physics_list_t = PhysicsList<>>
 struct Interactor {
 
@@ -65,7 +62,7 @@ struct Interactor {
 
   /// The hit creator helper class
   hit_creator_t hitCreator;
-  
+
   /// It mainly acts as an internal state cache which is
   /// created for every propagation/extrapolation step
   struct this_result {
@@ -119,8 +116,8 @@ struct Interactor {
 
     // Check if the current surrface a senstive one
     bool sensitive = state.navigation.currentSurface
-                           ? sensitiveSelector(*state.navigation.currentSurface)
-                           : false;
+                         ? sensitiveSelector(*state.navigation.currentSurface)
+                         : false;
     double depositedEnergy = 0.;
 
     // a current surface has been assigned by the navigator
@@ -133,9 +130,7 @@ struct Interactor {
       bool breakIndicator = false;
       if (mProperties) {
         // run the Fatras physics list - only when there's material
-        breakIndicator = physicsList(*generator, 
-                                     *mProperties,
-                                     result.particle,
+        breakIndicator = physicsList(*generator, *mProperties, result.particle,
                                      result.outgoing);
       }
     }
@@ -150,7 +145,7 @@ struct Interactor {
       // create and fill the hit
       double value = 0.; //!< todo fill from depositedEnergy calculation
       double htime = 0.; //!< todo calculate from delta time
-      hit_t simHit = hitCreator(state,value,htime,result.particle);
+      hit_t simHit = hitCreator(state, value, htime, result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }
   }

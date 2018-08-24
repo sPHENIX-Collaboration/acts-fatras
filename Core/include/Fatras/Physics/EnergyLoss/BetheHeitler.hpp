@@ -38,15 +38,13 @@ struct BetheHeitler {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return eventually produced photons
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
+  template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
 
     double tInX0 = detector.thickness() / detector.material().X0();
-    
+
     // Take a random gamma-distributed value - depending on t/X0
     GammaDist gDist = GammaDist(tInX0 / log_2, 1.);
 
@@ -56,7 +54,7 @@ struct BetheHeitler {
 
     // apply the energy loss
     particle.energyLoss(deltaE);
-    
+
     // todo return photons, needs particle_creator_t
     return {};
   }

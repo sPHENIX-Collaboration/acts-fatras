@@ -25,8 +25,7 @@ namespace Fatras {
 /// There's two options to apply the scattering
 /// - a parametric action that relates phi and theta (default: off)
 /// - an actuall out of direction scattering applying two random numbers
-template <typename formula_t> 
-struct Scattering {
+template <typename formula_t> struct Scattering {
 
   /// Include the log term
   bool parametric = false;
@@ -36,11 +35,8 @@ struct Scattering {
   formula_t angle;
 
   /// This is the scattering call operator
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
-  std::vector<particle_t> operator()(generator_t &gen, 
-                                     const detector_t &det,
+  template <typename generator_t, typename detector_t, typename particle_t>
+  std::vector<particle_t> operator()(generator_t &gen, const detector_t &det,
                                      particle_t &in) const {
 
     // 3D scattering angle
@@ -79,9 +75,7 @@ struct Scattering {
       double ctheta = std::cos(theta);
 
       // assign the new values
-      in.scatter(in.p() * Acts::Vector3D(cphi * stheta, 
-                                         sphi * stheta, 
-                                         ctheta));
+      in.scatter(in.p() * Acts::Vector3D(cphi * stheta, sphi * stheta, ctheta));
     } else {
 
       /// uniform distribution

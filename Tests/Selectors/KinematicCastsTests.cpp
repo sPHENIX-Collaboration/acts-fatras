@@ -18,9 +18,9 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Particle.hpp"
 #include "Acts/Utilities/Units.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
+#include "Particle.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -29,21 +29,20 @@ namespace Fatras {
 
 namespace Test {
 
-double m = 134.9766 * Acts::units::_MeV; 
+double m = 134.9766 * Acts::units::_MeV;
 
 // This tests the implementation of kinematic cast operators
 BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentumCentral(1500.* Acts::units::_MeV, 0., 0);
+  Acts::Vector3D momentumCentral(1500. * Acts::units::_MeV, 0., 0);
   Particle pionCentral(position, momentumCentral, -1., m);
 
   // a forward pion
   Acts::Vector3D positionFwd(0., 0., 100.);
-  Acts::Vector3D momentumFwd(10.* Acts::units::_MeV, 
-                             10. * Acts::units::_MeV, 
-                             1500.* Acts::units::_MeV);
+  Acts::Vector3D momentumFwd(10. * Acts::units::_MeV, 10. * Acts::units::_MeV,
+                             1500. * Acts::units::_MeV);
   Particle pionFwd(positionFwd, momentumFwd, -1., m);
 
   // the list of possible casts
@@ -58,8 +57,8 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   // test the central
   BOOST_TEST(eta_c(pionCentral), 0.);
   BOOST_TEST(absEta_c(pionCentral), 0.);
-  BOOST_TEST(pT_c(pionCentral), 1500.* Acts::units::_MeV);
-  BOOST_TEST(p_c(pionCentral), 1500.* Acts::units::_MeV);
+  BOOST_TEST(pT_c(pionCentral), 1500. * Acts::units::_MeV);
+  BOOST_TEST(p_c(pionCentral), 1500. * Acts::units::_MeV);
   BOOST_CHECK(E_c(pionCentral) > p_c(pionCentral));
 
   BOOST_CHECK_CLOSE(vR_c(pionCentral), 0., 10e-5);
@@ -67,7 +66,7 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // test the forward
   BOOST_CHECK(eta_c(pionFwd) > eta_c(pionCentral));
-  BOOST_TEST(vZ_c(pionFwd), 100.* Acts::units::_MeV);
+  BOOST_TEST(vZ_c(pionFwd), 100. * Acts::units::_MeV);
 }
 
 } // namespace Test

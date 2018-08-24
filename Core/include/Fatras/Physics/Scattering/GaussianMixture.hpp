@@ -48,11 +48,8 @@ struct GaussianMixture {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
-  double operator()(generator_t &generator, 
-                    const detector_t &detector,
+  template <typename generator_t, typename detector_t, typename particle_t>
+  double operator()(generator_t &generator, const detector_t &detector,
                     particle_t &particle) const {
 
     // thickness in X0
@@ -60,7 +57,8 @@ struct GaussianMixture {
     bool electron = std::abs(particle.pdg()) == 11;
 
     /// Calculate the highland formula first
-    double sigma = highlandForumla(particle.p(), particle.beta(), dInX0, electron);
+    double sigma =
+        highlandForumla(particle.p(), particle.beta(), dInX0, electron);
     double sigma2 = sigma * sigma;
 
     // Gauss distribution, will be sampled with generator

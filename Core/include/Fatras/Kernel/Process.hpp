@@ -14,10 +14,10 @@
 
 namespace Fatras {
 
-/// @brief Process class that turns a parameterized or 
+/// @brief Process class that turns a parameterized or
 /// tabularized fast simulation module into a process that
 /// can be plugged into the PhysicsList
-/// 
+///
 /// This is plugin for physics processes
 ///  - scattering
 ///  - energy loss
@@ -28,9 +28,7 @@ namespace Fatras {
 /// The type (and actual trigger) of the particle
 /// and interaction is steered via the Selector list
 /// for in and out.
-template <typename physics_t, 
-          typename selector_in_t, 
-          typename selector_out_t,
+template <typename physics_t, typename selector_in_t, typename selector_out_t,
           typename selector_child_t>
 
 struct Process {

@@ -18,9 +18,9 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Particle.hpp"
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Selectors/PdgSelectors.hpp"
+#include "Particle.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(PdgSelectors_test) {
   Acts::Vector3D position(0., 0., 0.);
   Acts::Vector3D momentum(1500., 0., 0);
 
-  Particle electron(position, momentum,  m_e, -1., 11);
+  Particle electron(position, momentum, m_e, -1., 11);
   Particle positron(position, momentum, m_e, 1., -11);
   Particle muon(position, momentum, m_muon, -1., 13);
   Particle antimuon(position, momentum, m_muon, 1., -13);

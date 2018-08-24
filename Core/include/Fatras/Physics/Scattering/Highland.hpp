@@ -33,11 +33,8 @@ struct Highland {
   /// @param[in] particle the particle which is being scattered
   ///
   /// @return a scattering angle in 3D
-  template <typename generator_t, 
-            typename detector_t, 
-            typename particle_t>
-  double operator()(generator_t &generator, 
-                    const detector_t &detector,
+  template <typename generator_t, typename detector_t, typename particle_t>
+  double operator()(generator_t &generator, const detector_t &detector,
                     particle_t &particle) const {
 
     // Gauss distribution, will be sampled sampled with generator
@@ -49,10 +46,8 @@ struct Highland {
 
     // return projection factor times sigma times grauss radnom
     return M_SQRT2 *
-           highlandForumla(particle.p(), 
-                           particle.beta(), 
-                           dInX0, 
-                           electron) * gaussDist(generator);
+           highlandForumla(particle.p(), particle.beta(), dInX0, electron) *
+           gaussDist(generator);
   }
 };
 

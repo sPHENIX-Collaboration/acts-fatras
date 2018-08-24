@@ -69,11 +69,9 @@ struct Simulator {
   /// @param fatrasGenerator is the event-bound random generator
   /// @param fatrasEvent is the truth event collection
   /// @param fatrasHits is the hit collection
-  template <typename generator_t, 
-            typename event_collection_t,
+  template <typename generator_t, typename event_collection_t,
             typename hit_collection_t>
-  void operator()(generator_t &fatrasGenerator, 
-                  event_collection_t &fatrasEvent,
+  void operator()(generator_t &fatrasGenerator, event_collection_t &fatrasEvent,
                   hit_collection_t &fatrasHits) const {
 
     // if screen output is required
@@ -100,34 +98,32 @@ struct Simulator {
     for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
-      for (auto particle = vertex.outgoing_begin(); 
-           particle != vertex.outgoing_end(); 
-           ++particle) {
+      for (auto particle = vertex.outgoing_begin();
+           particle != vertex.outgoing_end(); ++particle) {
         // charged particle detected and selected
         if (chargedSelector(detector, *particle)) {
           // Need to construct them per call to set the particle
           // Options and configuration
           ChargedOptions chargedOptions;
           chargedOptions.debug = debug;
-          // get the charged interactor
+          // Get the charged interactor
           auto &chargedInteractor =
               chargedOptions.actionList.template get<charged_interactor_t>();
-          // result type typedef
+          // Result type typedef
           typedef typename charged_interactor_t::result_type ChargedResult;
-          // set the generator to guarantee event consistent entires
+          // Set the generator to guarantee event consistent entires
           chargedInteractor.generator = &fatrasGenerator;
-          // put all the additional information into the interactor
+          // Put all the additional information into the interactor
           chargedInteractor.initialParticle = (*particle);
-          // create the kinematic start parameters
-          Acts::CurvilinearParameters start(nullptr, 
-                                            particle->position(),
-                                            particle->momentum(), 
+          // Create the kinematic start parameters
+          Acts::CurvilinearParameters start(nullptr, particle->position(),
+                                            particle->momentum(),
                                             particle->q());
-          // run the simulation
+          // Run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions);
           auto &fatrasResult = result.template get<ChargedResult>();
-          // a) handle the hits
+          // a) Handle the hits
           // hits go to the hit collection, particle go to the particle
           // collection
           for (auto &fHit : fatrasResult.simulatedHits) {
@@ -145,19 +141,18 @@ struct Simulator {
           // Options and configuration
           NeutralOptions neutralOptions;
           neutralOptions.debug = debug;
-          // get the charged interactor
+          // Get the charged interactor
           auto &neutralInteractor =
               neutralOptions.actionList.template get<neutral_interactor_t>();
-          // result type typedef
+          // Result type typedef
           typedef typename neutral_interactor_t::result_type NeutralResult;
-          // set the generator to guarantee event consistent entires
+          // Set the generator to guarantee event consistent entires
           neutralInteractor.generator = &fatrasGenerator;
-          // put all the additional information into the interactor
+          // Put all the additional information into the interactor
           neutralInteractor.initialParticle = (*particle);
-          // create the kinematic start parameters
-          Acts::NeutralCurvilinearParameters start(nullptr, 
-                                                   particle->position(),
-                                                   particle->momentum());
+          // Create the kinematic start parameters
+          Acts::NeutralCurvilinearParameters start(
+              nullptr, particle->position(), particle->momentum());
           const auto &result =
               neutralPropagator.propagate(start, neutralOptions);
           auto &fatrasResult = result.template get<NeutralResult>();

@@ -18,11 +18,11 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Particle.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Utilities/Units.hpp"
 #include "Fatras/Selectors/LimitSelectors.hpp"
+#include "Particle.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -34,7 +34,7 @@ namespace Test {
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
 
-double m = 134.9766 * Acts::units::_MeV; 
+double m = 134.9766 * Acts::units::_MeV;
 
 // This tests the implementation of kinematic cast operators
 BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentum(1500.* Acts::units::_MeV, 0., 0);
+  Acts::Vector3D momentum(1500. * Acts::units::_MeV, 0., 0);
   Particle pion(position, momentum, -1., m);
   // the limit of the particle
   pion.setLimits(0.15, 0.45);
   // the path of the particle
-  pion.update(position,momentum,0.10,0.34);
+  pion.update(position, momentum, 0.10, 0.34);
 
   X0Limit x0LimitSelector;
   L0Limit l0LimitSelector;
