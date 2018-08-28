@@ -111,7 +111,7 @@ std::ofstream ofsResetter("geant4out.txt");
     //~ x, y, z, p, index) {
 		
 BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(10000), index) {
+    ParamNucularInt_test_, bdata::xrange(2), index) {
 
 if(index ==0)
 {
