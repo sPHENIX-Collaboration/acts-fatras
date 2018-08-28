@@ -62,9 +62,10 @@ struct BetheBloch {
     // the uncertainty of the mean energy loss
     double energyLossSigma = eLoss.second;
 
+	/// Commented out annoying message
     // Simulate the energy loss
-    double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
-                    scaleFactorSigma * energyLossSigma * landau;
+    //~ double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
+                    //~ scaleFactorSigma * energyLossSigma * landau;
     // apply the energy loss
     particle.energyLoss(energyLoss);
 
