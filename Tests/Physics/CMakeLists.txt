@@ -17,5 +17,3 @@ target_include_directories(FatrasParametricNuclearIntTests PUBLIC ${Geant4_INCLU
 target_link_libraries(FatrasParametricNuclearIntTests PRIVATE Acts::Core Acts::Legacy Fatras::Core)
 target_link_libraries(FatrasParametricNuclearIntTests PUBLIC ${Geant4_LIBRARIES})
 add_test (NAME FatrasParametricNuclearIntUnitTest COMMAND FatrasParametricNuclearIntTests)
-
-

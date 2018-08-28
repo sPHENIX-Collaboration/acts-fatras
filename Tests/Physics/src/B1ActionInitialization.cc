@@ -36,9 +36,13 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1ActionInitialization::B1ActionInitialization(double thickness)
+B1ActionInitialization::B1ActionInitialization(double thickness, std::string particleName, double px, double py, double pz)
  : G4VUserActionInitialization(),
- m_thickness(thickness)
+ m_thickness(thickness),
+ m_particleName(particleName),
+ m_px(px),
+ m_py(py),
+ m_pz(pz)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -58,7 +62,9 @@ void B1ActionInitialization::BuildForMaster() const
 
 void B1ActionInitialization::Build() const
 {
-  SetUserAction(new B1PrimaryGeneratorAction);
+	//~ B1PrimaryGeneratorAction* primAction = new B1PrimaryGeneratorAction();
+	//~ primAction->configureGun(m_particleName, m_px, m_py, m_pz);
+  SetUserAction(new B1PrimaryGeneratorAction(m_particleName, m_px, m_py, m_pz));
 
   B1RunAction* runAction = new B1RunAction;
   SetUserAction(runAction);

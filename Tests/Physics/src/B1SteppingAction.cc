@@ -57,21 +57,7 @@ B1SteppingAction::~B1SteppingAction()
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-    fScoringVolume = detectorConstruction->GetScoringVolume();   
-  }
-
-  // get volume of the current step
-  G4LogicalVolume* volume 
-    = step->GetPreStepPoint()->GetTouchableHandle()
-      ->GetVolume()->GetLogicalVolume();
-      
-  // check if we are in scoring volume
-  if (volume != fScoringVolume) return;
-  
+//~ std::cout << "dicki hoppenstett: " << m_thickness * cm << std::endl;
 	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
 		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm
 		|| fabs((step->GetPostStepPoint()->GetPosition().x() - 10. * cm) / (10. * cm)) < 1e-15
@@ -92,6 +78,22 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
 		p.parentid = step->GetTrack()->GetParentID();
 		fEventAction->AddParticle(p);
 	}
+	
+  if (!fScoringVolume) { 
+    const B1DetectorConstruction* detectorConstruction
+      = static_cast<const B1DetectorConstruction*>
+        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+    fScoringVolume = detectorConstruction->GetScoringVolume();   
+  }
+
+  // get volume of the current step
+  G4LogicalVolume* volume 
+    = step->GetPreStepPoint()->GetTouchableHandle()
+      ->GetVolume()->GetLogicalVolume();
+
+  // check if we are in scoring volume
+  if (volume != fScoringVolume) return;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

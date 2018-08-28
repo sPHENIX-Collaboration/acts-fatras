@@ -36,6 +36,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
+#include "G4ParticleGun.hh"
     
 #include <fstream>
 #include <random>
@@ -45,142 +46,91 @@ namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
 
 namespace Fatras {
-
 namespace Test {
-
-// the generator
-typedef std::mt19937 Generator;
-
-/// Generator in [0,1]
-struct MyGenerator {
-
-MyGenerator(int samen)
-{
-	generator.seed(samen);
-}
-
-// standard generator
-Generator generator;
-
-	double operator()()
-	{
-		return (double) generator() / (double) generator.max();
-	}
-};
-
-/// The selector
-struct MySelector {
-
-  /// call operator
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &) const {
-    return true;
-  }
-};
-
+	
 std::string material = "G4_Be";
-std::string gunAmmo = "pi+";
-double detectorThickness = 5.; // in [cm]
+std::string gunAmmo = "kaon0";
 
-std::ofstream ofs("fatrasout.txt");
-std::ofstream ofsResetter("geant4out.txt");
+G4VModularPhysicsList* physicsList = new QBBC;
+G4UImanager* UImanager = G4UImanager::GetUIpointer();
+G4RunManager* runManager = new G4RunManager;
+  
+std::ofstream ofsResetter;
+std::ofstream ofsRuntime("runtime.txt");
 
-  G4RunManager* runManager = new G4RunManager;
-  G4VModularPhysicsList* physicsList = new QBBC;
-  G4UImanager* UImanager = G4UImanager::GetUIpointer();
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4ParticleDefinition* parDef;
-    
+//~ double l0 = 394.133 / 10.; // Be
+//~ std::vector<double> mass = {0.1395701, 0.1349766, 0.1395701, 939.56563 * 1e-3, 938.27231 * 1e-3}; // pi-, pi0, pi+, n, p
+
 /// Test the scattering implementation
 //~ BOOST_DATA_TEST_CASE(
     //~ ParamNucularInt_test_,
-    //~ bdata::random(
-        //~ (bdata::seed = 20,
-         //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random(
-            //~ (bdata::seed = 21,
-             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random(
-            //~ (bdata::seed = 22,
-             //~ bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        //~ bdata::random((bdata::seed = 23,
+        //~ bdata::random((bdata::seed = 21,
                        //~ bdata::distribution =
-                           //~ std::uniform_real_distribution<>(0.5, 10.5))) ^
-        //~ bdata::xrange(10000),
-    //~ x, y, z, p, index) {
-		
+                           //~ std::uniform_real_distribution<>(0.01 * 394.133 / 10., 2. * 394.133 / 10.))) ^
+        //~ bdata::random((bdata::seed = 22,
+                       //~ bdata::distribution =
+                           //~ std::uniform_real_distribution<>(0.5 * 0.1349766, 20. * 0.1349766))) ^
+        //~ bdata::xrange(1000),
+    //~ detectorThickness, p, index) {
 BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(10000), index) {
+    ParamNucularInt_test_,
+        bdata::random((bdata::seed = 21,
+                       bdata::distribution =
+                           std::uniform_real_distribution<>(0.01 * 394.133 / 10., 0.5 * 394.133 / 10.))) ^ // 0.01 - 2.
+        bdata::random((bdata::seed = 22,
+                       bdata::distribution =
+                           std::uniform_real_distribution<>(0.5, 4.))) ^ // 0.5 - 20.
+        bdata::xrange(100),
+    detectorThickness, p, index) {
 
-if(index ==0)
+std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
+if(index == 0)
+	ofsResetter.open("geant4outNeu.txt");
+else
+	ofsResetter.open("geant4outNeu.txt", std::ofstream::app);
+ofsResetter << "run: " << index << "\t" << detectorThickness << "\t" << p << "\t" << material << "\t" << gunAmmo << std::endl;
+ofsResetter.close();
+
+double x = 0., y = 0., z = 1.;
+Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
+
+B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
+B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
+
+if(index == 0)
 {
-  G4Random::setTheEngine(new CLHEP::RanecuEngine);
-  physicsList->SetVerboseLevel(0);
-  runManager->SetVerboseLevel(0);
-  runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
-  runManager->SetUserInitialization(physicsList);
-  runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness));
-	ofsResetter.close();
-	parDef = particleTable->FindParticle(gunAmmo);
+	G4Random::setTheEngine(new CLHEP::RanecuEngine);
+	physicsList->SetVerboseLevel(0);
+	runManager->SetVerboseLevel(0);
+	runManager->SetUserInitialization(physicsList);
+	//~ runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
+	runManager->SetUserInitialization(detConstr);
+	//~ runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV));
+	runManager->SetUserInitialization(actionInit);
 }
-// TODO: record timings
-// TODO: G4NistManager could allow access to material properties
+else
+{
+	runManager->DefineWorldVolume(detConstr->Construct());
+	runManager->SetUserInitialization(actionInit);
+}
 
-// some material
-G4NistManager* nist = G4NistManager::Instance();
-G4Material* g4mat = nist->FindOrBuildMaterial(material);
-Acts::Material actsMaterial = Acts::Material(g4mat->GetRadlen(), g4mat->GetNuclearInterLength(), g4mat->GetA() * mole / g, g4mat->GetZ(), g4mat->GetDensity() * cm3 / kg);
+	runManager->Initialize();
+	UImanager->ApplyCommand("/tracking/verbose 0");
+	runManager->BeamOn(10000);
 
-	double x = 0., y = 0., z = 1., p = 1.;
+	
+//~ std::cout << "munni: " << UImanager->GetCurrentValues("/gun/particle") << std::endl;
 
-  // create the particle and set the momentum
-  /// position at 0.,0.,0
-  Acts::Vector3D position{0., 0., 0.};
-  Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
-  // p of 1 GeV
-  Acts::Vector3D momentum =
-      p * Acts::units::_GeV * direction;
+std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
-  UImanager->ApplyCommand("/run/initialize");
-  UImanager->ApplyCommand("/gun/particle " + gunAmmo);
-  //~ UImanager->ApplyCommand("/gun/energy " + std::to_string(p) + " GeV");
-  //~ UImanager->ApplyCommand("/gun/direction " + std::to_string(direction.x())
-		//~ + " " + std::to_string(direction.y())
-		//~ + " " + std::to_string(direction.z()));
-  UImanager->ApplyCommand("/gun/momentum " + std::to_string(p * direction.x())
-	+ " " + std::to_string(p * direction.y())
-	+ " " + std::to_string(p * direction.z()) + " GeV");
-  UImanager->ApplyCommand("/gun/position 0. 0. 0.");
-  UImanager->ApplyCommand("/gun/time 0.");
-  UImanager->ApplyCommand("/tracking/verbose 1");
-  UImanager->ApplyCommand("/run/beamOn 1");
-
-
-
-MyGenerator mg(index);
-
-  // a detector
-  Acts::MaterialProperties detector(actsMaterial, detectorThickness * Acts::units::_cm);
-
-std::cout << detector << std::endl;
-
-  // create the particle
-  Particle particle(position, momentum, parDef->GetPDGMass() * Acts::units::_MeV, parDef->GetPDGCharge(), parDef->GetPDGEncoding(), 1);
-
-ParametricNuclearInt paramNuclInt;
-
-std::vector<Particle> par = paramNuclInt(mg, detector, particle);
-for(size_t i = 0; i < par.size(); i++)
-	ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
-		<< par[i].position.x() << "\t" << par[i].position.y() << "\t" << par[i].position.z() << "\t"
-		<< par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" << par[i].momentum.z() << std::endl;
-ofs << "*" << std::endl;
-
-  typedef MySelector All;
-  std::vector<Particle> outgoing;
-  typedef Process<ParametricNuclearInt, All, All, All> HadronProcess;
-  PhysicsList<HadronProcess> hsPhysicsList;
-  hsPhysicsList(mg, detector, particle, outgoing);
+ofsRuntime << index << "\t" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << std::endl;
+//thickness, l0, pdg, p
+// Thicknes & p can be sampled
+// L0 will be used by selecting certain materials
+// PDG code will be set for certain particles -> could be performed in a for-loop
+delete(detConstr);
+delete(actionInit);
 }
 
 } // namespace Test

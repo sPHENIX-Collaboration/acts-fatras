@@ -42,10 +42,20 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
+B1PrimaryGeneratorAction::B1PrimaryGeneratorAction(std::string particleName, double px, double py, double pz)
 : G4VUserPrimaryGeneratorAction()
 {
   fParticleGun  = new G4ParticleGun(1);
+  
+    // default particle kinematic
+  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+  
+  G4ParticleDefinition* particle
+    = particleTable->FindParticle(particleName);
+  fParticleGun->SetParticleDefinition(particle);
+  fParticleGun->SetParticleMomentum({px, py, pz});
+  //~ fParticleGun->SetParticleMomentumDirection(G4ThreeVector(px,py,pz));
+  //~ fParticleGun->SetParticleEnergy(1. * GeV);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
