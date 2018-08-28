@@ -21,7 +21,8 @@
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 
-#include "Fatras/Kernel/Particle.hpp"
+//~ #include "Fatras/Kernel/Particle.hpp"
+#include "../Common/Particle.hpp"
 #include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
@@ -171,9 +172,9 @@ ParametricNuclearInt paramNuclInt;
 
 std::vector<Particle> par = paramNuclInt(mg, detector, particle);
 for(size_t i = 0; i < par.size(); i++)
-	ofs << par[i].pdg << "\t" << par[i].m << "\t" << par[i].q << "\t" << par[i].E << "\t" 
-		<< par[i].position.x() << "\t" << par[i].position.y() << "\t" << par[i].position.z() << "\t"
-		<< par[i].momentum.x() << "\t" << par[i].momentum.y() << "\t" << par[i].momentum.z() << std::endl;
+	ofs << par[i].pdg() << "\t" << par[i].m() << "\t" << par[i].q() << "\t" << par[i].E() << "\t" 
+		<< par[i].position().x() << "\t" << par[i].position().y() << "\t" << par[i].position().z() << "\t"
+		<< par[i].momentum().x() << "\t" << par[i].momentum().y() << "\t" << par[i].momentum().z() << std::endl;
 ofs << "*" << std::endl;
 
   typedef MySelector All;

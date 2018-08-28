@@ -8,8 +8,9 @@
 
 #pragma once
 
-#include "Fatras/Kernel/Definitions.hpp"
-#include "Fatras/Kernel/RandomNumberDistributions.hpp"
+//~ #include "Fatras/Kernel/Definitions.hpp"
+//~ #include "Fatras/Kernel/RandomNumberDistributions.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
 #include <math.h>
 
@@ -133,11 +134,11 @@ ParametricNuclearInt::absorptionLength(const material_t* material, particle_t& p
 {
   double al = material->averageL0();
 
-  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311)
-    al *= 1. / (1. + exp(-(particle.p - 270.) * (particle.p - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
+  if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311)
+    al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
 
-  if(particle.pdg == 2212 || particle.pdg == 2112) al *= 0.7;
-  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 111) al *= 0.9;
+  if(particle.pdg() == 2212 || particle.pdg() == 2112) al *= 0.7;
+  if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 111) al *= 0.9;
 
   return al;
 }
@@ -147,7 +148,7 @@ int
 ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& particle) const
 {
   // sampling of hadronic interaction
-  double E = sqrt(particle.p * particle.p + particle.m * particle.m);
+  double E = sqrt(particle.p() * particle.p() + particle.m() * particle.m());
   // get the maximum multiplicity    
   double multiplicity_max = 0.25 * E / 1000. + 18.;
   // multiplicity distribution
@@ -172,7 +173,7 @@ ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& 
     if (randy < arg && randx > 3 && randx < multiplicity_max) break;
   }
   
-  randx *= (1.2 - 0.4 * exp(-0.001 * particle.p));     // trying to adjust
+  randx *= (1.2 - 0.4 * exp(-0.001 * particle.p()));     // trying to adjust
 
   return (int)randx;
 }
@@ -181,86 +182,86 @@ template<typename generator_t, typename particle_t>
 void
 ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& particle, std::vector<particle_t>& particles) const
 {    
-  // new sampling: sample particle type and energy in the CMS frame of outgoing particles
-  // creation of shower particles
-  double chargedist = 0.;
+  //~ // new sampling: sample particle type and energy in the CMS frame of outgoing particles
+  //~ // creation of shower particles
+  //~ double chargedist = 0.;
   
-  // sample heavy particles (alpha) but don't save  
-  double pif = 0.10; 
-  double nef = 0.30;
-  double prf = 0.30;
+  //~ // sample heavy particles (alpha) but don't save  
+  //~ double pif = 0.10; 
+  //~ double nef = 0.30;
+  //~ double prf = 0.30;
   
-  if(particle.pdg == 211 || particle.pdg == -211 || particle.pdg == 321 || particle.pdg == -321 || particle.pdg == 111 || particle.pdg == 311) 
-  {
-      pif = 0.15;
-      nef = 0.25;
-      prf = 0.25;
-  }
-  if(particle.pdg == 2212) 
-  {
-    pif = 0.06;
-    nef = 0.25;
-    prf = 0.35;
-  }
-  if(particle.pdg == 2112) 
-  {
-    pif = 0.03;
-    nef = 0.35;
-    prf = 0.17;
-  }
+  //~ if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311) 
+  //~ {
+      //~ pif = 0.15;
+      //~ nef = 0.25;
+      //~ prf = 0.25;
+  //~ }
+  //~ if(particle.pdg() == 2212) 
+  //~ {
+    //~ pif = 0.06;
+    //~ nef = 0.25;
+    //~ prf = 0.35;
+  //~ }
+  //~ if(particle.pdg() == 2112) 
+  //~ {
+    //~ pif = 0.03;
+    //~ nef = 0.35;
+    //~ prf = 0.17;
+  //~ }
   
-  // Source of masses: Geant4
-  for(unsigned int i = 0; i < particles.size(); i++) {
-    chargedist  = generator();
-    if(chargedist < pif) 
-    {
-		particles[i].q = 0.;
-		particles[i].pdg = 111;
-		particles[i].m = 0.1349766 * Acts::units::_GeV;
-		continue;
-    }
-    if(chargedist < 2 * pif) 
-    {
-		particles[i].q = Acts::units::_e;
-		particles[i].pdg = 211;
-		particles[i].m = 0.1395701 * Acts::units::_GeV;
-		continue;
-    }
-    if(chargedist < 3 * pif) 
-    {
-		particles[i].q = -Acts::units::_e;
-		particles[i].pdg = -211;
-		particles[i].m = 0.1395701 * Acts::units::_GeV;
-		continue;
-    }
-    if(chargedist < 3 * pif + nef) 
-    {
-		particles[i].q = 0.;
-		particles[i].pdg = 2112;
-		particles[i].m = 939.56563 * Acts::units::_MeV;
-		continue;
-    }
-    if(chargedist < 3 * pif + nef + prf) 
-    {
-		particles[i].q = Acts::units::_e;
-		particles[i].pdg = 2212;
-		particles[i].m = 938.27231 * Acts::units::_MeV;
-		continue;
-    }
-    particles[i].q = 2.;
-    particles[i].pdg = 20000;
-    particles[i].m = 4. * Acts::units::_GeV;
-  }
+  //~ // Source of masses: Geant4
+  //~ for(unsigned int i = 0; i < particles.size(); i++) {
+    //~ chargedist  = generator();
+    //~ if(chargedist < pif) 
+    //~ {
+		//~ particles[i].q() = 0.;
+		//~ particles[i].pdg() = 111;
+		//~ particles[i].m() = 0.1349766 * Acts::units::_GeV;
+		//~ continue;
+    //~ }
+    //~ if(chargedist < 2 * pif) 
+    //~ {
+		//~ particles[i].q() = Acts::units::_e;
+		//~ particles[i].pdg() = 211;
+		//~ particles[i].m() = 0.1395701 * Acts::units::_GeV;
+		//~ continue;
+    //~ }
+    //~ if(chargedist < 3 * pif) 
+    //~ {
+		//~ particles[i].q() = -Acts::units::_e;
+		//~ particles[i].pdg() = -211;
+		//~ particles[i].m() = 0.1395701 * Acts::units::_GeV;
+		//~ continue;
+    //~ }
+    //~ if(chargedist < 3 * pif + nef) 
+    //~ {
+		//~ particles[i].q() = 0.;
+		//~ particles[i].pdg() = 2112;
+		//~ particles[i].m() = 939.56563 * Acts::units::_MeV;
+		//~ continue;
+    //~ }
+    //~ if(chargedist < 3 * pif + nef + prf) 
+    //~ {
+		//~ particles[i].q() = Acts::units::_e;
+		//~ particles[i].pdg() = 2212;
+		//~ particles[i].m() = 938.27231 * Acts::units::_MeV;
+		//~ continue;
+    //~ }
+    //~ particles[i].q() = 2.;
+    //~ particles[i].pdg() = 20000;
+    //~ particles[i].m() = 4. * Acts::units::_GeV;
+  //~ }
 
-  // move the incoming particle type forward
-  if(particles[0].pdg != particle.pdg) 
-    for(unsigned int i = 1; i < particles.size(); i++)
-      if(particles[i].pdg == particle.pdg)
-      {
-        particles[i] = particles[0];
-        particles[0] = particle;
-        break;
-      }
+  //~ // move the incoming particle type forward
+  //~ if(particles[0].pdg() != particle.pdg()) 
+    //~ for(unsigned int i = 1; i < particles.size(); i++)
+      //~ if(particles[i].pdg() == particle.pdg())
+      //~ {
+        //~ particles[i] = particles[0];
+        //~ particles[0] = particle;
+        //~ break;
+      //~ }
 }
 
 template<typename generator_t, typename particle_t>
@@ -360,30 +361,31 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   // particle sampled, rotate, boost and save final state
   double etot = 0.;
   for (unsigned int i = 0; i < Npart; i++) 
-	etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
+	etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
   double summ = 0.;
   for (unsigned int i = 0; i < Npart; i++) 
-	summ += particles[i].m;
+	summ += particles[i].m();
 
   // rescale (roughly) to the expected energy
-  float scale = sqrt(summ*summ+2*summ*particle.p+particle.m*particle.m)/etot;
+  float scale = sqrt(summ*summ+2*summ*particle.p()+particle.m() * particle.m())/etot;
   etot = 0.;
   for (unsigned int i = 0; i < Npart; i++) {
     mom[i] *= scale;
-    etot += sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
+    etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
   }
   
   // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
-  Acts::Vector3D bv = particle.momentum / sqrt(etot * etot + particle.p * particle.p); // TODO: Why such an energy term?
+  Acts::Vector3D bv = particle.momentum() / sqrt(etot * etot + particle.p() * particle.p()); // TODO: Why such an energy term?
   
-  for (unsigned int i = 0; i < Npart; i++) 
-  {
-    Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
-    particles[i].momentum = mom[i] * dirCms;
-    particles[i].p = particles[i].momentum.mag();
-    particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
-	particles[i].boost(bv);
-  }
+  /// New particle structure does not allow setting values in the old way
+  //~ for (unsigned int i = 0; i < Npart; i++) 
+  //~ {
+    //~ Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
+    //~ particles[i].momentum = mom[i] * dirCms;
+    //~ particles[i].p = particles[i].momentum.mag();
+    //~ particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
+	//~ particles[i].boost(bv);
+  //~ }
 }
 
 template<typename particle_t>
@@ -397,7 +399,7 @@ ParametricNuclearInt::selectionOfCollection(std::vector<particle_t>& particles) 
   std::vector<particle_t> filteredParticles;
   filteredParticles.reserve(particles.size());
   
-  std::copy_if(particles.begin(), particles.end(), std::back_inserter(filteredParticles), [&](particle_t& p){return (p.pdg < 10000 && p.p > m_cfg.m_minimumHadOutEnergy);});
+  std::copy_if(particles.begin(), particles.end(), std::back_inserter(filteredParticles), [&](particle_t& p){return (p.pdg() < 10000 && p.E() > m_cfg.m_minimumHadOutEnergy);});
 	particles = filteredParticles;
 }
 
