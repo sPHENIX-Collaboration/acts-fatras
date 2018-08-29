@@ -36,17 +36,19 @@ struct ParametricNuclearInt {
                                 
 protected:
 
-/// @brief Calculates the absorption length for various hadrons
+/// @brief Calculates and states if a nuclear interaction occurs
 ///
+/// @tparam generator_t data type of the random number generator
 /// @tparam material_t data type of the material
 /// @tparam particle_t data type of the particle
+/// @param [in] generator is the random number generator
 /// @param [in] material material that is penetrated
 /// @param [in] particle particle that penetrates the material
 ///
-/// @return absorption length
-template <typename material_t, typename particle_t>
-double 
-absorptionLength(const material_t* matertial, particle_t& particle) const;
+/// @return boolean result if a nuclear interaction occurs
+template <typename generator_t, typename material_t, typename particle_t>
+bool 
+nuclearInteraction(generator_t& generator, const material_t& matertial, particle_t& particle) const;
 
 /// @brief Dices the number of particle candidates that leave the detector
 ///
@@ -93,19 +95,27 @@ std::vector<particle_t>
 getHadronState(generator_t& generator, particle_t& particle) const;
 };
 
-template <typename material_t, typename particle_t>
-double 
-ParametricNuclearInt::absorptionLength(const material_t* material, particle_t& particle) const 
+template <typename generator_t, typename material_t, typename particle_t>
+bool 
+ParametricNuclearInt::nuclearInteraction(generator_t& generator, const material_t& material, particle_t& particle) const 
 {
-  double al = material->averageL0();
+  double al = material.averageL0();
 
-  if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311)
-    al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.));
+	if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311)
+		al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.));
 
-  if(particle.pdg() == 2212 || particle.pdg() == 2112) al *= 0.7;
-  if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 111) al *= 0.9;
+	if(particle.pdg() == 2212 || particle.pdg() == 2112) al *= 0.7;
+	if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 111) al *= 0.9;
 
-  return al;
+	const material_t* extMprop = &material;
+	double prob = 0.;
+
+    if (al > 0.) 
+		prob = exp(-extMprop->thickness() / al);
+    else
+		prob = exp(-extMprop->averageL0());
+
+  return generator() < (1. - prob) * 0.5;
 }
 
 template<typename generator_t, typename particle_t>
@@ -381,20 +391,7 @@ std::vector<particle_t> ParametricNuclearInt::operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const
 {
-	const detector_t* extMprop = &detector;
-	double prob = 0.;
-
-	double al = absorptionLength(extMprop, particle);  // in mm
-
-    if (al > 0.) 
-		prob = exp(-extMprop->thickness() / al);
-    else
-		prob = exp(-extMprop->averageL0());
-
-	// apply a global scalor of the probability
-	// (1. - prob) is generally O(0.01), so this is the right way to scale it
-	//~ if (generator() < (1. - prob) * m_cfg.m_hadronInteractionProbabilityScale)
-	if (generator() < (1. - prob) * 0.5)
+	if (nuclearInteraction(generator, detector, particle))
 		return getHadronState(generator, particle);
  
 	// no hadronic interactions were computed
