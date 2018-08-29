@@ -104,14 +104,6 @@ template<typename generator_t, typename particle_t>
 void
 kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_t& particle) const;
 
-/// @brief Selects created particles if they fulfill the criteria
-///
-/// @tparam particle_t data type of the particle
-/// @param [in] particles list of created particles
-template<typename particle_t>
-void
-selectionOfCollection(std::vector<particle_t>& particles) const;
-
 /// @brief Calculates the hadron interactions of a particle
 ///
 /// @tparam generator_t data type of the random number generator
@@ -386,21 +378,6 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
     //~ particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
 	//~ particles[i].boost(bv);
   //~ }
-}
-
-template<typename particle_t>
-void
-ParametricNuclearInt::selectionOfCollection(std::vector<particle_t>& particles) const
-{
-  // child particle vector for TruthIncident
-  //  Reserve space for as many paricles as created due to hadr. int.
-  //  However, the number of child particles for TruthIncident might be
-  //  smaller due to (momentum) cuts  
-  std::vector<particle_t> filteredParticles;
-  filteredParticles.reserve(particles.size());
-  
-  std::copy_if(particles.begin(), particles.end(), std::back_inserter(filteredParticles), [&](particle_t& p){return (p.pdg() < 10000 && p.E() > m_cfg.m_minimumHadOutEnergy);});
-	particles = filteredParticles;
 }
 
 template<typename generator_t, typename particle_t>
