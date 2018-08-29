@@ -18,18 +18,6 @@ namespace Fatras {
 ///
 struct ParametricNuclearInt {
 
-/// @brief Calculates the hadronic with a given probability given by the properties of the material and the incoming particle
-///
-/// @tparam generator_t data type of the random number generator
-/// @tparam material_t data type of the material
-/// @tparam particle_t data type of the particle
-/// @param generator random number generator
-/// @param material penetrated material
-/// @param particle penetrating particle
-template <typename generator_t, typename material_t, typename particle_t>
-std::vector<particle_t> 
-hadronicInteraction(generator_t& generator, const material_t& material, particle_t& particle) const;
-
   /// Call operator
   ///
   /// @tparam generator_t is a random number generator type
@@ -45,9 +33,8 @@ hadronicInteraction(generator_t& generator, const material_t& material, particle
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const;
-
-                                     
-private:
+                                
+protected:
 
 /// @brief Calculates the absorption length for various hadrons
 ///
@@ -389,19 +376,20 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
   return chDef;
 }
 
-template <typename generator_t, typename material_t, typename particle_t>
-std::vector<particle_t> 
-ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material_t& material, particle_t& particle) const
+template <typename generator_t, typename detector_t, typename particle_t>
+std::vector<particle_t> ParametricNuclearInt::operator()(generator_t &generator,
+                                     const detector_t &detector,
+                                     particle_t &particle) const
 {
-	const material_t* extMprop = &material;
+	const detector_t* extMprop = &detector;
 	double prob = 0.;
 
-		double al = absorptionLength(extMprop, particle);  // in mm
+	double al = absorptionLength(extMprop, particle);  // in mm
 
-	    if (al > 0.) 
-			prob = exp(-extMprop->thickness() / al);
-	    else
-			prob = exp(-extMprop->averageL0());
+    if (al > 0.) 
+		prob = exp(-extMprop->thickness() / al);
+    else
+		prob = exp(-extMprop->averageL0());
 
 	// apply a global scalor of the probability
 	// (1. - prob) is generally O(0.01), so this is the right way to scale it
@@ -412,13 +400,5 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 	// no hadronic interactions were computed
 	return {particle};  // Return the incoming particle
 }
-
-template <typename generator_t, typename detector_t, typename particle_t>
-std::vector<particle_t> ParametricNuclearInt::operator()(generator_t &generator,
-                                     const detector_t &detector,
-                                     particle_t &particle) const
-	{
-		return hadronicInteraction(generator, detector, particle);
-	}
 	
 } // namespace Fatras
