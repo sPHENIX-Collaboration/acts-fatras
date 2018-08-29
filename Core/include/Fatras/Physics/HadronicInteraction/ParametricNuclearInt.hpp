@@ -8,24 +8,15 @@
 
 #pragma once
 
-//~ #include "Fatras/Kernel/Definitions.hpp"
-//~ #include "Fatras/Kernel/RandomNumberDistributions.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
 #include <math.h>
-
+// TODO: explicit calculations may become an interface
 namespace Fatras {
 
 /// The struct for the physics list
 ///
 struct ParametricNuclearInt {
-
-struct Config
-{
-	double m_hadronInteractionProbabilityScale = 1.; // TODO: tuning parameter?
-	unsigned int MAXHADINTCHILDREN = 100000; // TODO: Job of selector
-	double m_minimumHadOutEnergy = 0.; // TODO: Job of selector
-};
 
 /// @brief Calculates the hadronic with a given probability given by the properties of the material and the incoming particle
 ///
@@ -53,10 +44,8 @@ hadronicInteraction(generator_t& generator, const material_t& material, particle
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
-                                     particle_t &particle) const
-	{
-		return hadronicInteraction(generator, detector, particle);
-	}
+                                     particle_t &particle) const;
+
                                      
 private:
 
@@ -115,9 +104,6 @@ kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 getHadronState(generator_t& generator, particle_t& particle) const;
-
-// TODO: funktion waere geil, die eine vertex list ausgibt
-Config m_cfg; //TODO: weg damit
 };
 
 template <typename material_t, typename particle_t>
@@ -127,7 +113,7 @@ ParametricNuclearInt::absorptionLength(const material_t* material, particle_t& p
   double al = material->averageL0();
 
   if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311)
-    al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.)); // TODO: da kann man sicherlich noch etwas optimieren
+    al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.));
 
   if(particle.pdg() == 2212 || particle.pdg() == 2112) al *= 0.7;
   if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 111) al *= 0.9;
@@ -397,7 +383,6 @@ ParametricNuclearInt::getHadronState(generator_t& generator, particle_t& particl
 	createMultiplicity(generator, particle, chDef);
 	
 	kinematics(generator, chDef, particle);
-	selectionOfCollection(chDef);
   }
   else
 	chDef.push_back(particle); // Return at least the leading particle
@@ -428,4 +413,12 @@ ParametricNuclearInt::hadronicInteraction(generator_t& generator, const material
 	return {particle};  // Return the incoming particle
 }
 
+template <typename generator_t, typename detector_t, typename particle_t>
+std::vector<particle_t> ParametricNuclearInt::operator()(generator_t &generator,
+                                     const detector_t &detector,
+                                     particle_t &particle) const
+	{
+		return hadronicInteraction(generator, detector, particle);
+	}
+	
 } // namespace Fatras
