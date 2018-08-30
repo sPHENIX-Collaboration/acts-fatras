@@ -50,6 +50,17 @@ template <typename generator_t, typename material_t, typename particle_t>
 bool 
 nuclearInteraction(generator_t& generator, const material_t& matertial, particle_t& particle) const;
 
+/// @brief Calculates the probability of a nuclear interaction
+///
+/// @tparam generator_t data type of the random number generator
+/// @param [in] thickness Thickness of the material in terms of L0
+/// @param [in] momentum Particles momentum
+/// @param [in] pdg PDG code of the particle
+///
+/// @return boolean result if a nuclear interaction occurs
+double 
+nuclearInteractionProb(const double thickness, const double momentum, const int pdg) const;
+
 /// @brief Dices the number of particle candidates that leave the detector
 ///
 /// @tparam generator_t data type of the random number generator
@@ -99,7 +110,8 @@ template <typename generator_t, typename material_t, typename particle_t>
 bool 
 ParametricNuclearInt::nuclearInteraction(generator_t& generator, const material_t& material, particle_t& particle) const 
 {
-  double al = material.averageL0();
+	double prob = nuclearInteractionProb(extMprop->thickness() / material.averageL0(), 
+  double al = extMprop->thickness() / material.averageL0();
 
 	if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311)
 		al *= 1. / (1. + exp(-(particle.p() - 270.) * (particle.p() - 270.) / 7200.));
@@ -116,6 +128,64 @@ ParametricNuclearInt::nuclearInteraction(generator_t& generator, const material_
 		prob = exp(-extMprop->averageL0());
 
   return generator() < (1. - prob) * 0.5;
+}
+
+// TODO: move this function to .cpp
+double
+ParametricNuclearInt::nuclearInteractionProb(const double thickness, const double momentum, const int pdg) const
+{
+
+	//p/n
+	//~ //return (1. - exp(-val[1] * 1.1804 * (1.6309e-07 + exp(-(val[0] - 12.833) * (val[0] - 12.833) / 221.47)))) * 0.96211; // volle range
+	//~ if(val[0] > 3.)
+		//~ return (1. - exp(-val[1] * 0.98835 * (0.07491 + exp(-(val[0] - 13.744) * (val[0] - 13.744) / 805.25)))) * 0.97985; // >3
+	//~ else
+		//~ if(val[1] > 0.5)
+			//~ return 0.05703 + (1. - exp(-val[1] * 1.1889 * (1.1714e-06 + exp(-(val[0] - 2.497) * (val[0] - 2.497) / 2.0915)))) * 0.75229; // < 3
+		//~ else
+			//~ return 0.009525 + (1. - exp(-val[1] * 1.4277 * (0.011844 + exp(-(val[0] - 2.3332) * (val[0] - 2.3332) / 3.9307)))) * 0.71596;
+
+	//pi+/pi-
+	//~ return (1. - exp(-val[1] * 0.87514 * (4.8592e-06 + exp(-(val[0] - 12.05) * (val[0] - 12.05) / 483.61)))) * 0.935931; // volle range
+	//~ if(val[0] > 4.)
+		//~ return (1. - exp(-val[1] * 0.55001 * (0.46996 + exp(-(val[0] - 8.5732) * (val[0] - 8.5732) / 1800.)))) * 0.96459; // > 4
+	//~ else 
+		//~ if(val[1] > 0.5)
+			//~ return 0.03192 + (1. - exp(-val[1] * 1.0276 * (0.028738 + exp(-(val[0] - 3.1018) * (val[0] - 3.1018) / 8.866)))) * 0.76954; // < 4
+		//~ else
+			//~ return 0.003446 + (1. - exp(-val[1] * 1.0482 * (0.074884 + exp(-(val[0] - 2.277) * (val[0] - 2.277) / 22.708)))) * 0.74133;
+
+	//kaon+
+	//~ return (1. - exp(-val[1] * 0.86505 * (1.5586e-07 + exp(-(val[0] - 11.243) * (val[0] - 11.243) / 577.7)))) * 0.84876; // volle range
+	//~ if(val[0] > 4.)
+		//~ return (1. - exp(-val[1] * 0.13597 * (4.8514 + exp(-(val[0] - 8.1613e-05) * (val[0] - 8.1613e-05) / 771.03)))) * 0.88989; // > 4
+	//~ else 
+		//~ if(val[1] > 0.5)
+			//~ return 0.009418 + (1. - exp(-val[1] * 0.83191 * (7.8499e-10 + exp(-(val[0] - 2.9685) * (val[0] - 2.9685) / 4.0707)))) * 0.74356; // < 4
+		//~ else
+			//~ return -0.004841 + (1. - exp(-val[1] * 1.5404 * (0.00046885 + exp(-(val[0] - 2.8789) * (val[0] - 2.8789) / 8.8744)))) * 0.44758;
+			
+	//kaon-
+	//~ if(val[0] > 4.)
+		//~ return (1. - exp(-val[1] * 0.13597 * (4.8514 + exp(-(val[0] - 8.1613e-05) * (val[0] - 8.1613e-05) / 771.03)))) * 0.88989; // > 4
+	//~ else 
+		//~ if(val[1] > 0.5)
+			//~ return 0.0004233 + (1. - exp(-val[1] * 0.70435 * (0.40021 + exp(-(val[0] - 5.8872e-05) * (val[0] - 5.8872e-05) / 107.32)))) * 0.82217; // < 4
+		//~ else
+			//~ return 0.003083 + (1. - exp(-val[1] * 3.6515 * (0.14931 + exp(-(val[0] - 88.407) * (val[0] - 88.407) / 15.98)))) * 1.3231;
+			
+	//kaon0
+	if(val[0] > 4.)
+		if(val[1] < 0.5 && val[0] < 12.)
+			return (1. - exp(-val[1] * 0.62966 * (1.8493 + exp(-(val[0] - 8.9774e-08) * (val[0] - 8.9774e-08) / 44.93)))) * 0.72643; // > 4
+		else
+			return (1. - exp(-val[1] * 0.13597 * (4.8514 + exp(-(val[0] - 8.1613e-05) * (val[0] - 8.1613e-05) / 771.03)))) * 0.88989;
+	else 
+		if(val[1] > 0.5)
+			return 0.2789 + (1. - exp(-val[1] * 0.98166 * (6.3897e-08 + exp(-(val[0] - 3.1151) * (val[0] - 3.1151) / 4.08)))) * 0.46121; // < 4
+		else
+			return 0.01415 + (1. - exp(-val[1] * 3.8071 * (0.59535 + exp(-(val[0] - 0.0004938) * (val[0] - 0.0004938) / 10.21)))) * 0.42625;
+			
 }
 
 template<typename generator_t, typename particle_t>
