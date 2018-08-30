@@ -12,6 +12,7 @@
 #include "Acts/Utilities/Units.hpp"
 #include <math.h>
 #include <vector>
+#include <array>
 
 namespace Fatras {
 
@@ -100,13 +101,13 @@ multiplicity(generator_t& generator, const double thickness, particle_t& particl
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
-/// @param [in] particle ingoing particle
+/// @param [in] pdg PDG code of the ingoing particle
 /// @param [in] nParticles Number of outgoing particles
 ///
 /// @return list of outgoing particle PDGs
-template<typename generator_t, typename particle_t>
+template<typename generator_t>
 std::vector<int>
-particleComposition(generator_t& generator, particle_t& particle, const unsigned int nParticles) const;
+particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const;
 
 /// @brief Creates the kinematics of a list of particles
 ///
@@ -133,6 +134,34 @@ kinematics(generator_t& generator, particle_t& particle, const std::vector<int>&
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle) const;
+
+private:
+
+	// TODO: adding up the elements
+	// TODO: reroll if number too high
+	
+	// Look up table for produceable hadrons 
+	const std::array<double, 8> pdgLookUp = {-321, -211, 111, 211, 310, 321, 2112, 2212};
+	
+	// Probabilities for the production of different particles
+	// Order in list: k-, pi-, pi0, pi+, k0, k+, n, p (as the PDG code)
+	const std::array<double, 8> probsKm = {0.131426, 0.108972, 2.15513e-05, 0.0735287, 0.00333459 + 0.0122508, 0.00437491, 0.586811, 0.072719};
+	const std::array<double, 8> probsKp = {0.00193334, 0.0857213, 2.62148e-05, 0.0949544, 0.00502494 + 0.0176528, 0.168827, 0.54008, 0.0818682};
+	const std::array<double, 8> probsK0 = {0.00880667, 0.111725, 3.91104e-05, 0.103377, 0.0368607 + 0.0782085, 0.0132087, 0.56815, 0.0746813};
+	const std::array<double, 8> probsPim = {0.00331695, 0.228171, 3.58508e-06, 0.0750272, 0.00127534 + 0.00512345, 0.00588292, 0.609138, 0.0678355};
+	const std::array<double, 8> probsPip = {0.00317051, 0.0880611, 1.59362e-06, 0.229114, 0.00128486 + 0.00513405, 0.00696432, 0.575764, 0.0862595};
+	const std::array<double, 8> probsP = {0.00102691, 0.0770944, 1.72117e-06, 0.0848894, 0.00051197 + 0.00272571, 0.00363871, 0.630106, 0.195689};
+	const std::array<double, 8> probsN = {0.00104396, 0.0940003, 1.66574e-06, 0.065843, 0.000550299 + 0.00277906, 0.00333905, 0.719939, 0.10825};
+
+	// Cumulative probabilities
+	const std::array<double, 8> cProbsKm = {0.131426, 0.240398, 0.24042, 0.313948, 0.329534, 0.333909, 0.92072, 0.993439};
+	const std::array<double, 8> cProbsKp = {0.00193334, 0.0876546, 0.0876809, 0.182635, 0.205313, 0.37414, 0.91422, 0.996088};
+	const std::array<double, 8> cProbsK0 = {0.00880667, 0.120532, 0.120571, 0.223948, 0.339017, 0.352226, 0.920376, 0.995057};
+	const std::array<double, 8> cProbsPim = {0.00331695, 0.231488, 0.231492, 0.306519, 0.312918, 0.3188, 0.927938, 0.995774};
+	const std::array<double, 8> cProbsPip = {0.00317051, 0.0912316, 0.0912332, 0.320347, 0.326766, 0.33373, 0.909494, 0.995754};
+	const std::array<double, 8> cProbsP = {0.00102691, 0.0781213, 0.078123, 0.163012, 0.16625, 0.169889, 0.799995, 0.995684};
+	const std::array<double, 8> cProbsN = {0.00104396, 0.0950443, 0.0950459, 0.160889, 0.164218, 0.167557, 0.887496, 0.995746};
+
 };
 
 template <typename generator_t, typename particle_t>
@@ -150,6 +179,7 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	size_t mult = 2;
 	double cumulativeProb = 0.;
 	
+	// Adding probabilites of the multiplicities
 	while(dice > cumulativeProb)
 	{
 		cumulativeProb += multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
@@ -159,81 +189,143 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	return --mult;
 }
 
-template<typename generator_t, typename particle_t>
+template<typename generator_t>
 std::vector<int>
-ParametricNuclearInt::particleComposition(generator_t& generator, particle_t& particle, const unsigned int nParticles) const
-{    
-	return {};
-  //~ // new sampling: sample particle type and energy in the CMS frame of outgoing particles
-  //~ // creation of shower particles
-  //~ double chargedist = 0.;
-  
-  //~ // sample heavy particles (alpha) but don't save  
-  //~ double pif = 0.10; 
-  //~ double nef = 0.30;
-  //~ double prf = 0.30;
-  
-  //~ if(particle.pdg() == 211 || particle.pdg() == -211 || particle.pdg() == 321 || particle.pdg() == -321 || particle.pdg() == 111 || particle.pdg() == 311) 
-  //~ {
-      //~ pif = 0.15;
-      //~ nef = 0.25;
-      //~ prf = 0.25;
-  //~ }
-  //~ if(particle.pdg() == 2212) 
-  //~ {
-    //~ pif = 0.06;
-    //~ nef = 0.25;
-    //~ prf = 0.35;
-  //~ }
-  //~ if(particle.pdg() == 2112) 
-  //~ {
-    //~ pif = 0.03;
-    //~ nef = 0.35;
-    //~ prf = 0.17;
-  //~ }
-  
-  //~ // Source of masses: Geant4
-  //~ for(unsigned int i = 0; i < particles.size(); i++) {
-    //~ chargedist  = generator();
-    //~ if(chargedist < pif) 
-    //~ {
-		//~ particles[i].q() = 0.;
-		//~ particles[i].pdg() = 111;
-		//~ particles[i].m() = 0.1349766 * Acts::units::_GeV;
-		//~ continue;
-    //~ }
-    //~ if(chargedist < 2 * pif) 
-    //~ {
-		//~ particles[i].q() = Acts::units::_e;
-		//~ particles[i].pdg() = 211;
-		//~ particles[i].m() = 0.1395701 * Acts::units::_GeV;
-		//~ continue;
-    //~ }
-    //~ if(chargedist < 3 * pif) 
-    //~ {
-		//~ particles[i].q() = -Acts::units::_e;
-		//~ particles[i].pdg() = -211;
-		//~ particles[i].m() = 0.1395701 * Acts::units::_GeV;
-		//~ continue;
-    //~ }
-    //~ if(chargedist < 3 * pif + nef) 
-    //~ {
-		//~ particles[i].q() = 0.;
-		//~ particles[i].pdg() = 2112;
-		//~ particles[i].m() = 939.56563 * Acts::units::_MeV;
-		//~ continue;
-    //~ }
-    //~ if(chargedist < 3 * pif + nef + prf) 
-    //~ {
-		//~ particles[i].q() = Acts::units::_e;
-		//~ particles[i].pdg() = 2212;
-		//~ particles[i].m() = 938.27231 * Acts::units::_MeV;
-		//~ continue;
-    //~ }
-    //~ particles[i].q() = 2.;
-    //~ particles[i].pdg() = 20000;
-    //~ particles[i].m() = 4. * Acts::units::_GeV;
-  //~ }
+ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const
+{    	
+	std::vector<int> result;
+	double dice;
+	unsigned int index;
+	
+	switch(pdg)
+	{
+		//k-
+		case -321:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsKm[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//pi-
+		case -211:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsPim[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//pi+
+		case 211:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsPip[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//k0
+		case 310:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsK0[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//k+
+		case 321:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsKp[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//n
+		case 2112:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsN[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+			break;
+		}
+		
+		//p
+		case 2212:
+		{
+			while(result.size() < nParticles)
+			{
+				dice = generator();
+				for(index = 0; index < 8; index++) // 8 particles can be produced
+				{
+					if(cProbsP[index] > dice)
+					{
+						result.push_back(pdgLookUp[index]);
+						break;
+					}	
+				}
+			}
+		}
+	}
+
+	return result;
 
   //~ // move the incoming particle type forward
   //~ if(particles[0].pdg() != particle.pdg()) 
@@ -251,6 +343,7 @@ std::vector<particle_t>
 ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
 {
 	// TODO: whole function
+	// TODO: boost should be a part of this class
 	
 	//~ unsigned int Npart = particles.size();
   //~ std::vector<double> mom(Npart);
@@ -377,14 +470,16 @@ template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
 {  
-  
+  // Roll if the final state has any hadrons
   if(generator() < hadronSurvives(particle.p(), thickness, particle.pdg()))
   {
 		// Calculate multiplicity
 		const unsigned int Npart = multiplicity(generator, thickness, particle);
-	  
+		
+		// Calculate particle types
 		const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
 
+		// Calculate the kinematics
 		return kinematics(generator, particle, particlePDGs);
   }
   else
