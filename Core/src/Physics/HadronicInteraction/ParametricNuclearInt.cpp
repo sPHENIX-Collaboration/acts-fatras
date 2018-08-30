@@ -225,3 +225,27 @@ Fatras::ParametricNuclearInt::multiplicityProb(const double momentum, const doub
 	}
 	return exp(exponent) * scaling;
 }
+
+double
+Fatras::ParametricNuclearInt::hadronSurvives(const double momentum, const double thickness, const int pdg) const
+{
+	//TODO: protons missing
+	
+	//k0
+	if(pdg == 311)
+		return 0.05773 - 0.03475 * momentum + 0.4632 * thickness + 0.004882 * momentum * momentum - 0.03134 * momentum * thickness - 0.3981 * thickness * thickness;
+	
+	//k+-
+	if(pdg == 321 || pdg == -321)
+	{
+		const double exponent = -1.503 * momentum + 12.09 * thickness + 0.2249 * momentum * momentum - 0.3225 * momentum * thickness - 12.31 * thickness * thickness;
+		return exp(exponent) * 0.003988;
+	}
+
+	//pi+-,n
+	if(pdg == 211 || pdg == -211 || pdg == 2112)
+	{
+		const double exponent = -4.249 * momentum + 7.135 * momentum * thickness;
+		return exp(exponent) * 0.02784;
+	}
+}
