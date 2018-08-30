@@ -54,14 +54,13 @@ nuclearInteraction(generator_t& generator, const material_t& matertial, particle
 
 /// @brief Calculates the probability of a nuclear interaction
 ///
-/// @tparam generator_t data type of the random number generator
 /// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] momentum Particles momentum in GeV
 /// @param [in] pdg PDG code of the particle
 ///
 /// @return boolean result if a nuclear interaction occurs
 double 
-nuclearInteractionProb(const double thickness, const double momentum, const int pdg) const;
+nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const;
 
 /// @brief Calculates if no hadrons survive
 ///
@@ -77,6 +76,17 @@ template <typename generator_t, typename material_t, typename particle_t>
 bool
 hadronSurvives(generator_t& generator, const material_t& matertial, particle_t& particle) const;
 
+/// @brief Calculates the probability for a certain multiplicity
+///
+/// @param [in] thickness Thickness of the material in terms of L0
+/// @param [in] momentum Particles momentum in GeV
+/// @param [in] pdg PDG code of the particle
+/// @param [in] mult Multiplicity of the final state
+///
+/// @return Probability of the given configuration
+double
+multiplicityProb(const double momentum, const double thickness, const int pdg, const unsigned int mult) const;
+
 /// @brief Dices the number of particle candidates that leave the detector
 ///
 /// @tparam generator_t data type of the random number generator
@@ -85,8 +95,8 @@ hadronSurvives(generator_t& generator, const material_t& matertial, particle_t& 
 /// @param [in] particle ingoing particle
 /// @return number of outgoing candidates
 template<typename generator_t, typename particle_t>
-int
-diceNumberOfParticles(generator_t& generator, particle_t& particle) const;
+unsigned int
+multiplicity(generator_t& generator, particle_t& particle) const;
 
 /// @brief Creates the particle candidates that leave the detector
 ///
@@ -137,38 +147,21 @@ hadronSurvives(generator_t& generator, const material_t& matertial, particle_t& 
 }
 
 template<typename generator_t, typename particle_t>
-int
-ParametricNuclearInt::diceNumberOfParticles(generator_t& generator, particle_t& particle) const
+unsigned int
+ParametricNuclearInt::multiplicity(generator_t& generator, particle_t& particle) const
 {
-  // sampling of hadronic interaction
-  double E = sqrt(particle.p() * particle.p() + particle.m() * particle.m());
-  // get the maximum multiplicity    
-  double multiplicity_max = 0.25 * E / 1000. + 18.;
-  // multiplicity distribution
-  double randx, randy, arg = 0.;
-  double p1 = 0.;
-  double p2 = 0.;
-  if (E > 15000.) 
-  {
-    p1 = 8.69;
-    p2 = 2.34;
-  } 
-  else 
-  {
-    p1 = 6.77;
-    p2 = 2.02;
-  }
-  
-  for (;;) {
-    randx = 30. * generator();
-    randy = 1.  * generator();
-    arg = exp(-0.5 * ((randx - p1) / p2 + exp(-(randx - p1) / p2)));
-    if (randy < arg && randx > 3 && randx < multiplicity_max) break;
-  }
-  
-  randx *= (1.2 - 0.4 * exp(-0.001 * particle.p()));     // trying to adjust
-
-  return (int)randx;
+	const double dice = generator();
+	size_t mult = 2;
+	double cumulativeProb = 0.;
+	const double thicknessInL0 = material.thickness() / material.averageL0();
+	
+	while(dice > cumulativeProb)
+	{
+		cumulativeProb += multiplicityProb(particle.p(), thicknessInL0, particle.pdg(), mult);
+		mult++;
+	}
+	
+	return --mult;
 }
 
 template<typename generator_t, typename particle_t>
