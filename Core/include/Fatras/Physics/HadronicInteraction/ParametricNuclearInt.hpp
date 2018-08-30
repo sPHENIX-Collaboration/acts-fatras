@@ -41,21 +41,20 @@ protected:
 /// @brief Calculates and states if a nuclear interaction occurs
 ///
 /// @tparam generator_t data type of the random number generator
-/// @tparam material_t data type of the material
 /// @tparam particle_t data type of the particle
 /// @param [in] generator is the random number generator
-/// @param [in] material material that is penetrated
+/// @param [in] thickness Material thickness that is penetrated
 /// @param [in] particle particle that penetrates the material
 ///
 /// @return boolean result if a nuclear interaction occurs
-template <typename generator_t, typename material_t, typename particle_t>
+template <typename generator_t, typename particle_t>
 bool 
-nuclearInteraction(generator_t& generator, const material_t& matertial, particle_t& particle) const;
+nuclearInteraction(generator_t& generator, const double thickness, particle_t& particle) const;
 
 /// @brief Calculates the probability of a nuclear interaction
 ///
-/// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] momentum Particles momentum in GeV
+/// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] pdg PDG code of the particle
 ///
 /// @return boolean result if a nuclear interaction occurs
@@ -64,17 +63,13 @@ nuclearInteractionProb(const double momentum, const double thickness, const int 
 
 /// @brief Calculates if no hadrons survive
 ///
-/// @tparam generator_t data type of the random number generator
-/// @tparam material_t data type of the material
-/// @tparam particle_t data type of the particle
-/// @param [in] generator is the random number generator
-/// @param [in] material material that is penetrated
-/// @param [in] particle particle that penetrates the material
+/// @param [in] momentum Particles momentum in GeV
+/// @param [in] thickness Thickness of the material in terms of L0
+/// @param [in] pdg PDG code of the particle
 ///
 /// @return boolean result if a hadron survives
-template <typename generator_t, typename material_t, typename particle_t>	
-bool
-hadronSurvives(generator_t& generator, const material_t& matertial, particle_t& particle) const;
+double
+hadronSurvives(const double momentum, const double thickness, const int pdg) const;
 
 /// @brief Calculates the probability for a certain multiplicity
 ///
@@ -90,74 +85,73 @@ multiplicityProb(const double momentum, const double thickness, const int pdg, c
 /// @brief Dices the number of particle candidates that leave the detector
 ///
 /// @tparam generator_t data type of the random number generator
+/// @tparam material_t data type of the material
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
+/// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] particle ingoing particle
+///
 /// @return number of outgoing candidates
 template<typename generator_t, typename particle_t>
 unsigned int
-multiplicity(generator_t& generator, particle_t& particle) const;
+multiplicity(generator_t& generator, const double thickness, particle_t& particle) const;
 
-/// @brief Creates the particle candidates that leave the detector
-///
+/// @brief Creates the particle types that leave the detector
+///4
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
 /// @param [in] particle ingoing particle
-/// @param [in] particles list of created particles
+/// @param [in] nParticles Number of outgoing particles
+///
+/// @return list of outgoing particle PDGs
 template<typename generator_t, typename particle_t>
-void
-createMultiplicity(generator_t& generator, particle_t& particle, std::vector<particle_t>& particles) const;
+std::vector<int>
+particleComposition(generator_t& generator, particle_t& particle, const unsigned int nParticles) const;
 
 /// @brief Creates the kinematics of a list of particles
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
-/// @param [in] particles list of created particles
+/// @param [in] particle incoming particle
+/// @param [in] particlePDGs list of created particle PDGs
 template<typename generator_t, typename particle_t>
 void
-kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_t& particle) const;
+kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const;
 
 /// @brief Calculates the hadron interactions of a particle
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
+/// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] particle particle that interacts
 ///
 /// @return vector of outgoing particles
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
-getHadronState(generator_t& generator, particle_t& particle) const;
+finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle) const;
 };
 
-template <typename generator_t, typename material_t, typename particle_t>
+template <typename generator_t, typename particle_t>
 bool 
-ParametricNuclearInt::nuclearInteraction(generator_t& generator, const material_t& material, particle_t& particle) const 
+ParametricNuclearInt::nuclearInteraction(generator_t& generator, const double thickness, particle_t& particle) const 
 {
-  return generator() < nuclearInteractionProb(material.thickness() / material.averageL0(), particle.p(), particle.pdg());
-}
-
-template <typename generator_t, typename material_t, typename particle_t>	
-bool
-hadronSurvives(generator_t& generator, const material_t& matertial, particle_t& particle) const
-{
-	return true;
+  return generator() < nuclearInteractionProb(particle.p(), thickness, particle.pdg());
 }
 
 template<typename generator_t, typename particle_t>
 unsigned int
-ParametricNuclearInt::multiplicity(generator_t& generator, particle_t& particle) const
+ParametricNuclearInt::multiplicity(generator_t& generator, const double thickness, particle_t& particle) const
 {
 	const double dice = generator();
 	size_t mult = 2;
 	double cumulativeProb = 0.;
-	const double thicknessInL0 = material.thickness() / material.averageL0();
 	
 	while(dice > cumulativeProb)
 	{
-		cumulativeProb += multiplicityProb(particle.p(), thicknessInL0, particle.pdg(), mult);
+		cumulativeProb += multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
 		mult++;
 	}
 	
@@ -165,9 +159,10 @@ ParametricNuclearInt::multiplicity(generator_t& generator, particle_t& particle)
 }
 
 template<typename generator_t, typename particle_t>
-void
-ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& particle, std::vector<particle_t>& particles) const
+std::vector<int>
+ParametricNuclearInt::particleComposition(generator_t& generator, particle_t& particle, const unsigned int nParticles) const
 {    
+	return {};
   //~ // new sampling: sample particle type and energy in the CMS frame of outgoing particles
   //~ // creation of shower particles
   //~ double chargedist = 0.;
@@ -252,116 +247,118 @@ ParametricNuclearInt::createMultiplicity(generator_t& generator, particle_t& par
 
 template<typename generator_t, typename particle_t>
 void
-ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>& particles, particle_t& particle) const
+ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
 {
-	unsigned int Npart = particles.size();
-  std::vector<double> mom(Npart);
-  std::vector<double> th(Npart);
-  std::vector<double> ph(Npart);
+	// TODO: whole function
+	
+	//~ unsigned int Npart = particles.size();
+  //~ std::vector<double> mom(Npart);
+  //~ std::vector<double> th(Npart);
+  //~ std::vector<double> ph(Npart);
 
-  // sample first particle energy fraction and random momentum direction
-  double eps = 2. / Npart;
-  double rnd  = generator();
-  mom[0] = 0.5 * pow(eps, rnd);          
-  th[0]  = acos(2 * generator() - 1.);
-  ph[0]  = 2 * M_PI * generator();
+  //~ // sample first particle energy fraction and random momentum direction
+  //~ double eps = 2. / Npart;
+  //~ double rnd  = generator();
+  //~ mom[0] = 0.5 * pow(eps, rnd);          
+  //~ th[0]  = acos(2 * generator() - 1.);
+  //~ ph[0]  = 2 * M_PI * generator();
   
-  // toss particles around in a way which preserves the total momentum (0.,0.,0.) at this point
-  // TODO shoot first particle along the impact direction preferentially
+  //~ // toss particles around in a way which preserves the total momentum (0.,0.,0.) at this point
+  //~ // TODO shoot first particle along the impact direction preferentially
 
-  Acts::Vector3D ptemp(mom[0]*sin(th[0])*cos(ph[0]),mom[0]*sin(th[0])*sin(ph[0]),mom[0]*cos(th[0]));
-  double ptot = mom[0];
+  //~ Acts::Vector3D ptemp(mom[0]*sin(th[0])*cos(ph[0]),mom[0]*sin(th[0])*sin(ph[0]),mom[0]*cos(th[0]));
+  //~ double ptot = mom[0];
   
-  double theta = 0.; double phi = 0.; 
-  for (unsigned int i = 1; i < Npart - 2; i++) 
-  {
-    eps = 1. / (Npart - i); 
-    mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot); 
-    if(ptemp.mag() < 1 - ptot) 
-      while(fabs(ptemp.mag() - mom[i]) > 1 - ptot - mom[i])
-		mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot);
+  //~ double theta = 0.; double phi = 0.; 
+  //~ for (unsigned int i = 1; i < Npart - 2; i++) 
+  //~ {
+    //~ eps = 1. / (Npart - i); 
+    //~ mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot); 
+    //~ if(ptemp.mag() < 1 - ptot) 
+      //~ while(fabs(ptemp.mag() - mom[i]) > 1 - ptot - mom[i])
+		//~ mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot);
     
-    // max p remaining
-    double p_rem = 1 - ptot-mom[i];
-    double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
-    rnd  = generator();
-    theta = acos( (cthmax+1.)*rnd-1.);          
-    phi = 2 * M_PI * generator();
-    Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-    Acts::RotationMatrix3D rotY, rotZ;
-    rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
-		0., 1., 0.,
-		-sin(ptemp.theta()), 0., cos(ptemp.theta());
-	rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
-		sin(ptemp.phi()), cos(ptemp.phi()), 0.,
-		0., 0., 1.;
-    Acts::Vector3D dnewHep = rotZ * rotY * test;
-    Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
-    th[i] = dnew.theta();    
-    ph[i] = dnew.phi();          
-    ptemp += mom[i] * dnew;
-    ptot += mom[i];
-  }
+    //~ // max p remaining
+    //~ double p_rem = 1 - ptot-mom[i];
+    //~ double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
+    //~ rnd  = generator();
+    //~ theta = acos( (cthmax+1.)*rnd-1.);          
+    //~ phi = 2 * M_PI * generator();
+    //~ Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+    //~ Acts::RotationMatrix3D rotY, rotZ;
+    //~ rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
+		//~ 0., 1., 0.,
+		//~ -sin(ptemp.theta()), 0., cos(ptemp.theta());
+	//~ rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
+		//~ sin(ptemp.phi()), cos(ptemp.phi()), 0.,
+		//~ 0., 0., 1.;
+    //~ Acts::Vector3D dnewHep = rotZ * rotY * test;
+    //~ Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
+    //~ th[i] = dnew.theta();    
+    //~ ph[i] = dnew.phi();          
+    //~ ptemp += mom[i] * dnew;
+    //~ ptot += mom[i];
+  //~ }
   
-  eps = 0.5; 
-  mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
-  mom[Npart-1] = 1 - ptot - mom[Npart - 2];
+  //~ eps = 0.5; 
+  //~ mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
+  //~ mom[Npart-1] = 1 - ptot - mom[Npart - 2];
   
-  if(ptemp.mag() < 1 - ptot) 
-    while(mom[Npart-1]+mom[Npart-2]<ptemp.mag()) 
-    { 
-      mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
-      mom[Npart-1] = 1 - ptot - mom[Npart - 2];
-    }
+  //~ if(ptemp.mag() < 1 - ptot) 
+    //~ while(mom[Npart-1]+mom[Npart-2]<ptemp.mag()) 
+    //~ { 
+      //~ mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
+      //~ mom[Npart-1] = 1 - ptot - mom[Npart - 2];
+    //~ }
     
-  if (ptemp.mag()<fabs(mom[Npart-1]-mom[Npart-2]) ) {
-    double diff = ptemp.mag() * generator();
-    double sum = mom[Npart - 1] - mom[Npart - 2];
-    mom[Npart - 2] = 0.5 * (sum + diff);  
-    mom[Npart - 1] = 0.5 * (sum - diff);  
-  }
-  double cth =(-ptemp.mag()*ptemp.mag()-mom[Npart-2]*mom[Npart-2]+mom[Npart-1]*mom[Npart-1])/2/ptemp.mag()/mom[Npart-2];
-  if (fabs(cth)>1.) cth = (cth>0.) ? 1. : -1.;
+  //~ if (ptemp.mag()<fabs(mom[Npart-1]-mom[Npart-2]) ) {
+    //~ double diff = ptemp.mag() * generator();
+    //~ double sum = mom[Npart - 1] - mom[Npart - 2];
+    //~ mom[Npart - 2] = 0.5 * (sum + diff);  
+    //~ mom[Npart - 1] = 0.5 * (sum - diff);  
+  //~ }
+  //~ double cth =(-ptemp.mag()*ptemp.mag()-mom[Npart-2]*mom[Npart-2]+mom[Npart-1]*mom[Npart-1])/2/ptemp.mag()/mom[Npart-2];
+  //~ if (fabs(cth)>1.) cth = (cth>0.) ? 1. : -1.;
   
-  theta = acos(cth);
-  phi = 2 * M_PI * generator();
-  Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-    Acts::RotationMatrix3D rotY, rotZ;
-    rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
-		 0., 1., 0.,
-		 -sin(ptemp.theta()), 0., cos(ptemp.theta());
-	rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
-		 sin(ptemp.phi()), cos(ptemp.phi()), 0.,
-		 0., 0., 1.;
-  Acts::Vector3D dnewHep = rotZ * rotY * test;
-  Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
+  //~ theta = acos(cth);
+  //~ phi = 2 * M_PI * generator();
+  //~ Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+    //~ Acts::RotationMatrix3D rotY, rotZ;
+    //~ rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
+		 //~ 0., 1., 0.,
+		 //~ -sin(ptemp.theta()), 0., cos(ptemp.theta());
+	//~ rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
+		 //~ sin(ptemp.phi()), cos(ptemp.phi()), 0.,
+		 //~ 0., 0., 1.;
+  //~ Acts::Vector3D dnewHep = rotZ * rotY * test;
+  //~ Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
   
-  th[Npart - 2]=dnew.theta();    
-  ph[Npart - 2]=dnew.phi();    
-  ptemp += mom[Npart - 2] * dnew;
-  Acts::Vector3D dlast = -ptemp;
-  th[Npart - 1] = dlast.theta(); 
-  ph[Npart - 1] = dlast.phi();
+  //~ th[Npart - 2]=dnew.theta();    
+  //~ ph[Npart - 2]=dnew.phi();    
+  //~ ptemp += mom[Npart - 2] * dnew;
+  //~ Acts::Vector3D dlast = -ptemp;
+  //~ th[Npart - 1] = dlast.theta(); 
+  //~ ph[Npart - 1] = dlast.phi();
   
   
-  // particle sampled, rotate, boost and save final state
-  double etot = 0.;
-  for (unsigned int i = 0; i < Npart; i++) 
-	etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
-  double summ = 0.;
-  for (unsigned int i = 0; i < Npart; i++) 
-	summ += particles[i].m();
+  //~ // particle sampled, rotate, boost and save final state
+  //~ double etot = 0.;
+  //~ for (unsigned int i = 0; i < Npart; i++) 
+	//~ etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
+  //~ double summ = 0.;
+  //~ for (unsigned int i = 0; i < Npart; i++) 
+	//~ summ += particles[i].m();
 
-  // rescale (roughly) to the expected energy
-  float scale = sqrt(summ*summ+2*summ*particle.p()+particle.m() * particle.m())/etot;
-  etot = 0.;
-  for (unsigned int i = 0; i < Npart; i++) {
-    mom[i] *= scale;
-    etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
-  }
+  //~ // rescale (roughly) to the expected energy
+  //~ float scale = sqrt(summ*summ+2*summ*particle.p()+particle.m() * particle.m())/etot;
+  //~ etot = 0.;
+  //~ for (unsigned int i = 0; i < Npart; i++) {
+    //~ mom[i] *= scale;
+    //~ etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
+  //~ }
   
-  // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
-  Acts::Vector3D bv = particle.momentum() / sqrt(etot * etot + particle.p() * particle.p()); // TODO: Why such an energy term?
+  //~ // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
+  //~ Acts::Vector3D bv = particle.momentum() / sqrt(etot * etot + particle.p() * particle.p()); // TODO: Why such an energy term?
   
   /// New particle structure does not allow setting values in the old way
   //~ for (unsigned int i = 0; i < Npart; i++) 
@@ -374,39 +371,33 @@ ParametricNuclearInt::kinematics(generator_t& generator, std::vector<particle_t>
   //~ }
 }
 
-template<typename generator_t, typename material_t, typename particle_t>
+template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
-ParametricNuclearInt::getHadronState(generator_t& generator, const material_t& detector, particle_t& particle) const
+ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
 {  
-	std::vector<particle_t> chDef; 
   
-  if(hadronSurvives(generator, particle)
+  if(generator() < hadronSurvives(particle.p(), thickness, particle.pdg()))
   {
-	  // Calculate multiplicity
-	  int Npart = diceNumberOfParticles(generator, particle);
+		// Calculate multiplicity
+		const unsigned int Npart = multiplicity(generator, thickness, particle);
 	  
-	  // protection against Npart < 3
-	  if (Npart >= 3)
-		{
-		chDef.resize(Npart);
-
-		createMultiplicity(generator, particle, chDef);
-		
-		kinematics(generator, chDef, particle);
-	  }
-	  else
-		chDef.push_back(particle); // Return at least the leading particle
+		const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
+		kinematics(generator, particle, particlePDGs);
+		return {};
   }
-  return chDef;
+  else
+	return {};
 }
 
 template <typename generator_t, typename detector_t, typename particle_t>
-std::vector<particle_t> ParametricNuclearInt::operator()(generator_t &generator,
-                                     const detector_t &detector,
+std::vector<particle_t> ParametricNuclearInt::operator()(generator_t& generator,
+                                     const detector_t& detector,
                                      particle_t &particle) const
 {
-	if (nuclearInteraction(generator, detector, particle))
-		return getHadronState(generator, particle);
+	const double thicknessInL0 = detector.thickness() / detector.averageL0();
+	
+	if (nuclearInteraction(generator, thicknessInL0, particle))
+		return finalStateHadrons(generator, thicknessInL0, particle);
  
 	// no hadronic interactions were computed
 	return {particle};  // Return the incoming particle
