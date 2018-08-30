@@ -13,7 +13,6 @@
 #include <math.h>
 #include <vector>
 
-// TODO: explicit calculations may become an interface
 namespace Fatras {
 
 /// The struct for the physics list
@@ -116,8 +115,10 @@ particleComposition(generator_t& generator, particle_t& particle, const unsigned
 /// @param [in] generator random number generator
 /// @param [in] particle incoming particle
 /// @param [in] particlePDGs list of created particle PDGs
+///
+/// @return vector of outgoing particles
 template<typename generator_t, typename particle_t>
-void
+std::vector<particle_t>
 kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const;
 
 /// @brief Calculates the hadron interactions of a particle
@@ -246,7 +247,7 @@ ParametricNuclearInt::particleComposition(generator_t& generator, particle_t& pa
 }
 
 template<typename generator_t, typename particle_t>
-void
+std::vector<particle_t>
 ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
 {
 	// TODO: whole function
@@ -369,6 +370,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
     //~ particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
 	//~ particles[i].boost(bv);
   //~ }
+  return {};
 }
 
 template<typename generator_t, typename particle_t>
@@ -382,8 +384,8 @@ ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thi
 		const unsigned int Npart = multiplicity(generator, thickness, particle);
 	  
 		const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
-		kinematics(generator, particle, particlePDGs);
-		return {};
+
+		return kinematics(generator, particle, particlePDGs);
   }
   else
 	return {};
@@ -396,11 +398,13 @@ std::vector<particle_t> ParametricNuclearInt::operator()(generator_t& generator,
 {
 	const double thicknessInL0 = detector.thickness() / detector.averageL0();
 	
+	// If a nuclear interaction occurs ...
 	if (nuclearInteraction(generator, thicknessInL0, particle))
+		// ... calculate the final state hadrons
 		return finalStateHadrons(generator, thicknessInL0, particle);
  
-	// no hadronic interactions were computed
-	return {particle};  // Return the incoming particle
+	// No hadronic interactions occured
+	return {particle};
 }
 	
 } // namespace Fatras
