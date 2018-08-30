@@ -9,7 +9,7 @@ option(USE_GEANT4 "Build Geant4-based code" on)
 # explicitely add it here.
 
 if(NOT TARGET ActsCore)
-  find_package(Acts REQUIRED COMPONENTS Core Legacy MaterialPlugin)
+  find_package(Acts REQUIRED COMPONENTS Core Legacy)
 endif()
 
 # require C++14 globally

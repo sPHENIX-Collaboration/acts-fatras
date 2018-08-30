@@ -1,4 +1,4 @@
-add_library(FatrasCore SHARED src/RandomNumberDistributions.cpp)
+add_library(FatrasCore SHARED src/RandomNumberDistributions.cpp src/Physics/HadronicInteraction/ParametricNuclearInt.cpp)
 
 # prefix output library file name with Acts
 set_target_properties(FatrasCore PROPERTIES OUTPUT_NAME "FatrasCore")
