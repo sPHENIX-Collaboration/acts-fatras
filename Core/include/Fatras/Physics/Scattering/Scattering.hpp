@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
@@ -46,8 +47,8 @@ template <typename formula_t> struct Scattering {
     if (parametric) {
 
       // the initial values
-      double theta = in.momentum().theta();
-      double phi = in.momentum().phi();
+      double theta = Acts::LA::theta(in.momentum());
+      double phi = Acts::LA::phi(in.momentum());
       double sinTheta = (sin(theta) * sin(theta) > 10e-10) ? sin(theta) : 1.;
 
       // sample them in an independent way
@@ -85,7 +86,7 @@ template <typename formula_t> struct Scattering {
       double psi = 2. * M_PI * uniformDist(gen);
 
       // more complex but "more true"
-      Acts::Vector3D pDirection(in.momentum().unit());
+      Acts::Vector3D pDirection(in.momentum().normalized());
       double x = -pDirection.y();
       double y = pDirection.x();
       double z = 0.;
@@ -102,7 +103,7 @@ template <typename formula_t> struct Scattering {
       rotation = Acts::AngleAxis3D(psi, pDirection) *
                  Acts::AngleAxis3D(angle3D, deflector);
       // rotate and set a new direction to the cache
-      in.scatter(in.p() * rotation * pDirection.unit());
+      in.scatter(in.p() * rotation * pDirection.normalized());
     }
     // scattering always returns an empty list
     // - it is a non-distructive process

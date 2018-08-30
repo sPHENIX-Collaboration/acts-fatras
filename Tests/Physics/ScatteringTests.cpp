@@ -88,7 +88,7 @@ BOOST_DATA_TEST_CASE(
   Acts::Vector3D position{0., 0., 0.};
   // p of 1 GeV
   Acts::Vector3D momentum =
-      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit();
+      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).normalized();
   // positively charged
   double q = -1.;
   double m = 105.658367 * Acts::units::_MeV; // muon mass

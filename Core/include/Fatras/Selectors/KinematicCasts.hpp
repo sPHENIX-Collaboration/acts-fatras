@@ -9,6 +9,7 @@
 #pragma once
 
 #include <cmath>
+#include "Acts/Utilities/Helpers.hpp"
 
 namespace Fatras {
 
@@ -19,7 +20,7 @@ struct eta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum().eta();
+    return Acts::LA::eta(particle.momentum());
   }
 };
 
@@ -28,7 +29,7 @@ struct absEta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return std::abs(particle.momentum().eta());
+    return std::abs(Acts::LA::eta(particle.momentum()));
   }
 };
 
@@ -36,7 +37,7 @@ struct absEta {
 struct pT {
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum().perp();
+    return Acts::LA::perp(particle.momentum());
   }
 };
 
@@ -44,7 +45,7 @@ struct pT {
 struct p {
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.momentum().mag();
+    return particle.momentum().norm();
   }
 };
 
@@ -62,7 +63,7 @@ struct vR {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return particle.position().perp();
+    return Acts::LA::perp(particle.position());
   }
 };
 

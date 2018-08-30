@@ -92,7 +92,7 @@ BOOST_DATA_TEST_CASE(
   Acts::Vector3D position{0., 0., 0.};
   // pT of 1 GeV
   Acts::Vector3D momentum =
-      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).unit();
+      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).normalized();
   // positively charged
   double q = 1.;
   double m = 105.658367 * Acts::units::_MeV; // muon mass
@@ -112,7 +112,7 @@ BOOST_DATA_TEST_CASE(
   BOOST_CHECK(!cEnergyLoss(generator, detector, particle, outgoing));
 
   // check the the particle momentum magnitude is NOT identical
-  BOOST_CHECK(momentum.mag() != particle.momentum().mag());
+  BOOST_CHECK(momentum.norm() != particle.momentum().norm());
 
   // let's test this as part of a physics list
   PhysicsList<EnergyLoss> energyLossPhysics;

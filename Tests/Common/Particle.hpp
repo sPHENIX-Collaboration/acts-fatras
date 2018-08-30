@@ -12,6 +12,7 @@
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryID.hpp"
 #include "Acts/Utilities/Units.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include <cmath>
 
 namespace Fatras {
@@ -45,7 +46,7 @@ public:
            double m, double q, pdg_type pdg = 0, barcode_type barcode = 0,
            double startTime = 0.)
       : m_position(position), m_momentum(momentum), m_m(m), m_q(q),
-        m_p(momentum.mag()), m_pT(momentum.perp()), m_pdg(pdg),
+        m_p(momentum.norm()), m_pT(Acts::LA::perp(momentum)), m_pdg(pdg),
         m_barcode(barcode), m_timeStamp(startTime) {
     m_E = std::sqrt(m_p * m_p + m_m * m_m);
     m_beta = (m_p / m_E);
@@ -69,7 +70,7 @@ public:
   /// @param deltaE is the energy loss to be applied
   void scatter(Acts::Vector3D nmomentum) {
     m_momentum = std::move(nmomentum);
-    m_pT = m_momentum.perp();
+    m_pT = Acts::LA::perp(m_momentum);
   }
 
   /// @brief Update the particle with applying energy loss
@@ -89,8 +90,8 @@ public:
     // updatet the parameters
     m_E -= deltaE;
     m_p = std::sqrt(m_E * m_E - m_m * m_m);
-    m_momentum = m_p * m_momentum.unit();
-    m_pT = m_momentum.perp();
+    m_momentum = m_p * m_momentum.normalized();
+    m_pT = Acts::LA::perp(m_momentum);
     m_beta = (m_p / m_E);
     m_gamma = (m_E / m_m);
   }
@@ -110,9 +111,9 @@ public:
               double deltaTime = 0.) {
     m_position = position;
     m_momentum = momentum;
-    m_p = momentum.mag();
+    m_p = momentum.norm();
     if (m_p) {
-      m_pT = momentum.perp();
+      m_pT = Acts::LA::perp(momentum);
       m_E = std::sqrt(m_p * m_p + m_m * m_m);
       m_timeStamp += deltaTime;
       m_beta = (m_p / m_E);
