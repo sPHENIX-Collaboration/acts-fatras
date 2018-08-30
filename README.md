@@ -1,7 +1,7 @@
 # Fast track simulation extension for the Acts project
 
 This project provides the code to run a fast track simulation on top of 
-`Acts::Core`. The fast track simulation (Fatras) uses the actor plug-in 
+`ActsCore`. The fast track simulation (Fatras) uses the actor plug-in 
 mechanism of the `Acts::Propagator` and its predictive navigation through
 the `Acts::TrackingGeometry` to simulate particle trajectories through the
 tracking detector.
@@ -17,7 +17,7 @@ particle parameterised material effects:
 
 
 Dependencies for the Core components are:
-  * `Acts::Core` and consequently `Eigen` and `Boost`
+  * `ActsCore` and consequently `Eigen` and `Boost`
 
 Optional dependency exists for:
   * `Geant4` for optional functionality taken from the full simulation toolkit
