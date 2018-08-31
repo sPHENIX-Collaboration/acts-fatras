@@ -136,9 +136,6 @@ std::vector<particle_t>
 finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle) const;
 
 private:
-
-	// TODO: adding up the elements
-	// TODO: reroll if number too high
 	
 	// Look up table for produceable hadrons 
 	const std::array<double, 8> pdgLookUp = {-321, -211, 111, 211, 310, 321, 2112, 2212};
@@ -194,6 +191,7 @@ std::vector<int>
 ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const
 {    	
 	std::vector<int> result;
+	result.reserve(nParticles);
 	double dice;
 	unsigned int index;
 	
@@ -254,6 +252,7 @@ ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg,
 		}
 		
 		//k0
+		case 130:
 		case 310:
 		{
 			while(result.size() < nParticles)
