@@ -90,6 +90,38 @@ Fatras::ParametricNuclearInt::nuclearInteractionProb(const double momentum, cons
 }
 
 double
+Fatras::ParametricNuclearInt::hadronSurvives(const double momentum, const double thickness, const int pdg) const
+{
+	//TODO: protons missing
+	
+	switch(pdg)
+	{
+		//k0
+		case 130:
+		case 310:
+		case 311:
+			return 0.05773 - 0.03475 * momentum + 0.4632 * thickness + 0.004882 * momentum * momentum - 0.03134 * momentum * thickness - 0.3981 * thickness * thickness;
+		
+		//k+-
+		case -321:
+		case 321:
+		{
+			const double exponent = -1.503 * momentum + 12.09 * thickness + 0.2249 * momentum * momentum - 0.3225 * momentum * thickness - 12.31 * thickness * thickness;
+			return exp(exponent) * 0.003988;
+		}
+
+		//pi+-,n
+		case -211:
+		case 211:
+		case 2112:
+		{
+			const double exponent = -4.249 * momentum + 7.135 * momentum * thickness;
+			return exp(exponent) * 0.02784;
+		}
+	}
+}
+
+double
 Fatras::ParametricNuclearInt::multiplicityProb(const double momentum, const double thickness, const int pdg, const unsigned int mult) const
 {
 	double scaleP, scaleD, scaling, exponent;
@@ -251,39 +283,5 @@ Fatras::ParametricNuclearInt::multiplicityProb(const double momentum, const doub
 	return exp(exponent) * scaling;
 }
 
-double
-Fatras::ParametricNuclearInt::hadronSurvives(const double momentum, const double thickness, const int pdg) const
-{
-	//TODO: protons missing
-	
-	switch(pdg)
-	{
-		//k0
-		case 130:
-		case 310:
-		case 311:
-			return 0.05773 - 0.03475 * momentum + 0.4632 * thickness + 0.004882 * momentum * momentum - 0.03134 * momentum * thickness - 0.3981 * thickness * thickness;
-		
-		//k+-
-		case -321:
-		case 321:
-		{
-			const double exponent = -1.503 * momentum + 12.09 * thickness + 0.2249 * momentum * momentum - 0.3225 * momentum * thickness - 12.31 * thickness * thickness;
-			return exp(exponent) * 0.003988;
-		}
 
-		//pi+-,n
-		case -211:
-		case 211:
-		case 2112:
-		{
-			const double exponent = -4.249 * momentum + 7.135 * momentum * thickness;
-			return exp(exponent) * 0.02784;
-		}
-		
-		// Other particles do not survive 
-		default:
-			return 0.;
-	}
-}
 

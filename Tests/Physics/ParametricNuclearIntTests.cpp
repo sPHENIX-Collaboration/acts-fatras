@@ -163,10 +163,56 @@ int barcode = 0.;
 double time = 0.;
 Particle p(pos, mom, mass, charge, pdg, barcode, time);
 
-pnis.nuclearInteractionStub(fvg0, 0.5, p); 
+{
+	BOOST_TEST(pnis.nuclearInteractionStub(fvg0, 0.5, p) == true);
+	BOOST_TEST(pnis.nuclearInteractionStub(fvg1, 0.5, p) == false);
+}
 
-//~ hadronSurvivesStub(const double momentum, const double thickness, const int pdg)
-//~ multiplicityProbStub(const double momentum, const double thickness, const int pdg, const unsigned int mult) 
+{
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 130) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 310) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 311) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, -321) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 321) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, -211) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 211) > 0.);
+	BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 2112) > 0.);
+	//~ BOOST_TEST(pnis.hadronSurvivesStub(1. * Acts::units::_GeV, 0.5, 2212) > 0.); // Not implemented
+}
+
+for(unsigned int mult = 2; mult < 10; mult++)
+{
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.1, 130, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.2, 130, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.4, 130, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.1, 310, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.2, 310, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.4, 310, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.1, 311, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.2, 311, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.4, 311, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.1, -321, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.3, -321, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.3, 321, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(2. * Acts::units::_GeV, 0.3, 321, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.3, 2112, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(2. * Acts::units::_GeV, 0.3, 2112, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.3, 2212, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(2. * Acts::units::_GeV, 0.3, 2212, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(1. * Acts::units::_GeV, 0.3, -211, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(2. * Acts::units::_GeV, 0.3, -211, mult) > 0.);
+	
+	BOOST_TEST(pnis.multiplicityProbStub(2. * Acts::units::_GeV, 0.3, 211, mult) > 0.);
+	BOOST_TEST(pnis.multiplicityProbStub(3. * Acts::units::_GeV, 0.3, 211, mult) > 0.);
+}
+
 //~ multiplicityStub(generator_t& generator, const double thickness, particle_t& particle) 
 //~ particleCompositionStub(generator_t& generator, const int pdg, const unsigned int nParticles) 
 //~ kinematicsStub(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs)
