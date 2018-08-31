@@ -21,9 +21,8 @@
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 
-//~ #include "Fatras/Kernel/Particle.hpp"
 #include "../Common/Particle.hpp"
-#include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
+#include "ParametricNuclearIntStub.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
 
@@ -41,6 +40,7 @@
 #include <fstream>
 #include <random>
 #include <chrono>
+#include <array>
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -48,6 +48,18 @@ namespace tt = boost::test_tools;
 namespace Fatras {
 
 namespace Test {
+
+struct FixValueGenerator {
+
+	FixValueGenerator(double value) : m_value(value) {}
+
+	double m_value;
+	
+	double operator()()
+	{
+		return m_value;
+	}
+};
 
 // the generator
 typedef std::mt19937 Generator;
@@ -57,15 +69,15 @@ struct MyGenerator {
 
 MyGenerator(int samen)
 {
-	generator.seed(samen);
+	m_generator.seed(samen);
 }
 
 // standard generator
-Generator generator;
+Generator m_generator;
 
 	double operator()()
 	{
-		return (double) generator() / (double) generator.max();
+		return (double) m_generator() / (double) m_generator.max();
 	}
 };
 
@@ -91,7 +103,77 @@ std::ofstream ofsResetter("geant4out.txt");
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4ParticleDefinition* parDef;
-    
+
+BOOST_AUTO_TEST_CASE(ParamNucularInt_functions_test_) {
+
+ParametricNuclearIntStub pnis;
+
+{
+	BOOST_TEST(pnis.nuclearInteractionProbStub(4. * Acts::units::_GeV, 0.5, 2112) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(2. * Acts::units::_GeV, 0.4, 2112) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(2. * Acts::units::_GeV, 0.6, 2112) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(4. * Acts::units::_GeV, 0.5, 2212) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(2. * Acts::units::_GeV, 0.4, 2212) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(2. * Acts::units::_GeV, 0.6, 2212) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.5, -211) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, -211) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, -211) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.5, 211) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, 211) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, 211) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.5, 321) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, 321) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, 321) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.5, -321) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, -321) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, -321) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.4, 130) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.6, 130) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, 130) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, 130) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.4, 310) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.6, 310) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, 310) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, 310) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.4, 311) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(5. * Acts::units::_GeV, 0.6, 311) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.4, 311) > 0.);
+	BOOST_TEST(pnis.nuclearInteractionProbStub(3. * Acts::units::_GeV, 0.6, 311) > 0.);
+
+	BOOST_TEST(pnis.nuclearInteractionProbStub(1. * Acts::units::_GeV, 0.5, 1337) == 0.);
+}
+
+FixValueGenerator fvg0(0.);
+FixValueGenerator fvg1(1.);
+
+Acts::Vector3D pos{0., 0., 0.};
+Acts::Vector3D mom{0., 0., 1. * Acts::units::_GeV};
+double mass = 0.1395701 * Acts::units::_GeV;
+double charge = -1.;
+int pdg = -211;
+int barcode = 0.;
+double time = 0.;
+Particle p(pos, mom, mass, charge, pdg, barcode, time);
+
+pnis.nuclearInteractionStub(fvg0, 0.5, p); 
+
+//~ hadronSurvivesStub(const double momentum, const double thickness, const int pdg)
+//~ multiplicityProbStub(const double momentum, const double thickness, const int pdg, const unsigned int mult) 
+//~ multiplicityStub(generator_t& generator, const double thickness, particle_t& particle) 
+//~ particleCompositionStub(generator_t& generator, const int pdg, const unsigned int nParticles) 
+//~ kinematicsStub(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs)
+//~ finalStateHadronsStub(generator_t& generator, const double thicknessInL0, particle_t& particle)
+}  
+
+
 /// Test the scattering implementation
 //~ BOOST_DATA_TEST_CASE(
     //~ ParamNucularInt_test_,
@@ -110,9 +192,8 @@ std::ofstream ofsResetter("geant4out.txt");
         //~ bdata::xrange(10000),
     //~ x, y, z, p, index) {
 		
-BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_, bdata::xrange(2), index) {
 
+/**
 if(index ==0)
 {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -182,8 +263,9 @@ ofs << "*" << std::endl;
   typedef Process<ParametricNuclearInt, All, All, All> HadronProcess;
   PhysicsList<HadronProcess> hsPhysicsList;
   hsPhysicsList(mg, detector, particle, outgoing);
+  
 }
-
+**/
 } // namespace Test
 
 } // namespace Fatras

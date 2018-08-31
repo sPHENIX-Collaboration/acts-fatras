@@ -254,6 +254,7 @@ ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg,
 		//k0
 		case 130:
 		case 310:
+		case 311:
 		{
 			while(result.size() < nParticles)
 			{

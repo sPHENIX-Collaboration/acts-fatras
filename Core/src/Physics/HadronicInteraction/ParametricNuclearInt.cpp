@@ -11,6 +11,7 @@
 double
 Fatras::ParametricNuclearInt::nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const
 {
+	// TODO: less divisions
 	// Probability estimation based on the particle type
 	
 	switch(pdg)
@@ -66,6 +67,8 @@ Fatras::ParametricNuclearInt::nuclearInteractionProb(const double momentum, cons
 		}
 				
 		//kaon0
+		case 130:
+		case 310:
 		case 311:
 		{
 			if(momentum > 4.)
@@ -95,6 +98,8 @@ Fatras::ParametricNuclearInt::multiplicityProb(const double momentum, const doub
 	switch(pdg)
 	{
 		//k0
+		case 130:
+		case 310:
 		case 311:
 		{
 			if(thickness < 0.2)
@@ -254,6 +259,8 @@ Fatras::ParametricNuclearInt::hadronSurvives(const double momentum, const double
 	switch(pdg)
 	{
 		//k0
+		case 130:
+		case 310:
 		case 311:
 			return 0.05773 - 0.03475 * momentum + 0.4632 * thickness + 0.004882 * momentum * momentum - 0.03134 * momentum * thickness - 0.3981 * thickness * thickness;
 		
