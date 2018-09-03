@@ -20,7 +20,7 @@ struct eta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return Acts::LA::eta(particle.momentum());
+    return Acts::VectorHelpers::eta(particle.momentum());
   }
 };
 
@@ -29,7 +29,7 @@ struct absEta {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return std::abs(Acts::LA::eta(particle.momentum()));
+    return std::abs(Acts::VectorHelpers::eta(particle.momentum()));
   }
 };
 
@@ -37,7 +37,7 @@ struct absEta {
 struct pT {
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return Acts::LA::perp(particle.momentum());
+    return Acts::VectorHelpers::perp(particle.momentum());
   }
 };
 
@@ -63,7 +63,7 @@ struct vR {
 
   template <typename particle_t>
   double operator()(const particle_t &particle) const {
-    return Acts::LA::perp(particle.position());
+    return Acts::VectorHelpers::perp(particle.position());
   }
 };
 

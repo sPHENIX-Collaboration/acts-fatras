@@ -47,8 +47,8 @@ template <typename formula_t> struct Scattering {
     if (parametric) {
 
       // the initial values
-      double theta = Acts::LA::theta(in.momentum());
-      double phi = Acts::LA::phi(in.momentum());
+      double theta = Acts::VectorHelpers::theta(in.momentum());
+      double phi = Acts::VectorHelpers::phi(in.momentum());
       double sinTheta = (sin(theta) * sin(theta) > 10e-10) ? sin(theta) : 1.;
 
       // sample them in an independent way
