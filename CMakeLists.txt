@@ -6,7 +6,7 @@ project(Fatras LANGUAGES CXX)
 # includes acts-core as a subproject. in this case we do not need to
 # explicitely add it here.
 
-if(NOT TARGET Acts::Core)
+if(NOT TARGET ActsCore)
   find_package(Acts REQUIRED COMPONENTS Core Legacy)
 endif()
 
