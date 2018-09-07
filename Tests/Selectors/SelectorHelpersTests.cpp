@@ -40,17 +40,17 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   Detector detector;
 
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentumCast(1500., 0., 0);
+  Acts::Vector3D momentumCast(1500. * Acts::units::_MeV, 0., 0.);
 
   // e central electron
-  Particle pionCast(position, momentumCast, -1., m_pion);
+  Particle pionCast(position, momentumCast, m_pion, -1.);
   Acts::Vector3D positionForward(0., 0., 100. * Acts::units::_mm);
-  Acts::Vector3D momentumForward(10., 10., 1500. * Acts::units::_MeV);
+  Acts::Vector3D momentumForward(10. * Acts::units::_MeV, 10. * Acts::units::_MeV, 1500. * Acts::units::_MeV);
 
   Particle pionForward(positionForward, momentumForward, m_pion, -1.);
 
   Acts::Vector3D positionBackward(0., 0., 0.);
-  Acts::Vector3D momentumBackward(10., 10., -1500. * Acts::units::_MeV);
+  Acts::Vector3D momentumBackward(10. * Acts::units::_MeV, 10. * Acts::units::_MeV, -1500. * Acts::units::_MeV);
 
   Particle pionBackward(positionBackward, momentumBackward, m_pion, -1.);
 
