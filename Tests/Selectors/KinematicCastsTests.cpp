@@ -36,14 +36,14 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
-  Acts::Vector3D momentumCentral(1500. * Acts::units::_MeV, 0., 0);
-  Particle pionCentral(position, momentumCentral, -1., m);
+  Acts::Vector3D momentumCentral(1500. * Acts::units::_MeV, 0., 0.);
+  Particle pionCentral(position, momentumCentral, m, -1.);
 
   // a forward pion
   Acts::Vector3D positionFwd(0., 0., 100.);
   Acts::Vector3D momentumFwd(10. * Acts::units::_MeV, 10. * Acts::units::_MeV,
                              1500. * Acts::units::_MeV);
-  Particle pionFwd(positionFwd, momentumFwd, -1., m);
+  Particle pionFwd(positionFwd, momentumFwd, m, -1.);
 
   // the list of possible casts
   casts::eta eta_c;
@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   casts::vZ vZ_c;
 
   // test the central
-  BOOST_TEST(eta_c(pionCentral), 0.);
-  BOOST_TEST(absEta_c(pionCentral), 0.);
+  BOOST_TEST(eta_c(pionCentral) == 0., tt::tolerance(1e-10));
+  BOOST_TEST(absEta_c(pionCentral) == 0., tt::tolerance(1e-10));
   BOOST_TEST(pT_c(pionCentral), 1500. * Acts::units::_MeV);
   BOOST_TEST(p_c(pionCentral), 1500. * Acts::units::_MeV);
   BOOST_CHECK(E_c(pionCentral) > p_c(pionCentral));
