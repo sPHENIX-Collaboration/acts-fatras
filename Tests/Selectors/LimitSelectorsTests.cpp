@@ -45,10 +45,7 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   Acts::Vector3D position(0., 0., 0.);
 
   Acts::Vector3D momentum(1500., 0., 0.);
-  Particle pion(position, momentum, -1., m_pion);
-  // the path of the particle
-  pion.pathInX0 = 0.10;
-  pion.pathInL0 = 0.34;
+  Particle pion(position, momentum, -1., m);
 
   // the limit of the particle
   pion.setLimits(0.15, 0.45);
