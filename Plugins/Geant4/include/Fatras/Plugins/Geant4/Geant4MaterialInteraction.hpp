@@ -10,7 +10,8 @@
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
-#include "Fatras/Plugins/B1ActionInitialization.hpp"
+#include "Fatras/Plugins/Geant4/B1ActionInitialization.hpp"
+#include "Fatras/Plugins/Geant4/B1DetectorConstruction.hpp"
 
 #include <vector>
 #include "G4ParticleDefinition.hh"
@@ -33,44 +34,44 @@ public:
 	std::vector<particle_t> 
 	operator()(const particle_t& particle, const material_t& material) const;
 	
-private:
+protected:
 
 	template<typename particle_t>
 	G4ParticleDefinition*
 	convertParticleToG4(const particle_t& particle) const;
 	
-	template<particle_t>
-	G4ParticleGun*
-	createParticleGun(G4ParticleDefinition* particleG4, const particle_t& particle) const;
-	
 	template<typename particle_t>
-	particle_t
-	convertParticleFromG4(const G4ParticleDefinition* particleG4) const;
+	G4ParticleGun*
+	createParticleGun(const particle_t& particle) const;
+	
+	//~ template<typename particle_t>
+	//~ particle_t
+	//~ convertParticleFromG4(const G4ParticleDefinition* particleG4) const;
 	
 	template<typename material_t>
 	G4Material*
-	convertMaterialToG4(const material& material) const;
+	convertMaterialToG4(const material_t& material) const;
 	
-	template<typename material_t>
-	material_t
-	convertMaterialFromG4(const G4Material* materialG4) const;
+	//~ template<typename material_t>
+	//~ material_t
+	//~ convertMaterialFromG4(const G4Material* materialG4) const;
 };
 
 template<typename particle_t>
-G4ParticleDefintion*
-convertParticleToG4(const particle_t* particle) const
+G4ParticleDefinition*
+Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
-	if(particle->pdg() != 0)
+	if(particle.pdg() != 0)
 	{
 		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable(); // TODO: will be reconstructed all the time, can be stored probably
-		return particleTable->FindParticle(particle->pdg());
+		return particleTable->FindParticle(particle.pdg());
 	}
 	return nullptr;
 }
 
 template<typename particle_t>
 G4ParticleGun*
-createParticleGun(const particle_t& particle) const
+Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
 {
 	G4ParticleGun* pGun = new G4ParticleGun(1);
 	
@@ -78,7 +79,7 @@ createParticleGun(const particle_t& particle) const
 	pGun->SetParticleDefinition(parDef);
 	
 	Acts::Vector3D momentum = particle.momentum();
-	double scaleActsToG4 = MeV / Acts::units::_MeV 
+	double scaleActsToG4 = MeV / Acts::units::_MeV;
 	
 	pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
 	pGun->SetParticlePosition({0., 0., 0.,});
@@ -88,7 +89,7 @@ createParticleGun(const particle_t& particle) const
 
 template<typename material_t>
 G4Material*
-convertMaterialToG4(const material_t& material) const
+Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 {
 	//TODO: Test unit conversions
 	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_mm * Acts::units::_mm * Acts::units::_mm / Acts::units::_g * g / cm3);
@@ -96,7 +97,7 @@ convertMaterialToG4(const material_t& material) const
   
 template<typename particle_t, typename material_t>
 std::vector<particle_t>
-Geant4MaterialInteraction::operator()(const particle_t&, const material_t& material) const
+Geant4MaterialInteraction::operator()(const particle_t& particle, const material_t& material) const
 {
 	G4RunManager* runManager = new G4RunManager;
 	G4VModularPhysicsList* physicsList = new QBBC;
@@ -108,13 +109,17 @@ Geant4MaterialInteraction::operator()(const particle_t&, const material_t& mater
 	B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);
 	
 	G4Material* materialG4 = convertMaterialToG4(material);
-	B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, detectorThickness);
+	B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, materialThickness);
 	
 	runManager->SetUserInitialization(detConstr);
 	runManager->SetUserInitialization(actionInit);
-	runManager->Intialize();
+	runManager->Initialize();
 	runManager->BeamOn(1);
 	
+	//TODO: return of results
+	
+	delete(runManager);
+	delete(physicsList);
 	delete(pGun);
 	delete(actionInit);
 	delete(materialG4);

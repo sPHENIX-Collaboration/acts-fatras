@@ -32,6 +32,7 @@
 #define B1DetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
+#include "G4Material.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
@@ -41,7 +42,7 @@ class G4LogicalVolume;
 class B1DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    B1DetectorConstruction(G4String mat, double thickness);
+    B1DetectorConstruction(G4Material* material, double thickness);
     virtual ~B1DetectorConstruction();
 
     virtual G4VPhysicalVolume* Construct();
@@ -50,7 +51,7 @@ class B1DetectorConstruction : public G4VUserDetectorConstruction
 
   protected:
     G4LogicalVolume*  fScoringVolume;
-    G4String material;
+    G4Material* m_material;
     double m_thickness;
 };
 

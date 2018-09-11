@@ -38,10 +38,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1DetectorConstruction::B1DetectorConstruction(G4String mat, double thickness)
+B1DetectorConstruction::B1DetectorConstruction(G4Material* material, double thickness)
 : G4VUserDetectorConstruction(),
   fScoringVolume(0),
-  material(mat),
+  m_material(material),
   m_thickness(thickness)
 { }
 
@@ -109,11 +109,9 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     0,                       //copy number
                     checkOverlaps);          //overlaps checking
               
-G4Material* matDetector = nist->FindOrBuildMaterial(material);
-
 G4ThreeVector posDetector = G4ThreeVector(0., 0., 0.25 * env_sizeZ);
 G4Box* solidDetector = new G4Box("Detector", 0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.25 * env_sizeZ);
-G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, matDetector, "Detector");
+G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, m_material, "Detector");
 new G4PVPlacement(0, posDetector, logicDetector, "Detector", logicEnv, false, 0, checkOverlaps);
 
   // Set Shape2 as scoring volume

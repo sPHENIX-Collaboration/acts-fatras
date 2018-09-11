@@ -1,0 +1,6 @@
+add_executable (FatrasGeant4MaterialInteractionTests Geant4MaterialInteractionTests.cpp)
+target_include_directories (FatrasGeant4MaterialInteractionTests PRIVATE ${Boost_INCLUDE_DIRS} ../Common)
+target_link_libraries (FatrasGeant4MaterialInteractionTests PRIVATE ActsCore ActsLegacy FatrasCore FatrasGeant4Plugin)
+add_test (NAME FatrasGeant4MaterialInteractionUnitTest COMMAND FatrasGeant4MaterialInteractionTests)
+
+
