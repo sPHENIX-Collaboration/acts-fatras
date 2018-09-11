@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.7)
 
 project(Fatras LANGUAGES CXX)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(USE_GEANT4 "Build Geant4-based code" on)
 
@@ -17,6 +18,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 include(GNUInstallDirs)
+include(FatrasComponentsHelpers)
 include(CTest)
 
 # Geant4 specific configuration
@@ -27,6 +29,9 @@ endif()
 
 add_subdirectory(Core)
 add_subdirectory(Tests)
+if(USE_GEANT4)
+    add_subdirectory(Plugins)
+endif()
 
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
