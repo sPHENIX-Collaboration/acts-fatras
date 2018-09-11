@@ -18,7 +18,7 @@
 #include <boost/test/output_test_stream.hpp>
 // leave blank line
 
-#include "Fatras/Plugins/Geant4/Geant4MaterialInteraction.hpp"
+#include "Geant4MaterialInteractionStub.hpp"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -37,7 +37,7 @@ BOOST_DATA_TEST_CASE(
         bdata::xrange(1000),
     detectorThickness, p, index) {
 
-	Geant4MaterialInteraction g4mi;
+	Geant4MaterialInteractionStub g4mi;
 
 }
 } // namespace Test
