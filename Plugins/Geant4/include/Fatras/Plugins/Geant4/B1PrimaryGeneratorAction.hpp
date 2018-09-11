@@ -42,7 +42,7 @@ class G4Event;
 class B1PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    B1PrimaryGeneratorAction();    
+    B1PrimaryGeneratorAction(G4ParticleGun* pGun);    
     virtual ~B1PrimaryGeneratorAction();
 
     // method from the base class

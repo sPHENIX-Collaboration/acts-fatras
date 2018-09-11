@@ -42,10 +42,11 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
+B1PrimaryGeneratorAction::B1PrimaryGeneratorAction(G4ParticleGun* pGun)
 : G4VUserPrimaryGeneratorAction()
 {
-  fParticleGun  = new G4ParticleGun(1);
+  //~ fParticleGun  = new G4ParticleGun(1);
+  fParticleGun  = pGun;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

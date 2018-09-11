@@ -36,9 +36,9 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-B1ActionInitialization::B1ActionInitialization(double thickness)
+B1ActionInitialization::B1ActionInitialization(double thickness, G4ParticleGun* pGun)
  : G4VUserActionInitialization(),
- m_thickness(thickness)
+ m_thickness(thickness), m_pGun(pGun)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -58,7 +58,7 @@ void B1ActionInitialization::BuildForMaster() const
 
 void B1ActionInitialization::Build() const
 {
-  SetUserAction(new B1PrimaryGeneratorAction);
+  SetUserAction(new B1PrimaryGeneratorAction(m_pGun));
 
   B1RunAction* runAction = new B1RunAction;
   SetUserAction(runAction);

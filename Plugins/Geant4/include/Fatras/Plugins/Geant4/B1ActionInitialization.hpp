@@ -32,13 +32,14 @@
 #define B1ActionInitialization_h 1
 
 #include "G4VUserActionInitialization.hh"
+#include "G4ParticleGun.hh"
 
 /// Action initialization class.
 
 class B1ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    B1ActionInitialization(double thickness);
+    B1ActionInitialization(double thickness, G4ParticleGun* pGun);
     virtual ~B1ActionInitialization();
 
     virtual void BuildForMaster() const;
@@ -46,6 +47,7 @@ class B1ActionInitialization : public G4VUserActionInitialization
    
   protected:
 	double m_thickness;
+	G4ParticleGun* m_pGun;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
