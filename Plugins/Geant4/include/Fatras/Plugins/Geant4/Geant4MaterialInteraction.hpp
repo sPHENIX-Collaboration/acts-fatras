@@ -80,7 +80,7 @@ Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
 	
 	Acts::Vector3D momentum = particle.momentum();
 	double scaleActsToG4 = MeV / Acts::units::_MeV;
-	
+
 	pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
 	pGun->SetParticlePosition({0., 0., 0.,});
 	pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing

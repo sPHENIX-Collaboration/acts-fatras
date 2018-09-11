@@ -19,6 +19,12 @@
 // leave blank line
 
 #include "Geant4MaterialInteractionStub.hpp"
+#include "Particle.hpp"
+#include "Acts/Utilities/Definitions.hpp"
+#include "Acts/Utilities/Units.hpp"
+
+#include "G4ParticleDefinition.hh"
+#include "G4ParticleGun.hh"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -26,18 +32,31 @@ namespace tt = boost::test_tools;
 namespace Fatras {
 namespace Test {
 
-BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_,
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.01 * 394.133 / 10., 2. * 394.133 / 10.))) ^
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.5, 20.))) ^
-        bdata::xrange(1000),
-    detectorThickness, p, index) {
+BOOST_DATA_TEST_CASE(Geant4MaterialInteraction_test_, bdata::xrange(1), index) {
 
-	Geant4MaterialInteractionStub g4mi;
+Acts::Vector3D position(0., 0., 0.);
+Acts::Vector3D momentum(0., 0., 1. * Acts::units::_GeV);
+double mass = 0.1395701 * Acts::units::_GeV;
+double charge = 1.;
+int pdg = 211;
+Particle particle(position, momentum, mass, charge, pdg);
+
+Geant4MaterialInteractionStub g4mis;
+
+G4ParticleDefinition* parDef = g4mis.convertParticleToG4Stub(particle);
+
+BOOST_TEST(parDef->GetPDGEncoding() == pdg);
+BOOST_TEST(parDef->GetPDGMass() / GeV * Acts::units::_GeV == mass);
+BOOST_TEST(parDef->GetPDGCharge() == charge);
+
+G4ParticleGun* pGun = g4mis.createParticleGunStub(particle);
+
+BOOST_TEST(pGun->GetParticleDefinition()->GetPDGEncoding() == pdg);
+BOOST_TEST(pGun->GetParticleDefinition()->GetPDGMass() / GeV * Acts::units::_GeV == mass);
+BOOST_TEST(pGun->GetParticleDefinition()->GetPDGCharge() == charge);
+BOOST_TEST(pGun->GetParticleMomentumDirection().x() == 0.);
+BOOST_TEST(pGun->GetParticleMomentumDirection().y() == 0.);
+BOOST_TEST(pGun->GetParticleMomentumDirection().z() / MeV == 1. * Acts::units::_GeV);
 
 }
 } // namespace Test

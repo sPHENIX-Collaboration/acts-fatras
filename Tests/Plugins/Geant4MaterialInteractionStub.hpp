@@ -10,9 +10,9 @@
 
 #include "Fatras/Plugins/Geant4/Geant4MaterialInteraction.hpp"
 
-#include "G4ParticleDefinition.hh"
-#include "G4ParticleGun.hh"
-#include "G4Material.hh"
+//~ #include "G4ParticleDefinition.hh"
+//~ #include "G4ParticleGun.hh"
+//~ #include "G4Material.hh"
 
 namespace Fatras {
 namespace Test{
@@ -20,6 +20,14 @@ namespace Test{
 class Geant4MaterialInteractionStub : public Geant4MaterialInteraction
 {
 public:
+
+	Geant4MaterialInteractionStub()
+	{
+		runManager = new G4RunManager;
+		physicsList = new QBBC;
+		runManager->SetUserInitialization(physicsList);
+	}
+
 	template<typename particle_t>
 	G4ParticleDefinition*
 	convertParticleToG4Stub(const particle_t& particle) const
@@ -40,6 +48,11 @@ public:
 	{
 		return convertMaterialToG4(material);
 	}
+
+private:
+
+	G4RunManager* runManager;
+	G4VModularPhysicsList* physicsList;
 };
 }
 }

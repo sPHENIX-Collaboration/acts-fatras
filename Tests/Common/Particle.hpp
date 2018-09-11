@@ -135,7 +135,7 @@ public:
   const Acts::Vector3D &position() const { return m_position; }
 
   /// @brief Access methods: momentum
-  const Acts::Vector3D &momentum() const { return m_position; }
+  const Acts::Vector3D &momentum() const { return m_momentum; }
 
   /// @brief Access methods: p
   const double p() const { return m_p; }
