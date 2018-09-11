@@ -17,7 +17,8 @@
 #include "G4ParticleTable.hh"
 #include "G4ParticleGun.hh"
 #include "G4SystemOfUnits.hh"
-
+#include "G4RunManager.hh"
+#include "QBBC.hh"
 #include "G4Material.hh"
 
 namespace Fatras {
@@ -97,6 +98,10 @@ template<typename particle_t, typename material_t>
 std::vector<particle_t>
 Geant4MaterialInteraction::operator()(const particle_t&, const material_t& material) const
 {
+	G4RunManager* runManager = new G4RunManager;
+	G4VModularPhysicsList* physicsList = new QBBC;
+	runManager->SetUserInitialization(physicsList);
+	
 	double materialThickness = material.thickness() * mm / Acts::units::_mm;
 	
 	G4ParticleGun* pGun = createParticleGun(particle);
@@ -104,6 +109,16 @@ Geant4MaterialInteraction::operator()(const particle_t&, const material_t& mater
 	
 	G4Material* materialG4 = convertMaterialToG4(material);
 	B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, detectorThickness);
+	
+	runManager->SetUserInitialization(detConstr);
+	runManager->SetUserInitialization(actionInit);
+	runManager->Intialize();
+	runManager->BeamOn(1);
+	
+	delete(pGun);
+	delete(actionInit);
+	delete(materialG4);
+	delete(detConstr);
 	
 	return {};
 }
