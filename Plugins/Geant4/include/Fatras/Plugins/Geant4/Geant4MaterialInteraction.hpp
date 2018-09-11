@@ -10,6 +10,7 @@
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
+#include "Fatras/Plugins/B1ActionInitialization.hpp"
 
 #include <vector>
 #include "G4ParticleDefinition.hh"
@@ -84,12 +85,25 @@ createParticleGun(const particle_t& particle) const
 	return pGun;
 }
 
+template<typename material_t>
+G4Material*
+convertMaterialToG4(const material_t& material) const
+{
+	//TODO: Test unit conversions
+	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_mm * Acts::units::_mm * Acts::units::_mm / Acts::units::_g * g / cm3);
+}
   
 template<typename particle_t, typename material_t>
 std::vector<particle_t>
 Geant4MaterialInteraction::operator()(const particle_t&, const material_t& material) const
 {
+	double materialThickness = material.thickness() * mm / Acts::units::_mm;
+	
 	G4ParticleGun* pGun = createParticleGun(particle);
+	B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);
+	
+	G4Material* materialG4 = convertMaterialToG4(material);
+	B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, detectorThickness);
 	
 	return {};
 }

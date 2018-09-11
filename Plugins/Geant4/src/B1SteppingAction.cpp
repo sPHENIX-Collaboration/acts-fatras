@@ -72,8 +72,8 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
   // check if we are in scoring volume
   if (volume != fScoringVolume) return;
   
-	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
-		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm
+	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm / 10.) / (m_thickness * cm / 10.)) < 1e-15
+		|| step->GetPostStepPoint()->GetPosition().z() < 0.
 		|| fabs((step->GetPostStepPoint()->GetPosition().x() - 10. * cm) / (10. * cm)) < 1e-15
 		|| fabs((step->GetPostStepPoint()->GetPosition().y() - 10. * cm) / (10. * cm)) < 1e-15)
 	{

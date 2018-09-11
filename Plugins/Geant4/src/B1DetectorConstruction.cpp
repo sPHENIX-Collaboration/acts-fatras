@@ -59,7 +59,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   
   // Envelope parameters
   //
-  G4double env_sizeXY = 20. * cm, env_sizeZ = 2. * m_thickness * cm;
+  G4double env_sizeXY = 20. * cm, env_sizeZ = 2. * m_thickness * cm / 10.;
   G4Material* env_mat = nist->FindOrBuildMaterial("G4_Galactic");	
 
   // Option to switch on/off checking of volumes overlaps
