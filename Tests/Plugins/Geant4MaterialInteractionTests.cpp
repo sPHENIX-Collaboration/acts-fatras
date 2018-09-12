@@ -104,9 +104,32 @@ Particle wrongParticle(position, momentum, mass, charge, 0);
 BOOST_TEST(!g4mis.convertParticleToG4Stub(wrongParticle));
 BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle));
 particles.clear();
-g4mis(wrongParticle, mat, 1. * Acts::units::_m);
+particles = g4mis(wrongParticle, mat, 1. * Acts::units::_m);
 BOOST_TEST(particles.size() == 0);
 
+// Stability test for wrong material data
+Acts::Material wrongMat1(352.8, 407., -1, 4., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
+BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat1));
+particles.clear();
+particles = g4mis(particle, wrongMat1, 1. * Acts::units::_m);
+BOOST_TEST(particles.size() == 0);
+
+Acts::Material wrongMat2(352.8, 407., 9.012, -1., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
+BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat2));
+particles.clear();
+particles = g4mis(particle, wrongMat2, 1. * Acts::units::_m);
+BOOST_TEST(particles.size() == 0);
+
+Acts::Material wrongMat3(352.8, 407., 9.012, 4., -1. * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
+BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat3));
+particles.clear();
+particles = g4mis(particle, wrongMat3, 1. * Acts::units::_m);
+BOOST_TEST(particles.size() == 0);
+
+// Stability test for wrong thickness
+particles.clear();
+particles = g4mis(particle, mat, -1. * Acts::units::_m);
+BOOST_TEST(particles.size() == 0);
 }
 } // namespace Test
 } // namespace Fatras

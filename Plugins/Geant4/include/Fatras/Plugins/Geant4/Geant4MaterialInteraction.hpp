@@ -14,6 +14,7 @@
 #include "Fatras/Plugins/Geant4/B1DetectorConstruction.hpp"
 
 #include <vector>
+#include <cmath>
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleGun.hh"
@@ -120,7 +121,7 @@ G4ParticleDefinition*
 Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
 	// Check if pdg code is provided, return related particle or nothing
-	if(particle.pdg() != 0) // TODO: inf / nan
+	if(particle.pdg() != 0 && std::isfinite(particle.pdg()))
 		return particleTable->FindParticle(particle.pdg());
 	return nullptr;
 }
@@ -156,7 +157,8 @@ G4Material*
 Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 {
 	//Translate material if valid
-	if(material.Z() < 0. || material.A() < 0. || material.rho() < 0.) // TODO: test
+	if(material.Z() < 0. || material.A() < 0. || material.rho() < 0.
+		|| !std::isfinite(material.Z()) || !std::isfinite(material.A()) || !std::isfinite(material.rho()))
 		return nullptr;
 	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_cm * Acts::units::_cm * Acts::units::_cm / Acts::units::_g * g / cm3);
 }
@@ -188,7 +190,7 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 	G4ParticleGun* pGun = createParticleGun(particle);
 	G4Material* materialG4 = convertMaterialToG4(material);
 	
-	if(pGun && materialG4)
+	if(pGun && materialG4 && materialThickness >= 0.)
 	{
 		// Configure the Process
 		B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);	
