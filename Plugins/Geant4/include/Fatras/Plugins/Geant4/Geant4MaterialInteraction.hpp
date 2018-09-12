@@ -45,13 +45,22 @@ public:
 	/// @tparam material_t Type of the material
 	/// @param [in] particle Ingoing particle
 	/// @param [in] material Penentrated material
-	/// @param [in] thickness
+	/// @param [in] thickness Thickness of the material
+	/// @param [in] normalVector Normal vector of the penetrated material
 	/// @return Vector containing all outgoing particles
 	template<typename particle_t, typename material_t>
 	std::vector<particle_t> 
-	operator()(particle_t& particle, const material_t& material, const double thickness) const;
+	operator()(particle_t& particle, const material_t& material, const double thickness, const Acts::Vector3D normalVector) const;
 	
 protected:
+
+	/// @brief Calculates the angle of the normal vector for coordinate transformation
+	///
+	/// @param [in] normalVector Normal vector of the penetrated material
+	/// @param [in] momentum Momentum vector of the particle
+	/// @return Pair consisting of Theta and Phi in spherical coordinates for the transformation
+	std::pair<double, double>
+	angleOfNormalVector(const Acts::Vector3D normalVector, const Acts::Vector3D momentum) const;
 
 	/// @brief Converts a particle into a Geant4 particle
 	///
@@ -66,10 +75,11 @@ protected:
 	///
 	/// @tparam particle_t Type of the particle
 	/// @param [in] particle Ammo of the gun
+	/// @param [in] angles Angles of the penetrated material for transformation
 	/// @return Pointer to the particle gun
 	template<typename particle_t>
 	G4ParticleGun*
-	createParticleGun(const particle_t& particle) const;
+	createParticleGun(const particle_t& particle, const std::pair<double, double>& angles) const;
 	
 	/// @brief Converts material into Geant4 material
 	///
@@ -85,10 +95,11 @@ protected:
 	/// @tparam particle_t Type of the particle
 	/// @param [in] particlesG4 Vector of recorded outgoing particles
 	/// @param [in] particleIn Ingoing particle
+	/// @param [in] angles Angles of the penentrated material for transformation
 	/// @param [out] particles Vector of outgoing particles
 	template<typename particle_t>
 	void
-	convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const;
+	convertParticlesFromG4(const std::vector<B1particle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const;
 	
 private:
 
@@ -116,6 +127,21 @@ Geant4MaterialInteraction::~Geant4MaterialInteraction()
 	//~ delete(runManager);
 }
 
+std::pair<double, double>
+Geant4MaterialInteraction::angleOfNormalVector(const Acts::Vector3D normalVector, const Acts::Vector3D momentum) const // TODO: cpp file
+{
+	double tanphi = normalVector.y() / normalVector.x();
+	if(std::isnan(tanphi))
+		tanphi = 0.;
+	else
+		tanphi = std::atan(tanphi);
+		
+	// Check direction, invert direction if both vectors point in opposite direction
+	if(normalVector.dot(momentum) >= 0.)
+		return std::make_pair(std::acos(normalVector.z() / normalVector.norm()), tanphi);
+	return std::make_pair(std::acos(normalVector.z() / normalVector.norm()) + M_PI, tanphi);		
+}
+
 template<typename particle_t>
 G4ParticleDefinition*
 Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
@@ -128,7 +154,7 @@ Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 
 template<typename particle_t>
 G4ParticleGun*
-Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
+Geant4MaterialInteraction::createParticleGun(const particle_t& particle, const std::pair<double, double>& angles) const
 {	
 	// Create particle
 	G4ParticleDefinition* parDef = convertParticleToG4(particle);
@@ -141,10 +167,15 @@ Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
 		
 		// Set initial kinematics
 		Acts::Vector3D momentum = particle.momentum();
+		double theta = std::atan(momentum.z() / momentum.norm()) - angles.first;
+		//~ double phi = std::acos(momentum.y() / momentum.x()) - angles.second;
+		double phi = -angles.second; // TODO: angles do not transform correctly yet
 		double scaleActsToG4 = MeV / Acts::units::_MeV;
 
-		//TODO: Angles of incoming particles
-		pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
+		pGun->SetParticleMomentum({particle.p() * std::sin(theta) * std::cos(phi) * scaleActsToG4, 
+								   particle.p() * std::sin(theta) * std::sin(phi) * scaleActsToG4, 
+								   particle.p() * std::cos(theta) * scaleActsToG4});
+								   
 		pGun->SetParticlePosition({0., 0., 0.,});
 		pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing
 		return pGun;
@@ -165,16 +196,22 @@ Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 
 template<typename particle_t>
 void
-Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const
+Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
 {
-	
 	Acts::Vector3D momentum;
 	const double scaleG4ToActs = Acts::units::_GeV / GeV;
-	// TODO: Angles of ougoing particles
+	double p, theta, phi;
+
 	// Translate every particle from Geant4
 	for(const B1particle& bp : particlesG4)
 	{
-		momentum = {bp.momentum[0] * scaleG4ToActs, bp.momentum[1] * scaleG4ToActs, bp.momentum[2] * scaleG4ToActs};
+		p = bp.momentum.norm();
+		theta = std::atan(bp.momentum.z() / p) + angles.first;
+		phi = std::acos(bp.momentum.y() / bp.momentum.x()) + angles.second;
+		momentum = {p * std::sin(theta) * std::cos(phi) * scaleG4ToActs, 
+				    p * std::sin(theta) * std::sin(phi) * scaleG4ToActs,
+				    p * std::cos(theta) * scaleG4ToActs};
+				    
 		particle_t p(particleIn.position(), momentum, bp.mass * Acts::units::_GeV / GeV, bp.charge, bp.pdg);
 		particles.push_back(std::move(p));
 	}
@@ -182,14 +219,15 @@ Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>&
 
 template<typename particle_t, typename material_t>
 std::vector<particle_t>
-Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& material, const double thickness) const
+Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& material, const double thickness, const Acts::Vector3D normalVector) const
 {	
 	double materialThickness = thickness * mm / Acts::units::_mm;
-	
+	std::pair<double, double> angles = angleOfNormalVector(normalVector, particle.momentum());
+
 	// Load the gun and build material
-	G4ParticleGun* pGun = createParticleGun(particle);
+	G4ParticleGun* pGun = createParticleGun(particle, angles);
 	G4Material* materialG4 = convertMaterialToG4(material);
-	
+	//TODO: angular input for gun
 	if(pGun && materialG4 && materialThickness >= 0.)
 	{
 		// Configure the Process
@@ -204,7 +242,7 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 		
 		// Collect the result
 		std::vector<particle_t> particles;
-		convertParticlesFromG4(actionInit->particles(), particle, particles);
+		convertParticlesFromG4(actionInit->particles(), particle, angles, particles);
 		
 		// Free memory
 		delete(actionInit);

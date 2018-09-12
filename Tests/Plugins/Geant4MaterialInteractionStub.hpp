@@ -24,6 +24,12 @@ public:
 	{
 	}
 
+	std::pair<double, double>
+	angleOfNormalVectorStub(const Acts::Vector3D normalVector, const Acts::Vector3D momentum) const
+	{
+		return angleOfNormalVector(normalVector, momentum);
+	}
+	
 	template<typename particle_t>
 	G4ParticleDefinition*
 	convertParticleToG4Stub(const particle_t& particle) const
@@ -33,9 +39,9 @@ public:
 	
 	template<typename particle_t>
 	G4ParticleGun*
-	createParticleGunStub(const particle_t& particle) const
+	createParticleGunStub(const particle_t& particle, const std::pair<double, double>& angles) const
 	{
-		return createParticleGun(particle);
+		return createParticleGun(particle, angles);
 	}
 	
 	template<typename material_t>
@@ -47,9 +53,9 @@ public:
 
 	template<typename particle_t>
 	void
-	convertParticlesFromG4Stub(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const
+	convertParticlesFromG4Stub(const std::vector<B1particle>& particlesG4, particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
 	{
-		convertParticlesFromG4(particlesG4, particleIn, particles);
+		convertParticlesFromG4(particlesG4, particleIn, angles, particles);
 	}
 };
 }

@@ -45,6 +45,7 @@ int pdg = 211;
 Particle particle(position, momentum, mass, charge, pdg);
 
 Geant4MaterialInteractionStub g4mis;
+std::pair<double, double> angleStub(0., 0.);
 
 // Test conversion of particle
 G4ParticleDefinition* parDef = g4mis.convertParticleToG4Stub(particle);
@@ -54,7 +55,7 @@ BOOST_TEST(parDef->GetPDGMass() / GeV * Acts::units::_GeV == mass);
 BOOST_TEST(parDef->GetPDGCharge() == charge);
 
 // Test particle gun creation
-G4ParticleGun* pGun = g4mis.createParticleGunStub(particle);
+G4ParticleGun* pGun = g4mis.createParticleGunStub(particle, angleStub);
 
 BOOST_TEST(pGun->GetParticleDefinition()->GetPDGEncoding() == pdg);
 BOOST_TEST(pGun->GetParticleDefinition()->GetPDGMass() / GeV * Acts::units::_GeV == mass);
@@ -82,7 +83,7 @@ bp.pdg = 2. * pdg;
 bps.push_back(std::move(bp));
 
 std::vector<Particle> particles;
-g4mis.convertParticlesFromG4Stub(bps, particle, particles);
+g4mis.convertParticlesFromG4Stub(bps, particle, angleStub, particles);
 
 BOOST_TEST(particles.size() == 1);
 BOOST_TEST(particles[0].position() == Acts::Vector3D::Zero(3));
@@ -94,41 +95,78 @@ BOOST_TEST(tmpD == bp.charge);
 int tmpI = particles[0].pdg();
 BOOST_TEST(tmpI == bp.pdg);
 
-// Test of the main call operator
+// Test angle transformation
+Acts::Vector3D normal(1., 1., 1.);
+std::pair<double, double> angles = g4mis.angleOfNormalVectorStub(normal, momentum);
+BOOST_TEST(std::isfinite(angles.first));
+BOOST_TEST(std::isfinite(angles.second));
+
+normal = {1., 0., 1.};
+angles = g4mis.angleOfNormalVectorStub(normal, momentum);
+BOOST_TEST(std::isfinite(angles.first));
+BOOST_TEST(std::isfinite(angles.second));
+
+normal = {0., 0., 1.};
+angles = g4mis.angleOfNormalVectorStub(normal, momentum);
+BOOST_TEST(angles.first == 0.);
+BOOST_TEST(angles.second == 0.);
+
+Acts::Vector3D negMomentum(0., 0., -1.);
+std::pair<double, double> angles2 = g4mis.angleOfNormalVectorStub(normal, negMomentum);
+BOOST_TEST(angles2.first == M_PI);
+BOOST_TEST(angles2.second == 0.); 
+
+normal = {0., 1., 1.};
+angles = g4mis.angleOfNormalVectorStub(normal, momentum);
+BOOST_TEST(std::isfinite(angles.first));
+BOOST_TEST(std::isfinite(angles.second));
+
+normal = {1., 1., 0.};
+angles = g4mis.angleOfNormalVectorStub(normal, momentum);
+BOOST_TEST(std::isfinite(angles.first));
+BOOST_TEST(std::isfinite(angles.second));
+
+negMomentum = {-1., -1., 0.};
+angles2 = g4mis.angleOfNormalVectorStub(normal, negMomentum);
+BOOST_TEST(angles2.first - M_PI == angles.first);
+BOOST_TEST(angles2.second == angles.second);
+
+//~ // Test of the main call operator
+normal = {1., 1., 1.};
 particles.clear();
-particles = g4mis(particle, mat, 1. * Acts::units::_m);
+particles = g4mis(particle, mat, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() != 0);
 
 // Stability test for wrong particle data
 Particle wrongParticle(position, momentum, mass, charge, 0);
 BOOST_TEST(!g4mis.convertParticleToG4Stub(wrongParticle));
-BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle));
+BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle, angleStub));
 particles.clear();
-particles = g4mis(wrongParticle, mat, 1. * Acts::units::_m);
+particles = g4mis(wrongParticle, mat, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
 
 // Stability test for wrong material data
 Acts::Material wrongMat1(352.8, 407., -1, 4., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
 BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat1));
 particles.clear();
-particles = g4mis(particle, wrongMat1, 1. * Acts::units::_m);
+particles = g4mis(particle, wrongMat1, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
 
 Acts::Material wrongMat2(352.8, 407., 9.012, -1., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
 BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat2));
 particles.clear();
-particles = g4mis(particle, wrongMat2, 1. * Acts::units::_m);
+particles = g4mis(particle, wrongMat2, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
 
 Acts::Material wrongMat3(352.8, 407., 9.012, 4., -1. * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
 BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat3));
 particles.clear();
-particles = g4mis(particle, wrongMat3, 1. * Acts::units::_m);
+particles = g4mis(particle, wrongMat3, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
 
 // Stability test for wrong thickness
 particles.clear();
-particles = g4mis(particle, mat, -1. * Acts::units::_m);
+particles = g4mis(particle, mat, -1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
 }
 } // namespace Test
