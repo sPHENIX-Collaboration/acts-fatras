@@ -10,10 +10,6 @@
 
 #include "Fatras/Plugins/Geant4/Geant4MaterialInteraction.hpp"
 
-//~ #include "G4ParticleDefinition.hh"
-//~ #include "G4ParticleGun.hh"
-//~ #include "G4Material.hh"
-
 namespace Fatras {
 namespace Test{
 
@@ -21,11 +17,8 @@ class Geant4MaterialInteractionStub : public Geant4MaterialInteraction
 {
 public:
 
-	Geant4MaterialInteractionStub()
+	Geant4MaterialInteractionStub() : Geant4MaterialInteraction()
 	{
-		runManager = new G4RunManager;
-		physicsList = new QBBC;
-		runManager->SetUserInitialization(physicsList);
 	}
 
 	template<typename particle_t>
@@ -49,10 +42,12 @@ public:
 		return convertMaterialToG4(material);
 	}
 
-private:
-
-	G4RunManager* runManager;
-	G4VModularPhysicsList* physicsList;
+	template<typename particle_t>
+	void
+	convertParticlesFromG4Stub(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const
+	{
+		convertParticlesFromG4(particlesG4, particleIn, particles);
+	}
 };
 }
 }

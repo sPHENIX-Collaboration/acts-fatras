@@ -68,6 +68,30 @@ BOOST_TEST(matG4->GetA() * mole / g == mat.A());
 BOOST_TEST(matG4->GetZ() == mat.Z());
 BOOST_TEST(matG4->GetDensity() * cm3 / g * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm) == mat.rho());
 
+std::vector<B1particle> bps;
+B1particle bp;
+bp.momentum = {0., 0., 2. * Acts::units::_GeV};
+bp.mass = 2. * mass;
+bp.charge = 2. * charge;
+bp.pdg = 2. * pdg;
+bps.push_back(std::move(bp));
+
+std::vector<Particle> particles;
+g4mis.convertParticlesFromG4Stub(bps, particle, particles);
+
+BOOST_TEST(particles.size() == 1);
+BOOST_TEST(particles[0].position() == Acts::Vector3D::Zero(3));
+BOOST_TEST(particles[0].momentum() == bp.momentum);
+double tmpD = particles[0].m();
+BOOST_TEST(tmpD == bp.mass);
+tmpD = particles[0].q();
+BOOST_TEST(tmpD == bp.charge);
+int tmpI = particles[0].pdg();
+BOOST_TEST(tmpI == bp.pdg);
+
+particles.clear();
+particles = g4mis(particle, mat, 1. * Acts::units::_m);
+BOOST_TEST(particles.size() != 0);
 }
 } // namespace Test
 } // namespace Fatras

@@ -78,18 +78,12 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
 		|| fabs((step->GetPostStepPoint()->GetPosition().y() - 10. * cm) / (10. * cm)) < 1e-15)
 	{
 		B1particle p;
-		p.position[0] = step->GetPostStepPoint()->GetPosition().x();
-		p.position[1] = step->GetPostStepPoint()->GetPosition().y();
-		p.position[2] = step->GetPostStepPoint()->GetPosition().z();
 		p.momentum[0] = step->GetPostStepPoint()->GetMomentum().x();
 		p.momentum[1] = step->GetPostStepPoint()->GetMomentum().y();
 		p.momentum[2] = step->GetPostStepPoint()->GetMomentum().z();
 		p.pdg = step->GetTrack()->GetDynamicParticle()->GetPDGcode();
-		p.energy = step->GetPostStepPoint()->GetTotalEnergy();
 		p.mass = step->GetPostStepPoint()->GetMass();
 		p.charge = step->GetPostStepPoint()->GetCharge();
-		p.trackid = step->GetTrack()->GetTrackID();
-		p.parentid = step->GetTrack()->GetParentID();
 		fEventAction->AddParticle(p);
 	}
 }

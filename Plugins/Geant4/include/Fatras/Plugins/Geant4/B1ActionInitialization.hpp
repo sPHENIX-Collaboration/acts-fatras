@@ -33,6 +33,8 @@
 
 #include "G4VUserActionInitialization.hh"
 #include "G4ParticleGun.hh"
+#include "B1EventAction.hpp"
+#include "B1RunAction.hpp"
 
 /// Action initialization class.
 
@@ -44,10 +46,17 @@ class B1ActionInitialization : public G4VUserActionInitialization
 
     virtual void BuildForMaster() const;
     virtual void Build() const;
+    
+    std::vector<B1particle> particles()
+    {
+		return m_eventAction->particles();
+	}
    
   protected:
 	double m_thickness;
 	G4ParticleGun* m_pGun;
+	B1RunAction* m_runAction;
+	B1EventAction* m_eventAction;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

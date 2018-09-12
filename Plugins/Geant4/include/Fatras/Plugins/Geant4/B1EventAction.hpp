@@ -31,6 +31,7 @@
 #ifndef B1EventAction_h
 #define B1EventAction_h 1
 
+#include "Acts/Utilities/Definitions.hpp"
 #include "G4UserEventAction.hh"
 
 #include <vector>
@@ -40,10 +41,9 @@ class B1RunAction;
 
 struct B1particle
 {
-	std::array<double, 3> position, momentum;
-	int pdg;
-	double energy, mass;
-	int charge, trackid, parentid;
+	Acts::Vector3D momentum;
+	int pdg, charge;
+	double mass;
 };
 
 /// Event action class
@@ -60,11 +60,16 @@ class B1EventAction : public G4UserEventAction
     
     void AddParticle(B1particle& p)
     {
-		particles.push_back(p);
+		m_particles.push_back(p);
+	}
+	
+	std::vector<B1particle> particles()
+	{
+		return m_particles;
 	}
 
   private:
-	std::vector<B1particle> particles;
+	std::vector<B1particle> m_particles;
 	
     B1RunAction* fRunAction;
 };

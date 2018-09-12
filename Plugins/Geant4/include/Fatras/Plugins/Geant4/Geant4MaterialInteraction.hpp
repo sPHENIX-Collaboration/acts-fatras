@@ -28,11 +28,13 @@ class Geant4MaterialInteraction
 {
 public:
 
-	Geant4MaterialInteraction() = default;
+	Geant4MaterialInteraction();
+	
+	~Geant4MaterialInteraction();
 	
 	template<typename particle_t, typename material_t>
 	std::vector<particle_t> 
-	operator()(const particle_t& particle, const material_t& material) const;
+	operator()(particle_t& particle, const material_t& material, const double thickness) const;
 	
 protected:
 
@@ -49,19 +51,36 @@ protected:
 	convertMaterialToG4(const material_t& material) const;
 	
 	template<typename particle_t>
-	particle_t
-	convertParticleFromG4(const G4ParticleDefinition* particleG4) const;
+	void
+	convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const;
+	
+private:
+
+	G4RunManager* runManager;
+	G4VModularPhysicsList* physicsList;
+	G4ParticleTable* particleTable;
 };
+
+Geant4MaterialInteraction::Geant4MaterialInteraction()
+{
+	runManager = new G4RunManager;
+	physicsList = new QBBC;
+	runManager->SetUserInitialization(physicsList);
+	particleTable = G4ParticleTable::GetParticleTable();
+}
+
+Geant4MaterialInteraction::~Geant4MaterialInteraction()
+{
+	delete(physicsList);	
+	//~ delete(runManager);
+}
 
 template<typename particle_t>
 G4ParticleDefinition*
 Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
 	if(particle.pdg() != 0)
-	{
-		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable(); // TODO: will be reconstructed all the time, can be stored probably
 		return particleTable->FindParticle(particle.pdg());
-	}
 	return nullptr;
 }
 
@@ -77,6 +96,7 @@ Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
 	Acts::Vector3D momentum = particle.momentum();
 	double scaleActsToG4 = MeV / Acts::units::_MeV;
 
+	//TODO: Angles of incoming particles
 	pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
 	pGun->SetParticlePosition({0., 0., 0.,});
 	pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing
@@ -91,21 +111,24 @@ Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 }
 
 template<typename particle_t>
-particle_t
-Geant4MaterialInteraction::convertMaterialToG4(const G4ParticleDefinition* particleG4, const particle_t& particle) const
+void
+Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const
 {
-	particle_t part(particle.position(), particle, particleG4->GetPDGMass(), particleG4->GetPDGCharge(), particleG4->GetPDGEncoding())
+	Acts::Vector3D momentum;
+	// TODO: Angles of ougoing particles
+	for(const B1particle& bp : particlesG4)
+	{
+		momentum = {bp.momentum[0], bp.momentum[1], bp.momentum[2]};
+		particle_t p(particleIn.position(), momentum, bp.mass, bp.charge, bp.pdg);
+		particles.push_back(std::move(p));
+	}
 }
 
 template<typename particle_t, typename material_t>
 std::vector<particle_t>
-Geant4MaterialInteraction::operator()(const particle_t& particle, const material_t& material) const
-{
-	G4RunManager* runManager = new G4RunManager;
-	G4VModularPhysicsList* physicsList = new QBBC;
-	runManager->SetUserInitialization(physicsList);
-	
-	double materialThickness = material.thickness() * mm / Acts::units::_mm;
+Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& material, const double thickness) const
+{	
+	double materialThickness = thickness * mm / Acts::units::_mm;
 	
 	G4ParticleGun* pGun = createParticleGun(particle);
 	B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);
@@ -118,16 +141,15 @@ Geant4MaterialInteraction::operator()(const particle_t& particle, const material
 	runManager->Initialize();
 	runManager->BeamOn(1);
 	
-	//TODO: return of results
+	std::vector<particle_t> particles;
+	convertParticlesFromG4(actionInit->particles(), particle, particles);
 	
-	delete(runManager);
-	delete(physicsList);
-	delete(pGun);
 	delete(actionInit);
+	delete(pGun);
 	delete(materialG4);
-	delete(detConstr);
+	delete(detConstr);	
 	
-	return {};
+	return particles;
 }
 
 }
