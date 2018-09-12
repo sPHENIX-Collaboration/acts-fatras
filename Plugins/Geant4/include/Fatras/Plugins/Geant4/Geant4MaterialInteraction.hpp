@@ -44,17 +44,13 @@ protected:
 	G4ParticleGun*
 	createParticleGun(const particle_t& particle) const;
 	
-	//~ template<typename particle_t>
-	//~ particle_t
-	//~ convertParticleFromG4(const G4ParticleDefinition* particleG4) const;
-	
 	template<typename material_t>
 	G4Material*
 	convertMaterialToG4(const material_t& material) const;
 	
-	//~ template<typename material_t>
-	//~ material_t
-	//~ convertMaterialFromG4(const G4Material* materialG4) const;
+	template<typename particle_t>
+	particle_t
+	convertParticleFromG4(const G4ParticleDefinition* particleG4) const;
 };
 
 template<typename particle_t>
@@ -91,10 +87,16 @@ template<typename material_t>
 G4Material*
 Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 {
-	//TODO: Test unit conversions
-	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_mm * Acts::units::_mm * Acts::units::_mm / Acts::units::_g * g / cm3);
+	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_cm * Acts::units::_cm * Acts::units::_cm / Acts::units::_g * g / cm3);
 }
-  
+
+template<typename particle_t>
+particle_t
+Geant4MaterialInteraction::convertMaterialToG4(const G4ParticleDefinition* particleG4, const particle_t& particle) const
+{
+	particle_t part(particle.position(), particle, particleG4->GetPDGMass(), particleG4->GetPDGCharge(), particleG4->GetPDGEncoding())
+}
+
 template<typename particle_t, typename material_t>
 std::vector<particle_t>
 Geant4MaterialInteraction::operator()(const particle_t& particle, const material_t& material) const

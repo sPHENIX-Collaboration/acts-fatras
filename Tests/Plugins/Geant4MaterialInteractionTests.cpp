@@ -22,9 +22,11 @@
 #include "Particle.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
+#include "Acts/Material/Material.hpp"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleGun.hh"
+#include "G4Material.hh"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -56,7 +58,15 @@ BOOST_TEST(pGun->GetParticleDefinition()->GetPDGMass() / GeV * Acts::units::_GeV
 BOOST_TEST(pGun->GetParticleDefinition()->GetPDGCharge() == charge);
 BOOST_TEST(pGun->GetParticleMomentumDirection().x() == 0.);
 BOOST_TEST(pGun->GetParticleMomentumDirection().y() == 0.);
-BOOST_TEST(pGun->GetParticleMomentumDirection().z() / MeV == 1. * Acts::units::_GeV);
+BOOST_TEST(pGun->GetParticleMomentumDirection().z() / MeV * Acts::units::_GeV == 1. * Acts::units::_GeV);
+
+Acts::Material mat(352.8, 407., 9.012, 4., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
+
+G4Material* matG4 = g4mis.convertMaterialToG4Stub(mat);
+
+BOOST_TEST(matG4->GetA() * mole / g == mat.A());
+BOOST_TEST(matG4->GetZ() == mat.Z());
+BOOST_TEST(matG4->GetDensity() * cm3 / g * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm) == mat.rho());
 
 }
 } // namespace Test
