@@ -36,6 +36,7 @@ namespace Test {
 
 BOOST_DATA_TEST_CASE(Geant4MaterialInteraction_test_, bdata::xrange(1), index) {
 
+// Create particle
 Acts::Vector3D position(0., 0., 0.);
 Acts::Vector3D momentum(0., 0., 1. * Acts::units::_GeV);
 double mass = 0.1395701 * Acts::units::_GeV;
@@ -45,12 +46,14 @@ Particle particle(position, momentum, mass, charge, pdg);
 
 Geant4MaterialInteractionStub g4mis;
 
+// Test conversion of particle
 G4ParticleDefinition* parDef = g4mis.convertParticleToG4Stub(particle);
 
 BOOST_TEST(parDef->GetPDGEncoding() == pdg);
 BOOST_TEST(parDef->GetPDGMass() / GeV * Acts::units::_GeV == mass);
 BOOST_TEST(parDef->GetPDGCharge() == charge);
 
+// Test particle gun creation
 G4ParticleGun* pGun = g4mis.createParticleGunStub(particle);
 
 BOOST_TEST(pGun->GetParticleDefinition()->GetPDGEncoding() == pdg);
@@ -60,6 +63,7 @@ BOOST_TEST(pGun->GetParticleMomentumDirection().x() == 0.);
 BOOST_TEST(pGun->GetParticleMomentumDirection().y() == 0.);
 BOOST_TEST(pGun->GetParticleMomentumDirection().z() / MeV * Acts::units::_GeV == 1. * Acts::units::_GeV);
 
+// Create material and test its conversion
 Acts::Material mat(352.8, 407., 9.012, 4., 1.848 * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
 
 G4Material* matG4 = g4mis.convertMaterialToG4Stub(mat);
@@ -68,10 +72,11 @@ BOOST_TEST(matG4->GetA() * mole / g == mat.A());
 BOOST_TEST(matG4->GetZ() == mat.Z());
 BOOST_TEST(matG4->GetDensity() * cm3 / g * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm) == mat.rho());
 
+// Test back conversion
 std::vector<B1particle> bps;
 B1particle bp;
-bp.momentum = {0., 0., 2. * Acts::units::_GeV};
-bp.mass = 2. * mass;
+bp.momentum = {0., 0., 2. * GeV};
+bp.mass = 2. * 0.1395701 * GeV;
 bp.charge = 2. * charge;
 bp.pdg = 2. * pdg;
 bps.push_back(std::move(bp));
@@ -81,17 +86,27 @@ g4mis.convertParticlesFromG4Stub(bps, particle, particles);
 
 BOOST_TEST(particles.size() == 1);
 BOOST_TEST(particles[0].position() == Acts::Vector3D::Zero(3));
-BOOST_TEST(particles[0].momentum() == bp.momentum);
+BOOST_TEST(particles[0].momentum() == bp.momentum * Acts::units::_GeV / GeV);
 double tmpD = particles[0].m();
-BOOST_TEST(tmpD == bp.mass);
+BOOST_TEST(tmpD == bp.mass * Acts::units::_GeV / GeV);
 tmpD = particles[0].q();
 BOOST_TEST(tmpD == bp.charge);
 int tmpI = particles[0].pdg();
 BOOST_TEST(tmpI == bp.pdg);
 
+// Test of the main call operator
 particles.clear();
 particles = g4mis(particle, mat, 1. * Acts::units::_m);
 BOOST_TEST(particles.size() != 0);
+
+// Stability test for wrong particle data
+Particle wrongParticle(position, momentum, mass, charge, 0);
+BOOST_TEST(!g4mis.convertParticleToG4Stub(wrongParticle));
+BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle));
+particles.clear();
+g4mis(wrongParticle, mat, 1. * Acts::units::_m);
+BOOST_TEST(particles.size() == 0);
+
 }
 } // namespace Test
 } // namespace Fatras

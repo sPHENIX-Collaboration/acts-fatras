@@ -13,6 +13,9 @@
 namespace Fatras {
 namespace Test{
 
+/// @brief This class serves for testing @c Geant4MaterialInteraction.
+/// All functions just call the parent class functions for public calls.
+/// The functionality of the methods are described in @c Geant4MaterialInteraction
 class Geant4MaterialInteractionStub : public Geant4MaterialInteraction
 {
 public:

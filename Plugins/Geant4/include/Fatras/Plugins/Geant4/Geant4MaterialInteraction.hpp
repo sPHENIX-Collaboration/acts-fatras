@@ -24,45 +24,84 @@
 
 namespace Fatras {
 
+/// @brief This class is a converter for material interaction of particles.
+/// Given an Acts described particle and material, this class converts the
+/// environment into terms of Geant4 and calculates the interaction.
+/// The result of the interaction is transformed back into terms of Acts
 class Geant4MaterialInteraction
 {
 public:
 
+	/// @brief Constructor
 	Geant4MaterialInteraction();
 	
+	/// @brief Destructor
 	~Geant4MaterialInteraction();
 	
+	/// @brief Call parameter for the material interaction
+	///
+	/// @tparam particle_t Type of the particle
+	/// @tparam material_t Type of the material
+	/// @param [in] particle Ingoing particle
+	/// @param [in] material Penentrated material
+	/// @param [in] thickness
+	/// @return Vector containing all outgoing particles
 	template<typename particle_t, typename material_t>
 	std::vector<particle_t> 
 	operator()(particle_t& particle, const material_t& material, const double thickness) const;
 	
 protected:
 
+	/// @brief Converts a particle into a Geant4 particle
+	///
+	/// @tparam particle_t Type of the particle
+	/// @param [in] particle Particle that is converted
+	/// @return Pointer to the corresponding Geant4 particle
 	template<typename particle_t>
 	G4ParticleDefinition*
 	convertParticleToG4(const particle_t& particle) const;
 	
+	/// @brief Constructs a Geant4 particle gun
+	///
+	/// @tparam particle_t Type of the particle
+	/// @param [in] particle Ammo of the gun
+	/// @return Pointer to the particle gun
 	template<typename particle_t>
 	G4ParticleGun*
 	createParticleGun(const particle_t& particle) const;
 	
+	/// @brief Converts material into Geant4 material
+	///
+	/// @tparam material_t Type of the material
+	/// @param [in] material Material that is penetrated
+	/// @return Pointer to the corresponding Geant4 material
 	template<typename material_t>
 	G4Material*
 	convertMaterialToG4(const material_t& material) const;
 	
+	/// @brief Converts Geant4 particles back
+	///
+	/// @tparam particle_t Type of the particle
+	/// @param [in] particlesG4 Vector of recorded outgoing particles
+	/// @param [in] particleIn Ingoing particle
+	/// @param [out] particles Vector of outgoing particles
 	template<typename particle_t>
 	void
 	convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const;
 	
 private:
 
+	// Geant4 run manager
 	G4RunManager* runManager;
+	// List of physics processes in Geant4
 	G4VModularPhysicsList* physicsList;
+	// Table of particles in Geant4
 	G4ParticleTable* particleTable;
 };
 
 Geant4MaterialInteraction::Geant4MaterialInteraction()
 {
+	// Initialize Geant4 managers
 	runManager = new G4RunManager;
 	physicsList = new QBBC;
 	runManager->SetUserInitialization(physicsList);
@@ -71,6 +110,7 @@ Geant4MaterialInteraction::Geant4MaterialInteraction()
 
 Geant4MaterialInteraction::~Geant4MaterialInteraction()
 {
+	// Free heap memory
 	delete(physicsList);	
 	//~ delete(runManager);
 }
@@ -79,7 +119,8 @@ template<typename particle_t>
 G4ParticleDefinition*
 Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
-	if(particle.pdg() != 0)
+	// Check if pdg code is provided, return related particle or nothing
+	if(particle.pdg() != 0) // TODO: inf / nan
 		return particleTable->FindParticle(particle.pdg());
 	return nullptr;
 }
@@ -87,26 +128,36 @@ Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 template<typename particle_t>
 G4ParticleGun*
 Geant4MaterialInteraction::createParticleGun(const particle_t& particle) const
-{
-	G4ParticleGun* pGun = new G4ParticleGun(1);
-	
+{	
+	// Create particle
 	G4ParticleDefinition* parDef = convertParticleToG4(particle);
-	pGun->SetParticleDefinition(parDef);
-	
-	Acts::Vector3D momentum = particle.momentum();
-	double scaleActsToG4 = MeV / Acts::units::_MeV;
 
-	//TODO: Angles of incoming particles
-	pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
-	pGun->SetParticlePosition({0., 0., 0.,});
-	pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing
-	return pGun;
+	if(parDef)
+	{
+		// Build gun
+		G4ParticleGun* pGun = new G4ParticleGun(1);
+		pGun->SetParticleDefinition(parDef);
+		
+		// Set initial kinematics
+		Acts::Vector3D momentum = particle.momentum();
+		double scaleActsToG4 = MeV / Acts::units::_MeV;
+
+		//TODO: Angles of incoming particles
+		pGun->SetParticleMomentum({momentum.x() * scaleActsToG4, momentum.y() * scaleActsToG4, momentum.z() * scaleActsToG4});
+		pGun->SetParticlePosition({0., 0., 0.,});
+		pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing
+		return pGun;
+	}
+	return nullptr;
 }
 
 template<typename material_t>
 G4Material*
 Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 {
+	//Translate material if valid
+	if(material.Z() < 0. || material.A() < 0. || material.rho() < 0.) // TODO: test
+		return nullptr;
 	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_cm * Acts::units::_cm * Acts::units::_cm / Acts::units::_g * g / cm3);
 }
 
@@ -114,12 +165,15 @@ template<typename particle_t>
 void
 Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>& particlesG4, particle_t& particleIn, std::vector<particle_t>& particles) const
 {
+	
 	Acts::Vector3D momentum;
+	const double scaleG4ToActs = Acts::units::_GeV / GeV;
 	// TODO: Angles of ougoing particles
+	// Translate every particle from Geant4
 	for(const B1particle& bp : particlesG4)
 	{
-		momentum = {bp.momentum[0], bp.momentum[1], bp.momentum[2]};
-		particle_t p(particleIn.position(), momentum, bp.mass, bp.charge, bp.pdg);
+		momentum = {bp.momentum[0] * scaleG4ToActs, bp.momentum[1] * scaleG4ToActs, bp.momentum[2] * scaleG4ToActs};
+		particle_t p(particleIn.position(), momentum, bp.mass * Acts::units::_GeV / GeV, bp.charge, bp.pdg);
 		particles.push_back(std::move(p));
 	}
 }
@@ -130,26 +184,35 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 {	
 	double materialThickness = thickness * mm / Acts::units::_mm;
 	
+	// Load the gun and build material
 	G4ParticleGun* pGun = createParticleGun(particle);
-	B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);
-	
 	G4Material* materialG4 = convertMaterialToG4(material);
-	B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, materialThickness);
 	
-	runManager->SetUserInitialization(detConstr);
-	runManager->SetUserInitialization(actionInit);
-	runManager->Initialize();
-	runManager->BeamOn(1);
+	if(pGun && materialG4)
+	{
+		// Configure the Process
+		B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);	
+		
+		B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, materialThickness);
+		
+		runManager->SetUserInitialization(detConstr);
+		runManager->SetUserInitialization(actionInit);
+		runManager->Initialize();
+		runManager->BeamOn(1);
+		
+		// Collect the result
+		std::vector<particle_t> particles;
+		convertParticlesFromG4(actionInit->particles(), particle, particles);
+		
+		// Free memory
+		delete(actionInit);
+		delete(pGun);
+		delete(materialG4);
+		delete(detConstr);	
 	
-	std::vector<particle_t> particles;
-	convertParticlesFromG4(actionInit->particles(), particle, particles);
-	
-	delete(actionInit);
-	delete(pGun);
-	delete(materialG4);
-	delete(detConstr);	
-	
-	return particles;
+		return particles;
+	}
+	return {};
 }
 
 }
