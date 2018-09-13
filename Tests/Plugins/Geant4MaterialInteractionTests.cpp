@@ -131,11 +131,16 @@ angles2 = g4mis.angleOfNormalVectorStub(normal, negMomentum);
 BOOST_TEST(angles2.first - M_PI == angles.first);
 BOOST_TEST(angles2.second == angles.second);
 
-//~ // Test of the main call operator
+// Test of the main call operator
 normal = {1., 1., 1.};
 particles.clear();
 particles = g4mis(particle, mat, 1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() != 0);
+
+Acts::Vector3D normalZero(0., 0., 0.);
+particles.clear();
+particles = g4mis(particle, mat, 1. * Acts::units::_m, normalZero);
+BOOST_TEST(particles.size() == 0);
 
 // Stability test for wrong particle data
 Particle wrongParticle(position, momentum, mass, charge, 0);
