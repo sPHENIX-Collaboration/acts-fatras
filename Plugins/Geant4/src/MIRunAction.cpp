@@ -10,24 +10,17 @@
 
 #include "Fatras/Plugins/Geant4/MIRunAction.hpp"
 
-#include "G4RunManager.hh"
 #include "G4Run.hh"
+#include "G4RunManager.hh"
 
-MIRunAction::MIRunAction()
-: G4UserRunAction()
-{
-}
+MIRunAction::MIRunAction() : G4UserRunAction() {}
 
-void 
-MIRunAction::BeginOfRunAction(const G4Run*)
-{ 
+void MIRunAction::BeginOfRunAction(const G4Run *) {
   // Inform the runManager to save random number seed
   G4RunManager::GetRunManager()->SetRandomNumberStore(false);
 }
 
-void 
-MIRunAction::EndOfRunAction(const G4Run* run)
-{
-  if(run->GetNumberOfEvent() == 0) 
-	return;
+void MIRunAction::EndOfRunAction(const G4Run *run) {
+  if (run->GetNumberOfEvent() == 0)
+    return;
 }

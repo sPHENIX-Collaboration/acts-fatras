@@ -10,37 +10,34 @@
 
 #pragma once
 
-#include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4ParticleGun.hh"
+#include "G4VUserPrimaryGeneratorAction.hh"
 
 class G4ParticleGun;
 class G4Event;
 
 /// @brief The primary generator action class with particle gun.
-class MIPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
-{
-  public:
-	/// @brief Constructor
-	///
-	/// @param [in] pGun Particle gun
-    MIPrimaryGeneratorAction(G4ParticleGun* pGun);    
-    
-    /// @brief Destructor
-    virtual ~MIPrimaryGeneratorAction();
+class MIPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
+public:
+  /// @brief Constructor
+  ///
+  /// @param [in] pGun Particle gun
+  MIPrimaryGeneratorAction(G4ParticleGun *pGun);
 
-    /// @brief Method from the base class. Fires the gun.
-    ///
-    /// @param [out] anEvent Event related to the gun
-    virtual void 
-    GeneratePrimaries(G4Event* anEvent);         
-  
-    /// @brief Method to access particle gun.
-    ///
-    /// @return Pointer to the particle gun
-    const G4ParticleGun* 
-    GetParticleGun() const;
-  
-  private:
-	// Pointer to the Geant4 particle gun
-    G4ParticleGun*  fParticleGun;
+  /// @brief Destructor
+  virtual ~MIPrimaryGeneratorAction();
+
+  /// @brief Method from the base class. Fires the gun.
+  ///
+  /// @param [out] anEvent Event related to the gun
+  virtual void GeneratePrimaries(G4Event *anEvent);
+
+  /// @brief Method to access particle gun.
+  ///
+  /// @return Pointer to the particle gun
+  const G4ParticleGun *GetParticleGun() const;
+
+private:
+  // Pointer to the Geant4 particle gun
+  G4ParticleGun *fParticleGun;
 };

@@ -13,26 +13,11 @@
 
 #include <fstream>
 
-MIEventAction::MIEventAction(MIRunAction* runAction)
-: G4UserEventAction(),
-  fRunAction(runAction)
-{
-} 
+MIEventAction::MIEventAction(MIRunAction *runAction)
+    : G4UserEventAction(), fRunAction(runAction) {}
 
-void 
-MIEventAction::BeginOfEventAction(const G4Event*)
-{
-  m_particles.clear();
-}
+void MIEventAction::BeginOfEventAction(const G4Event *) { m_particles.clear(); }
 
-void 
-MIEventAction::AddParticle(MIparticle& p)
-{
-	m_particles.push_back(p);
-}
+void MIEventAction::AddParticle(MIparticle &p) { m_particles.push_back(p); }
 
-std::vector<MIparticle> 
-MIEventAction::particles()
-{
-	return m_particles;
-}
+std::vector<MIparticle> MIEventAction::particles() { return m_particles; }

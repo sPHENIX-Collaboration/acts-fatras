@@ -10,43 +10,39 @@
 
 #pragma once
 
-#include "G4VUserDetectorConstruction.hh"
 #include "G4Material.hh"
+#include "G4VUserDetectorConstruction.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 
 /// @brief Detector construction class to define materials and geometry.
-class MIDetectorConstruction : public G4VUserDetectorConstruction
-{
-  public:
-	/// @brief Constructor
-	///
-	/// @param [in] material Material of the detector
-	/// @param [in] thickness Thickness of the material
-    MIDetectorConstruction(G4Material* material, double thickness);
-    
-    /// @brief Destructor
-    virtual ~MIDetectorConstruction() = default;
+class MIDetectorConstruction : public G4VUserDetectorConstruction {
+public:
+  /// @brief Constructor
+  ///
+  /// @param [in] material Material of the detector
+  /// @param [in] thickness Thickness of the material
+  MIDetectorConstruction(G4Material *material, double thickness);
 
-	/// @brief Constructs the world
-	///
-	/// @return Pointer to the world
-    virtual G4VPhysicalVolume* 
-    Construct();
-    
-    /// @brief Getter of the scoring volume
-    ///
-    /// @return Pointer to the scoriung volume
-    G4LogicalVolume* 
-    GetScoringVolume() const;
+  /// @brief Destructor
+  virtual ~MIDetectorConstruction() = default;
 
-  protected:
-	// Pointer to the scoring volume
-    G4LogicalVolume*  fScoringVolume;
-    // Pointer to the detector material
-    G4Material* m_material;
-    // Thickness of the material
-    double m_thickness;
+  /// @brief Constructs the world
+  ///
+  /// @return Pointer to the world
+  virtual G4VPhysicalVolume *Construct();
+
+  /// @brief Getter of the scoring volume
+  ///
+  /// @return Pointer to the scoriung volume
+  G4LogicalVolume *GetScoringVolume() const;
+
+protected:
+  // Pointer to the scoring volume
+  G4LogicalVolume *fScoringVolume;
+  // Pointer to the detector material
+  G4Material *m_material;
+  // Thickness of the material
+  double m_thickness;
 };
-

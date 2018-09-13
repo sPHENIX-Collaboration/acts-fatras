@@ -10,43 +10,38 @@
 
 #pragma once
 
-#include "G4VUserActionInitialization.hh"
 #include "G4ParticleGun.hh"
+#include "G4VUserActionInitialization.hh"
 #include "MIEventAction.hpp"
 #include "MIRunAction.hpp"
 
 /// @brief Action initialization class.
-class MIActionInitialization : public G4VUserActionInitialization
-{
-  public:
-	/// @brief Constructor
-	///
-	/// @param [in] thickness Thickness of the material
-	/// @param [in] pGun Particle Gun
-    MIActionInitialization(double thickness, G4ParticleGun* pGun);
-    
-    /// @brief Destructor
-    virtual ~MIActionInitialization();
-    
-    /// @brief Sets up all necessacry components
-    virtual void 
-    Build() const;
-    
-    /// @brief Getter of the final state particles
-    ///
-    /// @return Vector containing the final state particles
-    std::vector<MIparticle> 
-    particles();
-   
-  protected:
-	// Thickness of the material
-	double m_thickness;
-	// Pointer to the Particle gun
-	G4ParticleGun* m_pGun;
-	// Pointer to the Run
-	MIRunAction* m_runAction;
-	// Pointer to the Event
-	MIEventAction* m_eventAction;
-};
+class MIActionInitialization : public G4VUserActionInitialization {
+public:
+  /// @brief Constructor
+  ///
+  /// @param [in] thickness Thickness of the material
+  /// @param [in] pGun Particle Gun
+  MIActionInitialization(double thickness, G4ParticleGun *pGun);
 
-    
+  /// @brief Destructor
+  virtual ~MIActionInitialization();
+
+  /// @brief Sets up all necessacry components
+  virtual void Build() const;
+
+  /// @brief Getter of the final state particles
+  ///
+  /// @return Vector containing the final state particles
+  std::vector<MIparticle> particles();
+
+protected:
+  // Thickness of the material
+  double m_thickness;
+  // Pointer to the Particle gun
+  G4ParticleGun *m_pGun;
+  // Pointer to the Run
+  MIRunAction *m_runAction;
+  // Pointer to the Event
+  MIEventAction *m_eventAction;
+};

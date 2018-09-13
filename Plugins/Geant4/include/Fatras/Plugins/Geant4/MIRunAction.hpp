@@ -16,23 +16,19 @@
 class G4Run;
 
 /// @brief Run action class
-class MIRunAction : public G4UserRunAction
-{
-  public:
-	/// @brief Constructor
-    MIRunAction();
-    
-    /// @brief Destructor
-    virtual ~MIRunAction() = default;
+class MIRunAction : public G4UserRunAction {
+public:
+  /// @brief Constructor
+  MIRunAction();
 
-	/// @brief Initializer of a run
-    virtual void 
-    BeginOfRunAction(const G4Run*);
-    
-    /// @brief Finalizer of a run
-    ///
-    /// @param [in] run Provides the number of events in the run
-    virtual void   
-    EndOfRunAction(const G4Run* run);
+  /// @brief Destructor
+  virtual ~MIRunAction() = default;
+
+  /// @brief Initializer of a run
+  virtual void BeginOfRunAction(const G4Run *);
+
+  /// @brief Finalizer of a run
+  ///
+  /// @param [in] run Provides the number of events in the run
+  virtual void EndOfRunAction(const G4Run *run);
 };
-

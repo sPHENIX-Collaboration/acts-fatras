@@ -16,30 +16,30 @@ class MIEventAction;
 struct MIparticle;
 class G4LogicalVolume;
 
-/// @brief Stepping action class. This class serves as collector of the final state.
-class MISteppingAction : public G4UserSteppingAction
-{
-  public:
-	/// @brief Constructor
-	///
-	/// @param [in, out] eventAction EventAction handler that stores the final state
-	/// @param [in] thickness Thickness of the material
-    MISteppingAction(MIEventAction* eventAction, double thickness);
-    
-    /// @brief Destructor
-    virtual ~MISteppingAction() = default;
+/// @brief Stepping action class. This class serves as collector of the final
+/// state.
+class MISteppingAction : public G4UserSteppingAction {
+public:
+  /// @brief Constructor
+  ///
+  /// @param [in, out] eventAction EventAction handler that stores the final
+  /// state
+  /// @param [in] thickness Thickness of the material
+  MISteppingAction(MIEventAction *eventAction, double thickness);
 
-    /// @brief Method from the base class for boundary checks of particles
-    /// 
-    /// @param [in] step Step calculated in Geant4
-    virtual void 
-    UserSteppingAction(const G4Step* step);
+  /// @brief Destructor
+  virtual ~MISteppingAction() = default;
 
-  private:
-	// Event handler
-    MIEventAction*  fEventAction;
-    // Checker if collection should be performed in the volume
-    G4LogicalVolume* fScoringVolume;
-    // Thickness of the material
-    double m_thickness;
+  /// @brief Method from the base class for boundary checks of particles
+  ///
+  /// @param [in] step Step calculated in Geant4
+  virtual void UserSteppingAction(const G4Step *step);
+
+private:
+  // Event handler
+  MIEventAction *fEventAction;
+  // Checker if collection should be performed in the volume
+  G4LogicalVolume *fScoringVolume;
+  // Thickness of the material
+  double m_thickness;
 };
