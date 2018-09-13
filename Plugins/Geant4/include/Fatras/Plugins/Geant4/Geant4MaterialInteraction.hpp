@@ -10,8 +10,8 @@
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Units.hpp"
-#include "Fatras/Plugins/Geant4/B1ActionInitialization.hpp"
-#include "Fatras/Plugins/Geant4/B1DetectorConstruction.hpp"
+#include "Fatras/Plugins/Geant4/MIActionInitialization.hpp"
+#include "Fatras/Plugins/Geant4/MIDetectorConstruction.hpp"
 
 #include <vector>
 #include <cmath>
@@ -99,7 +99,7 @@ protected:
 	/// @param [out] particles Vector of outgoing particles
 	template<typename particle_t>
 	void
-	convertParticlesFromG4(const std::vector<B1particle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const;
+	convertParticlesFromG4(const std::vector<MIparticle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const;
 	
 private:
 
@@ -172,14 +172,14 @@ Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 
 template<typename particle_t>
 void
-Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<B1particle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
+Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<MIparticle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
 {
 	Acts::Vector3D momentum;
 	const double scaleG4ToActs = Acts::units::_GeV / GeV;
 	double p, theta, phi;
 
 	// Translate every particle from Geant4
-	for(const B1particle& bp : particlesG4)
+	for(const MIparticle& bp : particlesG4)
 	{
 		// Correct angles
 		p = bp.momentum.norm();
@@ -216,9 +216,9 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 	if(pGun && materialG4 && materialThickness >= 0.)
 	{
 		// Configure the Process
-		B1ActionInitialization* actionInit = new B1ActionInitialization(materialThickness, pGun);	
+		MIActionInitialization* actionInit = new MIActionInitialization(materialThickness, pGun);	
 		
-		B1DetectorConstruction* detConstr = new B1DetectorConstruction(materialG4, materialThickness);
+		MIDetectorConstruction* detConstr = new MIDetectorConstruction(materialG4, materialThickness);
 		
 		runManager->SetUserInitialization(detConstr);
 		runManager->SetUserInitialization(actionInit);

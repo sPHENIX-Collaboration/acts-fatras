@@ -8,9 +8,9 @@
 
 /// This code is based on the B1 example of Geant4
 
-#include "Fatras/Plugins/Geant4/B1SteppingAction.hpp"
-#include "Fatras/Plugins/Geant4/B1EventAction.hpp"
-#include "Fatras/Plugins/Geant4/B1DetectorConstruction.hpp"
+#include "Fatras/Plugins/Geant4/MISteppingAction.hpp"
+#include "Fatras/Plugins/Geant4/MIEventAction.hpp"
+#include "Fatras/Plugins/Geant4/MIDetectorConstruction.hpp"
 
 #include "G4Step.hh"
 #include "G4Event.hh"
@@ -19,7 +19,7 @@
 
 #include "G4SystemOfUnits.hh"
 
-B1SteppingAction::B1SteppingAction(B1EventAction* eventAction, double thickness)
+MISteppingAction::MISteppingAction(MIEventAction* eventAction, double thickness)
 : G4UserSteppingAction(),
   fEventAction(eventAction),
   fScoringVolume(0),
@@ -28,12 +28,12 @@ B1SteppingAction::B1SteppingAction(B1EventAction* eventAction, double thickness)
 }
 
 void 
-B1SteppingAction::UserSteppingAction(const G4Step* step)
+MISteppingAction::UserSteppingAction(const G4Step* step)
 {
   // Set scoring volume if not set yet
   if (!fScoringVolume) { 
-    const B1DetectorConstruction* detectorConstruction
-      = static_cast<const B1DetectorConstruction*>
+    const MIDetectorConstruction* detectorConstruction
+      = static_cast<const MIDetectorConstruction*>
         (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
     fScoringVolume = detectorConstruction->GetScoringVolume();   
   }
@@ -51,7 +51,7 @@ B1SteppingAction::UserSteppingAction(const G4Step* step)
 		|| fabs((step->GetPostStepPoint()->GetPosition().x() - 1. * m) / (1. * m)) < 1e-15
 		|| fabs((step->GetPostStepPoint()->GetPosition().y() - 1. * m) / (1. * m)) < 1e-15)
 	{
-		B1particle p;
+		MIparticle p;
 		p.momentum[0] = step->GetPostStepPoint()->GetMomentum().x();
 		p.momentum[1] = step->GetPostStepPoint()->GetMomentum().y();
 		p.momentum[2] = step->GetPostStepPoint()->GetMomentum().z();

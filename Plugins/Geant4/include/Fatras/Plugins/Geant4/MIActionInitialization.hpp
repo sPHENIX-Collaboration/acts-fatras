@@ -12,21 +12,21 @@
 
 #include "G4VUserActionInitialization.hh"
 #include "G4ParticleGun.hh"
-#include "B1EventAction.hpp"
-#include "B1RunAction.hpp"
+#include "MIEventAction.hpp"
+#include "MIRunAction.hpp"
 
 /// @brief Action initialization class.
-class B1ActionInitialization : public G4VUserActionInitialization
+class MIActionInitialization : public G4VUserActionInitialization
 {
   public:
 	/// @brief Constructor
 	///
 	/// @param [in] thickness Thickness of the material
 	/// @param [in] pGun Particle Gun
-    B1ActionInitialization(double thickness, G4ParticleGun* pGun);
+    MIActionInitialization(double thickness, G4ParticleGun* pGun);
     
     /// @brief Destructor
-    virtual ~B1ActionInitialization() = default;
+    virtual ~MIActionInitialization() = default;
     
     /// @brief Sets up all necessacry components
     virtual void 
@@ -35,7 +35,7 @@ class B1ActionInitialization : public G4VUserActionInitialization
     /// @brief Getter of the final state particles
     ///
     /// @return Vector containing the final state particles
-    std::vector<B1particle> 
+    std::vector<MIparticle> 
     particles();
    
   protected:
@@ -44,9 +44,9 @@ class B1ActionInitialization : public G4VUserActionInitialization
 	// Pointer to the Particle gun
 	G4ParticleGun* m_pGun;
 	// Pointer to the Run
-	B1RunAction* m_runAction;
+	MIRunAction* m_runAction;
 	// Pointer to the Event
-	B1EventAction* m_eventAction;
+	MIEventAction* m_eventAction;
 };
 
     

@@ -8,7 +8,7 @@
 
 /// This code is based on the B1 example of Geant4
 
-#include "Fatras/Plugins/Geant4/B1DetectorConstruction.hpp"
+#include "Fatras/Plugins/Geant4/MIDetectorConstruction.hpp"
 
 #include "G4NistManager.hh"
 #include "G4Box.hh"
@@ -16,7 +16,7 @@
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 
-B1DetectorConstruction::B1DetectorConstruction(G4Material* material, double thickness)
+MIDetectorConstruction::MIDetectorConstruction(G4Material* material, double thickness)
 : G4VUserDetectorConstruction(),
   fScoringVolume(0),
   m_material(material),
@@ -25,7 +25,7 @@ B1DetectorConstruction::B1DetectorConstruction(G4Material* material, double thic
 }
 
 G4VPhysicalVolume* 
-B1DetectorConstruction::Construct()
+MIDetectorConstruction::Construct()
 {  
   // Get nist material manager
   G4NistManager* nist = G4NistManager::Instance();
@@ -90,7 +90,7 @@ B1DetectorConstruction::Construct()
 }
 
 G4LogicalVolume* 
-B1DetectorConstruction::GetScoringVolume() const
+MIDetectorConstruction::GetScoringVolume() const
 { 
 	return fScoringVolume;
 }

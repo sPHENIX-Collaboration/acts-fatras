@@ -53,7 +53,7 @@ public:
 
 	template<typename particle_t>
 	void
-	convertParticlesFromG4Stub(const std::vector<B1particle>& particlesG4, particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
+	convertParticlesFromG4Stub(const std::vector<MIparticle>& particlesG4, particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
 	{
 		convertParticlesFromG4(particlesG4, particleIn, angles, particles);
 	}

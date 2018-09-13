@@ -8,31 +8,31 @@
 
 /// This code is based on the B1 example of Geant4
 
-#include "Fatras/Plugins/Geant4/B1EventAction.hpp"
-#include "Fatras/Plugins/Geant4/B1RunAction.hpp"
+#include "Fatras/Plugins/Geant4/MIEventAction.hpp"
+#include "Fatras/Plugins/Geant4/MIRunAction.hpp"
 
 #include <fstream>
 
-B1EventAction::B1EventAction(B1RunAction* runAction)
+MIEventAction::MIEventAction(MIRunAction* runAction)
 : G4UserEventAction(),
   fRunAction(runAction)
 {
 } 
 
 void 
-B1EventAction::BeginOfEventAction(const G4Event*)
+MIEventAction::BeginOfEventAction(const G4Event*)
 {
   m_particles.clear();
 }
 
 void 
-B1EventAction::AddParticle(B1particle& p)
+MIEventAction::AddParticle(MIparticle& p)
 {
 	m_particles.push_back(p);
 }
 
-std::vector<B1particle> 
-B1EventAction::particles()
+std::vector<MIparticle> 
+MIEventAction::particles()
 {
 	return m_particles;
 }

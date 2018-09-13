@@ -16,14 +16,14 @@
 class G4Run;
 
 /// @brief Run action class
-class B1RunAction : public G4UserRunAction
+class MIRunAction : public G4UserRunAction
 {
   public:
 	/// @brief Constructor
-    B1RunAction();
+    MIRunAction();
     
     /// @brief Destructor
-    virtual ~B1RunAction() = default;
+    virtual ~MIRunAction() = default;
 
 	/// @brief Initializer of a run
     virtual void 

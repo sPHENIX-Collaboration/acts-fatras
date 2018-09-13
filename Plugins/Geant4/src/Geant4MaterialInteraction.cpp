@@ -22,8 +22,7 @@ Geant4MaterialInteraction::Geant4MaterialInteraction()
 Geant4MaterialInteraction::~Geant4MaterialInteraction()
 {
 	// Free heap memory
-	delete(physicsList);	
-	//~ delete(runManager); // TODO: there can be a runmanager destructor / finalize
+	delete(physicsList);
 }
 
 std::pair<double, double>

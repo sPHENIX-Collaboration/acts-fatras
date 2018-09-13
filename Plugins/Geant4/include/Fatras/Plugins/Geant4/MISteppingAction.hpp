@@ -12,22 +12,22 @@
 
 #include "G4UserSteppingAction.hh"
 
-class B1EventAction;
-struct B1particle;
+class MIEventAction;
+struct MIparticle;
 class G4LogicalVolume;
 
 /// @brief Stepping action class. This class serves as collector of the final state.
-class B1SteppingAction : public G4UserSteppingAction
+class MISteppingAction : public G4UserSteppingAction
 {
   public:
 	/// @brief Constructor
 	///
 	/// @param [in, out] eventAction EventAction handler that stores the final state
 	/// @param [in] thickness Thickness of the material
-    B1SteppingAction(B1EventAction* eventAction, double thickness);
+    MISteppingAction(MIEventAction* eventAction, double thickness);
     
     /// @brief Destructor
-    virtual ~B1SteppingAction() = default;
+    virtual ~MISteppingAction() = default;
 
     /// @brief Method from the base class for boundary checks of particles
     /// 
@@ -37,7 +37,7 @@ class B1SteppingAction : public G4UserSteppingAction
 
   private:
 	// Event handler
-    B1EventAction*  fEventAction;
+    MIEventAction*  fEventAction;
     // Checker if collection should be performed in the volume
     G4LogicalVolume* fScoringVolume;
     // Thickness of the material

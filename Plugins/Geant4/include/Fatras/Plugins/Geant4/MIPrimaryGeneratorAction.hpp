@@ -17,16 +17,16 @@ class G4ParticleGun;
 class G4Event;
 
 /// @brief The primary generator action class with particle gun.
-class B1PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class MIPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
 	/// @brief Constructor
 	///
 	/// @param [in] pGun Particle gun
-    B1PrimaryGeneratorAction(G4ParticleGun* pGun);    
+    MIPrimaryGeneratorAction(G4ParticleGun* pGun);    
     
     /// @brief Destructor
-    virtual ~B1PrimaryGeneratorAction();
+    virtual ~MIPrimaryGeneratorAction();
 
     /// @brief Method from the base class. Fires the gun.
     ///

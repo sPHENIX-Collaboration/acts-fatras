@@ -17,17 +17,17 @@ class G4VPhysicalVolume;
 class G4LogicalVolume;
 
 /// @brief Detector construction class to define materials and geometry.
-class B1DetectorConstruction : public G4VUserDetectorConstruction
+class MIDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
 	/// @brief Constructor
 	///
 	/// @param [in] material Material of the detector
 	/// @param [in] thickness Thickness of the material
-    B1DetectorConstruction(G4Material* material, double thickness);
+    MIDetectorConstruction(G4Material* material, double thickness);
     
     /// @brief Destructor
-    virtual ~B1DetectorConstruction() = default;
+    virtual ~MIDetectorConstruction() = default;
 
 	/// @brief Constructs the world
 	///

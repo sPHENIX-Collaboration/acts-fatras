@@ -74,8 +74,8 @@ BOOST_TEST(matG4->GetZ() == mat.Z());
 BOOST_TEST(matG4->GetDensity() * cm3 / g * Acts::units::_g / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm) == mat.rho());
 
 // Test back conversion
-std::vector<B1particle> bps;
-B1particle bp;
+std::vector<MIparticle> bps;
+MIparticle bp;
 bp.momentum = {0., 0., 2. * GeV};
 bp.mass = 2. * 0.1395701 * GeV;
 bp.charge = 2. * charge;

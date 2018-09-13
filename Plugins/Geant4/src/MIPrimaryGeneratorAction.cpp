@@ -8,7 +8,7 @@
 
 /// This code is based on the B1 example of Geant4
 
-#include "Fatras/Plugins/Geant4/B1PrimaryGeneratorAction.hpp"
+#include "Fatras/Plugins/Geant4/MIPrimaryGeneratorAction.hpp"
 
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
@@ -20,26 +20,26 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
-B1PrimaryGeneratorAction::B1PrimaryGeneratorAction(G4ParticleGun* pGun)
+MIPrimaryGeneratorAction::MIPrimaryGeneratorAction(G4ParticleGun* pGun)
 : G4VUserPrimaryGeneratorAction()
 {
   fParticleGun  = pGun;
 }
 
-B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction()
+MIPrimaryGeneratorAction::~MIPrimaryGeneratorAction()
 {
   delete fParticleGun;
 }
 
 void 
-B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+MIPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   // This function is called at the begining of each event
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 const G4ParticleGun* 
-B1PrimaryGeneratorAction::GetParticleGun() const 
+MIPrimaryGeneratorAction::GetParticleGun() const 
 { 
 	return fParticleGun; 
 }

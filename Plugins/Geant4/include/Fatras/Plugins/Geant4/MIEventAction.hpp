@@ -16,10 +16,10 @@
 #include <vector>
 #include <array>
 
-class B1RunAction;
+class MIRunAction;
 
 /// @brief Storage of the final state of a particle
-struct B1particle
+struct MIparticle
 {
 	// Momentum of a particle
 	Acts::Vector3D momentum;
@@ -32,16 +32,16 @@ struct B1particle
 };
 
 /// @brief Event action class. Stores the final state particles.
-class B1EventAction : public G4UserEventAction
+class MIEventAction : public G4UserEventAction
 {
   public:
 	/// @brief Constructor
 	///
 	/// @param [in, out] runAction Run that corresponds to the event
-    B1EventAction(B1RunAction* runAction);
+    MIEventAction(MIRunAction* runAction);
     
     /// @brief Destructor
-    virtual ~B1EventAction() = default;
+    virtual ~MIEventAction() = default;
 
 	/// @brief Initializer of an event. Resets the final state store.
     virtual void 
@@ -51,19 +51,19 @@ class B1EventAction : public G4UserEventAction
     ///
     /// @param [in] p Particle that is added to the store
     void 
-    AddParticle(B1particle& p);
+    AddParticle(MIparticle& p);
 	
 	/// @brief Getter of the final state particles
 	///
 	/// @return Vector containing the final state particles
-	std::vector<B1particle> 
+	std::vector<MIparticle> 
 	particles();
 	
   private:
 	// Vector of final state particles
-	std::vector<B1particle> m_particles;
+	std::vector<MIparticle> m_particles;
 	// Pointer to the run
-    B1RunAction* fRunAction;
+    MIRunAction* fRunAction;
 };
 
     
