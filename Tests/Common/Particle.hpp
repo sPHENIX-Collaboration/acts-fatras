@@ -176,6 +176,9 @@ public:
   /// @brief Access methods: barcode
   const double limitInL0() const { return m_limitInL0; }
 
+  /// @brief Access methods: life time
+  const double t() const { return m_timeStamp; }
+
   /// @brief boolean operator indicating the particle to be alive
   operator bool() { return m_alive; }
 

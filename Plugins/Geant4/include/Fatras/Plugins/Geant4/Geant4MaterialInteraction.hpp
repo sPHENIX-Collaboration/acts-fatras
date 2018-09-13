@@ -117,7 +117,11 @@ Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
 	// Check if pdg code is provided, return related particle or nothing
 	if(particle.pdg() != 0 && std::isfinite(particle.pdg()))
-		return m_particleTable->FindParticle(particle.pdg());
+	{
+		G4ParticleDefinition* parDef = m_particleTable->FindParticle(particle.pdg());
+		parDef->SetPDGLifeTime(parDef->GetPDGLifeTime() - particle.t());
+		return parDef;
+	}
 	return nullptr;
 }
 
@@ -153,7 +157,7 @@ Geant4MaterialInteraction::createParticleGun(const particle_t& particle, const s
 								   particle.p() * std::cos(theta) * scaleActsToG4});
 								   
 		pGun->SetParticlePosition({0., 0., 0.,});
-		pGun->SetParticleTime(0.); // TODO: passed path in L0,X0 and time missing
+		pGun->SetParticleTime(0.);
 		return pGun;
 	}
 	return nullptr;
