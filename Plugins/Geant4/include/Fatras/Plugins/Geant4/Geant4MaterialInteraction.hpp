@@ -178,6 +178,7 @@ template<typename particle_t>
 void
 Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<MIparticle>& particlesG4, const particle_t& particleIn, const std::pair<double, double>& angles, std::vector<particle_t>& particles) const
 {
+	// TODO: back conversion including time and paths
 	Acts::Vector3D momentum;
 	const double scaleG4ToActs = Acts::units::_GeV / GeV;
 	double p, theta, phi;
@@ -233,6 +234,12 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 		// Collect the result
 		std::vector<particle_t> particles;
 		convertParticlesFromG4(actionInit->particles(), particle, angles, particles);
+		for(auto& p : particles)
+			if(p.pdg() == particle.pdg())
+			{
+				p.update(p.position(), p.momentum(), particle.pathInX0() + thickness / material.X0(), particle.pathInL0() + thickness / material.L0(), particle.t());
+				break;
+			}
 
 		// Free memory
 		delete(detConstr);
