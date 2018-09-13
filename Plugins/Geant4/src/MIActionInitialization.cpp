@@ -35,4 +35,9 @@ MIActionInitialization::particles()
 {
 	return m_eventAction->particles();
 }
+
+MIActionInitialization::~MIActionInitialization()
+{
+	delete(m_pGun);
+}
 	

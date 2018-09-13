@@ -26,7 +26,7 @@ class MIActionInitialization : public G4VUserActionInitialization
     MIActionInitialization(double thickness, G4ParticleGun* pGun);
     
     /// @brief Destructor
-    virtual ~MIActionInitialization() = default;
+    virtual ~MIActionInitialization();
     
     /// @brief Sets up all necessacry components
     virtual void 

@@ -104,11 +104,11 @@ protected:
 private:
 
 	// Geant4 run manager
-	G4RunManager* runManager;
+	G4RunManager* m_runManager;
 	// List of physics processes in Geant4
-	G4VModularPhysicsList* physicsList;
+	G4VModularPhysicsList* m_physicsList;
 	// Table of particles in Geant4
-	G4ParticleTable* particleTable;
+	G4ParticleTable* m_particleTable;
 };
 
 template<typename particle_t>
@@ -117,7 +117,7 @@ Geant4MaterialInteraction::convertParticleToG4(const particle_t& particle) const
 {
 	// Check if pdg code is provided, return related particle or nothing
 	if(particle.pdg() != 0 && std::isfinite(particle.pdg()))
-		return particleTable->FindParticle(particle.pdg());
+		return m_particleTable->FindParticle(particle.pdg());
 	return nullptr;
 }
 
@@ -167,7 +167,7 @@ Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 	if(material.Z() < 0. || material.A() < 0. || material.rho() < 0.
 		|| !std::isfinite(material.Z()) || !std::isfinite(material.A()) || !std::isfinite(material.rho()))
 		return nullptr;
-	return new G4Material("Material", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_cm * Acts::units::_cm * Acts::units::_cm / Acts::units::_g * g / cm3);
+	return new G4Material("", material.Z(), material.A() * g / mole, material.rho() * Acts::units::_cm * Acts::units::_cm * Acts::units::_cm / Acts::units::_g * g / cm3);
 }
 
 template<typename particle_t>
@@ -183,7 +183,7 @@ Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<MIparticle>&
 	{
 		// Correct angles
 		p = bp.momentum.norm();
-		theta = std::acos(bp.momentum.z() / p) - angles.first; // TODO: modified due to symmetry of cos
+		theta = std::acos(bp.momentum.z() / p) - angles.first; // Modified due to symmetry of cos
 		if(bp.momentum.x() == 0. && bp.momentum.y() == 0.)
 			phi = angles.second;
 		else
@@ -216,26 +216,24 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 	if(pGun && materialG4 && materialThickness > 0.)
 	{
 		// Configure the Process
-		MIActionInitialization* actionInit = new MIActionInitialization(materialThickness, pGun);	
-		
+		MIActionInitialization* actionInit = new MIActionInitialization(materialThickness, pGun);			
 		MIDetectorConstruction* detConstr = new MIDetectorConstruction(materialG4, materialThickness);
-		
-		runManager->SetUserInitialization(detConstr);
-		//~ runManager->DefineWorldVolume(detConstr->Construct());
-		runManager->SetUserInitialization(actionInit);
-		runManager->Initialize();
-		runManager->BeamOn(1);
-		
+
+		m_runManager->SetUserInitialization(detConstr);
+		m_runManager->DefineWorldVolume(detConstr->Construct());
+
+		m_runManager->SetUserInitialization(actionInit);
+		m_runManager->Initialize();
+		m_runManager->BeamOn(1);
+	
 		// Collect the result
 		std::vector<particle_t> particles;
 		convertParticlesFromG4(actionInit->particles(), particle, angles, particles);
-		
+
 		// Free memory
+		delete(detConstr);
 		delete(actionInit);
-		delete(pGun);
-		delete(materialG4);
-		delete(detConstr);	
-	
+		
 		return particles;
 	}
 	return {};

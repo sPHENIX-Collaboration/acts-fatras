@@ -13,16 +13,16 @@ namespace Fatras {
 Geant4MaterialInteraction::Geant4MaterialInteraction()
 {
 	// Initialize Geant4 managers
-	runManager = new G4RunManager;
-	physicsList = new QBBC;
-	runManager->SetUserInitialization(physicsList);
-	particleTable = G4ParticleTable::GetParticleTable();
+	m_runManager = new G4RunManager;
+	m_physicsList = new QBBC;
+	m_runManager->SetUserInitialization(m_physicsList);
+	m_particleTable = G4ParticleTable::GetParticleTable();
 }
 
 Geant4MaterialInteraction::~Geant4MaterialInteraction()
 {
 	// Free heap memory
-	delete(physicsList);
+	delete(m_physicsList);
 }
 
 std::pair<double, double>

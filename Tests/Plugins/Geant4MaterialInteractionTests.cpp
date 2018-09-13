@@ -28,13 +28,15 @@
 #include "G4ParticleGun.hh"
 #include "G4Material.hh"
 
+namespace utf = boost::unit_test;
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
 
 namespace Fatras {
 namespace Test {
 
-BOOST_DATA_TEST_CASE(Geant4MaterialInteraction_test_, bdata::xrange(1), index) {
+BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, * utf::tolerance(1e-10))
+{
 
 // Create particle
 Acts::Vector3D position(0., 0., 0.);
@@ -142,6 +144,13 @@ particles.clear();
 particles = g4mis(particle, mat, 1. * Acts::units::_m, normalZero);
 BOOST_TEST(particles.size() == 0);
 
+particles.clear();
+particles = g4mis(particle, mat, 0.001 * Acts::units::_nm, normal);
+BOOST_TEST(particles.size() == 1);
+BOOST_TEST(particles[0].momentum().x() == particle.momentum().x(), tt::tolerance(1e-8));
+BOOST_TEST(particles[0].momentum().y() == particle.momentum().y(), tt::tolerance(1e-8));
+BOOST_TEST(particles[0].momentum().z() == particle.momentum().z(), tt::tolerance(1e-8));
+
 // Stability test for wrong particle data
 Particle wrongParticle(position, momentum, mass, charge, 0);
 BOOST_TEST(!g4mis.convertParticleToG4Stub(wrongParticle));
@@ -173,6 +182,7 @@ BOOST_TEST(particles.size() == 0);
 particles.clear();
 particles = g4mis(particle, mat, -1. * Acts::units::_m, normal);
 BOOST_TEST(particles.size() == 0);
+
 }
 } // namespace Test
 } // namespace Fatras
