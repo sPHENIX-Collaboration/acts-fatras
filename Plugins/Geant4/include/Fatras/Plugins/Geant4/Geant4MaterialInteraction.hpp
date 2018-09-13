@@ -183,7 +183,7 @@ Geant4MaterialInteraction::convertParticlesFromG4(const std::vector<MIparticle>&
 	{
 		// Correct angles
 		p = bp.momentum.norm();
-		theta = std::acos(bp.momentum.z() / p) + angles.first;
+		theta = std::acos(bp.momentum.z() / p) - angles.first; // TODO: modified due to symmetry of cos
 		if(bp.momentum.x() == 0. && bp.momentum.y() == 0.)
 			phi = angles.second;
 		else
@@ -213,7 +213,7 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 	G4ParticleGun* pGun = createParticleGun(particle, angles);
 	G4Material* materialG4 = convertMaterialToG4(material);
 	
-	if(pGun && materialG4 && materialThickness >= 0.)
+	if(pGun && materialG4 && materialThickness > 0.)
 	{
 		// Configure the Process
 		MIActionInitialization* actionInit = new MIActionInitialization(materialThickness, pGun);	
@@ -221,6 +221,7 @@ Geant4MaterialInteraction::operator()(particle_t& particle, const material_t& ma
 		MIDetectorConstruction* detConstr = new MIDetectorConstruction(materialG4, materialThickness);
 		
 		runManager->SetUserInitialization(detConstr);
+		//~ runManager->DefineWorldVolume(detConstr->Construct());
 		runManager->SetUserInitialization(actionInit);
 		runManager->Initialize();
 		runManager->BeamOn(1);
