@@ -1,61 +1,38 @@
+// This file is part of the Acts project.
 //
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// Copyright (C) 2018 Acts project team
 //
-// $Id: B1EventAction.cc 93886 2015-11-03 08:28:26Z gcosmo $
-//
-/// \file B1EventAction.cc
-/// \brief Implementation of the B1EventAction class
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+/// This code is based on the B1 example of Geant4
 
 #include "Fatras/Plugins/Geant4/B1EventAction.hpp"
 #include "Fatras/Plugins/Geant4/B1RunAction.hpp"
 
 #include <fstream>
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 B1EventAction::B1EventAction(B1RunAction* runAction)
 : G4UserEventAction(),
   fRunAction(runAction)
-{} 
+{
+} 
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-B1EventAction::~B1EventAction()
-{}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void B1EventAction::BeginOfEventAction(const G4Event*)
+void 
+B1EventAction::BeginOfEventAction(const G4Event*)
 {
   m_particles.clear();
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void B1EventAction::EndOfEventAction(const G4Event*)
+void 
+B1EventAction::AddParticle(B1particle& p)
 {
+	m_particles.push_back(p);
 }
-	
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+std::vector<B1particle> 
+B1EventAction::particles()
+{
+	return m_particles;
+}

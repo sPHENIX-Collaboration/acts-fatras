@@ -1,35 +1,14 @@
+// This file is part of the Acts project.
 //
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// Copyright (C) 2018 Acts project team
 //
-// $Id: B1SteppingAction.hh 74483 2013-10-09 13:37:06Z gcosmo $
-//
-/// \file B1SteppingAction.hh
-/// \brief Definition of the B1SteppingAction class
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef B1SteppingAction_h
-#define B1SteppingAction_h 1
+/// This code is based on the B1 example of Geant4
+
+#pragma once
 
 #include "G4UserSteppingAction.hh"
 
@@ -37,24 +16,30 @@ class B1EventAction;
 struct B1particle;
 class G4LogicalVolume;
 
-/// Stepping action class
-/// 
-
+/// @brief Stepping action class. This class serves as collector of the final state.
 class B1SteppingAction : public G4UserSteppingAction
 {
   public:
+	/// @brief Constructor
+	///
+	/// @param [in, out] eventAction EventAction handler that stores the final state
+	/// @param [in] thickness Thickness of the material
     B1SteppingAction(B1EventAction* eventAction, double thickness);
-    virtual ~B1SteppingAction();
+    
+    /// @brief Destructor
+    virtual ~B1SteppingAction() = default;
 
-    // method from the base class
-    virtual void UserSteppingAction(const G4Step*);
+    /// @brief Method from the base class for boundary checks of particles
+    /// 
+    /// @param [in] step Step calculated in Geant4
+    virtual void 
+    UserSteppingAction(const G4Step* step);
 
   private:
+	// Event handler
     B1EventAction*  fEventAction;
+    // Checker if collection should be performed in the volume
     G4LogicalVolume* fScoringVolume;
+    // Thickness of the material
     double m_thickness;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-#endif

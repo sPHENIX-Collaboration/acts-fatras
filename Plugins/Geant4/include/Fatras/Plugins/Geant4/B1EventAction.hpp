@@ -1,35 +1,14 @@
+// This file is part of the Acts project.
 //
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// Copyright (C) 2018 Acts project team
 //
-// $Id: B1EventAction.hh 93886 2015-11-03 08:28:26Z gcosmo $
-//
-/// \file B1EventAction.hh
-/// \brief Definition of the B1EventAction class
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef B1EventAction_h
-#define B1EventAction_h 1
+/// This code is based on the B1 example of Geant4
+
+#pragma once
 
 #include "Acts/Utilities/Definitions.hpp"
 #include "G4UserEventAction.hh"
@@ -39,43 +18,52 @@
 
 class B1RunAction;
 
+/// @brief Storage of the final state of a particle
 struct B1particle
 {
+	// Momentum of a particle
 	Acts::Vector3D momentum;
-	int pdg, charge;
+	// PDG code of a particle
+	int pdg;
+	// Charge of a particle
+	int charge;
+	// Mass of a particle
 	double mass;
 };
 
-/// Event action class
-///
-
+/// @brief Event action class. Stores the final state particles.
 class B1EventAction : public G4UserEventAction
 {
   public:
+	/// @brief Constructor
+	///
+	/// @param [in, out] runAction Run that corresponds to the event
     B1EventAction(B1RunAction* runAction);
-    virtual ~B1EventAction();
-
-    virtual void BeginOfEventAction(const G4Event*);
-    virtual void EndOfEventAction(const G4Event*);
     
-    void AddParticle(B1particle& p)
-    {
-		m_particles.push_back(p);
-	}
-	
-	std::vector<B1particle> particles()
-	{
-		return m_particles;
-	}
+    /// @brief Destructor
+    virtual ~B1EventAction() = default;
 
-  private:
-	std::vector<B1particle> m_particles;
+	/// @brief Initializer of an event. Resets the final state store.
+    virtual void 
+    BeginOfEventAction(const G4Event*);
+    
+    /// @brief Adds a final state particle to the store
+    ///
+    /// @param [in] p Particle that is added to the store
+    void 
+    AddParticle(B1particle& p);
 	
+	/// @brief Getter of the final state particles
+	///
+	/// @return Vector containing the final state particles
+	std::vector<B1particle> 
+	particles();
+	
+  private:
+	// Vector of final state particles
+	std::vector<B1particle> m_particles;
+	// Pointer to the run
     B1RunAction* fRunAction;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-#endif
 
     

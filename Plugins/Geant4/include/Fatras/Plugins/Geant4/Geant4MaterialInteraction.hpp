@@ -163,7 +163,7 @@ template<typename material_t>
 G4Material*
 Geant4MaterialInteraction::convertMaterialToG4(const material_t& material) const
 {
-	//Translate material if valid
+	// Translate material if valid
 	if(material.Z() < 0. || material.A() < 0. || material.rho() < 0.
 		|| !std::isfinite(material.Z()) || !std::isfinite(material.A()) || !std::isfinite(material.rho()))
 		return nullptr;

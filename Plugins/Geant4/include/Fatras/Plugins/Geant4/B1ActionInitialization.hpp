@@ -1,66 +1,52 @@
+// This file is part of the Acts project.
 //
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// Copyright (C) 2018 Acts project team
 //
-// $Id: B1ActionInitialization.hh 68058 2013-03-13 14:47:43Z gcosmo $
-//
-/// \file B1ActionInitialization.hh
-/// \brief Definition of the B1ActionInitialization class
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifndef B1ActionInitialization_h
-#define B1ActionInitialization_h 1
+/// This code is based on the B1 example of Geant4
+
+#pragma once
 
 #include "G4VUserActionInitialization.hh"
 #include "G4ParticleGun.hh"
 #include "B1EventAction.hpp"
 #include "B1RunAction.hpp"
 
-/// Action initialization class.
-
+/// @brief Action initialization class.
 class B1ActionInitialization : public G4VUserActionInitialization
 {
   public:
+	/// @brief Constructor
+	///
+	/// @param [in] thickness Thickness of the material
+	/// @param [in] pGun Particle Gun
     B1ActionInitialization(double thickness, G4ParticleGun* pGun);
-    virtual ~B1ActionInitialization();
-
-    virtual void BuildForMaster() const;
-    virtual void Build() const;
     
-    std::vector<B1particle> particles()
-    {
-		return m_eventAction->particles();
-	}
+    /// @brief Destructor
+    virtual ~B1ActionInitialization() = default;
+    
+    /// @brief Sets up all necessacry components
+    virtual void 
+    Build() const;
+    
+    /// @brief Getter of the final state particles
+    ///
+    /// @return Vector containing the final state particles
+    std::vector<B1particle> 
+    particles();
    
   protected:
+	// Thickness of the material
 	double m_thickness;
+	// Pointer to the Particle gun
 	G4ParticleGun* m_pGun;
+	// Pointer to the Run
 	B1RunAction* m_runAction;
+	// Pointer to the Event
 	B1EventAction* m_eventAction;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-#endif
 
     
