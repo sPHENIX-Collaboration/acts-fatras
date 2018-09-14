@@ -34,7 +34,7 @@ public:
   /// @brief Constructor
   ///
   /// @param [in] physicsList List of physics processes
-  Geant4MaterialInteraction(G4VModularPhysicsList *physicsList = nullptr);
+  Geant4MaterialInteraction(G4VUserPhysicsList *physicsList = nullptr);
 
   /// @brief Destructor
   ~Geant4MaterialInteraction();
@@ -109,7 +109,7 @@ private:
   // Geant4 run manager
   G4RunManager *m_runManager;
   // List of physics processes in Geant4
-  G4VModularPhysicsList *m_physicsList;
+  G4VUserPhysicsList *m_physicsList;
   // Table of particles in Geant4
   G4ParticleTable *m_particleTable;
 };

@@ -11,7 +11,7 @@
 namespace Fatras {
 
 Geant4MaterialInteraction::Geant4MaterialInteraction(
-    G4VModularPhysicsList *physicsList) {
+    G4VUserPhysicsList *physicsList) {
   // Initialize Geant4 managers
   m_runManager = new G4RunManager;
   if (physicsList)
