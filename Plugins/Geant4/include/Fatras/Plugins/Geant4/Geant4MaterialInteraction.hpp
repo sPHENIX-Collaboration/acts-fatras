@@ -32,7 +32,9 @@ namespace Fatras {
 class Geant4MaterialInteraction {
 public:
   /// @brief Constructor
-  Geant4MaterialInteraction();
+  ///
+  /// @param [in] physicsList List of physics processes
+  Geant4MaterialInteraction(G4VModularPhysicsList *physicsList = nullptr);
 
   /// @brief Destructor
   ~Geant4MaterialInteraction();

@@ -28,6 +28,9 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleGun.hh"
 
+#include "G4HadronElasticPhysics.hh"
+#include "G4VPhysicsConstructor.hh"
+
 namespace utf = boost::unit_test;
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;

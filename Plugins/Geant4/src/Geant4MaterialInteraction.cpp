@@ -10,10 +10,14 @@
 
 namespace Fatras {
 
-Geant4MaterialInteraction::Geant4MaterialInteraction() {
+Geant4MaterialInteraction::Geant4MaterialInteraction(
+    G4VModularPhysicsList *physicsList) {
   // Initialize Geant4 managers
   m_runManager = new G4RunManager;
-  m_physicsList = new QBBC;
+  if (physicsList)
+    m_physicsList = physicsList;
+  else
+    m_physicsList = new QBBC;
   m_runManager->SetUserInitialization(m_physicsList);
   m_particleTable = G4ParticleTable::GetParticleTable();
 }
