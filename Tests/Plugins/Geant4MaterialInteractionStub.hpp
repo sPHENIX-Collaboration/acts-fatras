@@ -39,10 +39,9 @@ public:
                         const std::pair<double, double> &angles) const {
     return createParticleGun(particle, angles);
   }
-  
+
   template <typename particle_t>
-  G4ParticleGun *
-  createParticleGunStub(const particle_t &particle) const {
+  G4ParticleGun *createParticleGunStub(const particle_t &particle) const {
     return createParticleGun(particle);
   }
 
@@ -58,7 +57,7 @@ public:
                                   std::vector<particle_t> &particles) const {
     convertParticlesFromG4(particlesG4, particleIn, angles, particles);
   }
-  
+
   template <typename particle_t>
   void convertParticlesFromG4Stub(const std::vector<MIparticle> &particlesG4,
                                   particle_t &particleIn,

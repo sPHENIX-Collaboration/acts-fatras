@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   BOOST_TEST(tmpD == bp.charge);
   int tmpI = particles[0].pdg();
   BOOST_TEST(tmpI == bp.pdg);
-  
+
   particles.clear();
   g4mis.convertParticlesFromG4Stub(bps, particle, angleStub, particles);
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
              tt::tolerance(1e-8));
   BOOST_TEST(particles[0].momentum().z() == particle.momentum().z(),
              tt::tolerance(1e-8));
-             
+
   particles.clear();
   particles = g4mis(particle, mat, 0.001 * Acts::units::_nm);
   BOOST_TEST(particles.size() == 1);

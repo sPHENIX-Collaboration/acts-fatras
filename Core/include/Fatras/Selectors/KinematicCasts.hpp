@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <cmath>
 #include "Acts/Utilities/Helpers.hpp"
+#include <cmath>
 
 namespace Fatras {
 

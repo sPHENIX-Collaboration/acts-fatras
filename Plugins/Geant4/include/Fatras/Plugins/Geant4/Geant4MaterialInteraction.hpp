@@ -49,10 +49,10 @@ public:
   /// @param [in] normalVector Normal vector of the penetrated material
   /// @return Vector containing all outgoing particles
   template <typename particle_t, typename material_t>
-  std::vector<particle_t>
-  operator()(particle_t &particle, const material_t &material,
-             const double thickness) const;
-             
+  std::vector<particle_t> operator()(particle_t &particle,
+                                     const material_t &material,
+                                     const double thickness) const;
+
   /// @brief Call parameter for the material interaction
   ///
   /// @tparam particle_t Type of the particle
@@ -96,15 +96,14 @@ protected:
   G4ParticleGun *
   createParticleGun(const particle_t &particle,
                     const std::pair<double, double> &angles) const;
-                    
+
   /// @brief Constructs a Geant4 particle gun
   ///
   /// @tparam particle_t Type of the particle
   /// @param [in] particle Ammo of the gun
   /// @return Pointer to the particle gun
   template <typename particle_t>
-  G4ParticleGun *
-  createParticleGun(const particle_t &particle) const;
+  G4ParticleGun *createParticleGun(const particle_t &particle) const;
 
   /// @brief Converts material into Geant4 material
   ///
@@ -126,7 +125,7 @@ protected:
                               const particle_t &particleIn,
                               const std::pair<double, double> &angles,
                               std::vector<particle_t> &particles) const;
-                              
+
   /// @brief Converts Geant4 particles back
   ///
   /// @tparam particle_t Type of the particle
@@ -200,8 +199,8 @@ G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
 }
 
 template <typename particle_t>
-G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
-    const particle_t &particle) const {
+G4ParticleGun *
+Geant4MaterialInteraction::createParticleGun(const particle_t &particle) const {
   // Create particle
   G4ParticleDefinition *parDef = convertParticleToG4(particle);
 
@@ -212,7 +211,7 @@ G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
 
     // Set initial kinematics
     double scaleActsToG4 = MeV / Acts::units::_MeV;
-	Acts::Vector3D momentum = particle.momentum() * scaleActsToG4;
+    Acts::Vector3D momentum = particle.momentum() * scaleActsToG4;
     pGun->SetParticleMomentum({momentum.x(), momentum.y(), momentum.z()});
     pGun->SetParticlePosition({
         0., 0., 0.,
