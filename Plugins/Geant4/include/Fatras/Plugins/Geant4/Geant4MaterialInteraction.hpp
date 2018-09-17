@@ -51,6 +51,19 @@ public:
   template <typename particle_t, typename material_t>
   std::vector<particle_t>
   operator()(particle_t &particle, const material_t &material,
+             const double thickness) const;
+             
+  /// @brief Call parameter for the material interaction
+  ///
+  /// @tparam particle_t Type of the particle
+  /// @tparam material_t Type of the material
+  /// @param [in] particle Ingoing particle
+  /// @param [in] material Penentrated material
+  /// @param [in] thickness Thickness of the material
+  /// @return Vector containing all outgoing particles
+  template <typename particle_t, typename material_t>
+  std::vector<particle_t>
+  operator()(particle_t &particle, const material_t &material,
              const double thickness, const Acts::Vector3D normalVector) const;
 
 protected:
@@ -83,6 +96,15 @@ protected:
   G4ParticleGun *
   createParticleGun(const particle_t &particle,
                     const std::pair<double, double> &angles) const;
+                    
+  /// @brief Constructs a Geant4 particle gun
+  ///
+  /// @tparam particle_t Type of the particle
+  /// @param [in] particle Ammo of the gun
+  /// @return Pointer to the particle gun
+  template <typename particle_t>
+  G4ParticleGun *
+  createParticleGun(const particle_t &particle) const;
 
   /// @brief Converts material into Geant4 material
   ///
@@ -103,6 +125,17 @@ protected:
   void convertParticlesFromG4(const std::vector<MIparticle> &particlesG4,
                               const particle_t &particleIn,
                               const std::pair<double, double> &angles,
+                              std::vector<particle_t> &particles) const;
+                              
+  /// @brief Converts Geant4 particles back
+  ///
+  /// @tparam particle_t Type of the particle
+  /// @param [in] particlesG4 Vector of recorded outgoing particles
+  /// @param [in] particleIn Ingoing particle
+  /// @param [out] particles Vector of outgoing particles
+  template <typename particle_t>
+  void convertParticlesFromG4(const std::vector<MIparticle> &particlesG4,
+                              const particle_t &particleIn,
                               std::vector<particle_t> &particles) const;
 
 private:
@@ -143,7 +176,6 @@ G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
 
     // Correct angles
     double theta = std::acos(momentum.z() / momentum.norm()) - angles.first;
-    ;
 
     double phi;
     if (momentum.x() == 0. && momentum.y() == 0.)
@@ -158,6 +190,30 @@ G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
          particle.p() * std::sin(theta) * std::sin(phi) * scaleActsToG4,
          particle.p() * std::cos(theta) * scaleActsToG4});
 
+    pGun->SetParticlePosition({
+        0., 0., 0.,
+    });
+    pGun->SetParticleTime(0.);
+    return pGun;
+  }
+  return nullptr;
+}
+
+template <typename particle_t>
+G4ParticleGun *Geant4MaterialInteraction::createParticleGun(
+    const particle_t &particle) const {
+  // Create particle
+  G4ParticleDefinition *parDef = convertParticleToG4(particle);
+
+  if (parDef) {
+    // Build gun
+    G4ParticleGun *pGun = new G4ParticleGun(1);
+    pGun->SetParticleDefinition(parDef);
+
+    // Set initial kinematics
+    double scaleActsToG4 = MeV / Acts::units::_MeV;
+	Acts::Vector3D momentum = particle.momentum() * scaleActsToG4;
+    pGun->SetParticleMomentum({momentum.x(), momentum.y(), momentum.z()});
     pGun->SetParticlePosition({
         0., 0., 0.,
     });
@@ -211,6 +267,23 @@ void Geant4MaterialInteraction::convertParticlesFromG4(
   }
 }
 
+template <typename particle_t>
+void Geant4MaterialInteraction::convertParticlesFromG4(
+    const std::vector<MIparticle> &particlesG4, const particle_t &particleIn,
+    std::vector<particle_t> &particles) const {
+  // TODO: back conversion including time and paths
+  Acts::Vector3D momentum;
+  const double scaleG4ToActs = Acts::units::_GeV / GeV;
+  double p, theta, phi;
+
+  // Translate every particle from Geant4
+  for (const MIparticle &bp : particlesG4) {
+    particle_t part(particleIn.position(), bp.momentum * scaleG4ToActs,
+                    bp.mass * Acts::units::_GeV / GeV, bp.charge, bp.pdg);
+    particles.push_back(std::move(part));
+  }
+}
+
 template <typename particle_t, typename material_t>
 std::vector<particle_t> Geant4MaterialInteraction::
 operator()(particle_t &particle, const material_t &material,
@@ -245,6 +318,53 @@ operator()(particle_t &particle, const material_t &material,
     std::vector<particle_t> particles;
     convertParticlesFromG4(actionInit->particles(), particle, angles,
                            particles);
+
+    // Update type of particle that is identical to the original one
+    for (auto &p : particles)
+      if (p.pdg() == particle.pdg()) {
+        p.update(p.position(), p.momentum(),
+                 particle.pathInX0() + thickness / material.X0(),
+                 particle.pathInL0() + thickness / material.L0(), particle.t());
+        break;
+      }
+
+    // Free memory
+    delete (detConstr);
+    delete (actionInit);
+
+    return particles;
+  }
+  return {};
+}
+
+template <typename particle_t, typename material_t>
+std::vector<particle_t> Geant4MaterialInteraction::
+operator()(particle_t &particle, const material_t &material,
+           const double thickness) const {
+
+  double materialThickness = thickness * mm / Acts::units::_mm;
+
+  // Load the gun and build material
+  G4ParticleGun *pGun = createParticleGun(particle);
+  G4Material *materialG4 = convertMaterialToG4(material);
+
+  if (pGun && materialG4 && materialThickness > 0.) {
+    // Configure the Process
+    MIActionInitialization *actionInit =
+        new MIActionInitialization(materialThickness, pGun);
+    MIDetectorConstruction *detConstr =
+        new MIDetectorConstruction(materialG4, materialThickness);
+
+    m_runManager->SetUserInitialization(detConstr);
+    m_runManager->DefineWorldVolume(detConstr->Construct());
+
+    m_runManager->SetUserInitialization(actionInit);
+    m_runManager->Initialize();
+    m_runManager->BeamOn(1);
+
+    // Collect the result
+    std::vector<particle_t> particles;
+    convertParticlesFromG4(actionInit->particles(), particle, particles);
 
     // Update type of particle that is identical to the original one
     for (auto &p : particles)

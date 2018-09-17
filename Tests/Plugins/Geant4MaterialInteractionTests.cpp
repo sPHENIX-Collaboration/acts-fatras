@@ -72,6 +72,19 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
                  Acts::units::_GeV ==
              1. * Acts::units::_GeV);
 
+  pGun = g4mis.createParticleGunStub(particle);
+
+  BOOST_TEST(pGun->GetParticleDefinition()->GetPDGEncoding() == pdg);
+  BOOST_TEST(pGun->GetParticleDefinition()->GetPDGMass() / GeV *
+                 Acts::units::_GeV ==
+             mass);
+  BOOST_TEST(pGun->GetParticleDefinition()->GetPDGCharge() == charge);
+  BOOST_TEST(pGun->GetParticleMomentumDirection().x() == 0.);
+  BOOST_TEST(pGun->GetParticleMomentumDirection().y() == 0.);
+  BOOST_TEST(pGun->GetParticleMomentumDirection().z() / MeV *
+                 Acts::units::_GeV ==
+             1. * Acts::units::_GeV);
+
   // Create material and test its conversion
   Acts::Material mat(
       352.8, 407., 9.012, 4.,
@@ -106,6 +119,19 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   tmpD = particles[0].q();
   BOOST_TEST(tmpD == bp.charge);
   int tmpI = particles[0].pdg();
+  BOOST_TEST(tmpI == bp.pdg);
+  
+  particles.clear();
+  g4mis.convertParticlesFromG4Stub(bps, particle, angleStub, particles);
+
+  BOOST_TEST(particles.size() == 1);
+  BOOST_TEST(particles[0].position() == Acts::Vector3D::Zero(3));
+  BOOST_TEST(particles[0].momentum() == bp.momentum * Acts::units::_GeV / GeV);
+  tmpD = particles[0].m();
+  BOOST_TEST(tmpD == bp.mass * Acts::units::_GeV / GeV);
+  tmpD = particles[0].q();
+  BOOST_TEST(tmpD == bp.charge);
+  tmpI = particles[0].pdg();
   BOOST_TEST(tmpI == bp.pdg);
 
   // Test angle transformation
@@ -151,6 +177,9 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   particles.clear();
   particles = g4mis(particle, mat, 1. * Acts::units::_m, normal);
   BOOST_TEST(particles.size() != 0);
+  particles.clear();
+  particles = g4mis(particle, mat, 1. * Acts::units::_m);
+  BOOST_TEST(particles.size() != 0);
 
   Acts::Vector3D normalZero(0., 0., 0.);
   particles.clear();
@@ -166,13 +195,27 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
              tt::tolerance(1e-8));
   BOOST_TEST(particles[0].momentum().z() == particle.momentum().z(),
              tt::tolerance(1e-8));
+             
+  particles.clear();
+  particles = g4mis(particle, mat, 0.001 * Acts::units::_nm);
+  BOOST_TEST(particles.size() == 1);
+  BOOST_TEST(particles[0].momentum().x() == particle.momentum().x(),
+             tt::tolerance(1e-8));
+  BOOST_TEST(particles[0].momentum().y() == particle.momentum().y(),
+             tt::tolerance(1e-8));
+  BOOST_TEST(particles[0].momentum().z() == particle.momentum().z(),
+             tt::tolerance(1e-8));
 
   // Stability test for wrong particle data
   Particle wrongParticle(position, momentum, mass, charge, 0);
   BOOST_TEST(!g4mis.convertParticleToG4Stub(wrongParticle));
   BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle, angleStub));
+  BOOST_TEST(!g4mis.createParticleGunStub(wrongParticle));
   particles.clear();
   particles = g4mis(wrongParticle, mat, 1. * Acts::units::_m, normal);
+  BOOST_TEST(particles.size() == 0);
+  particles.clear();
+  particles = g4mis(wrongParticle, mat, 1. * Acts::units::_m);
   BOOST_TEST(particles.size() == 0);
 
   // Stability test for wrong material data
@@ -184,6 +227,9 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   particles.clear();
   particles = g4mis(particle, wrongMat1, 1. * Acts::units::_m, normal);
   BOOST_TEST(particles.size() == 0);
+  particles.clear();
+  particles = g4mis(particle, wrongMat1, 1. * Acts::units::_m);
+  BOOST_TEST(particles.size() == 0);
 
   Acts::Material wrongMat2(
       352.8, 407., 9.012, -1.,
@@ -192,6 +238,9 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   BOOST_TEST(!g4mis.convertMaterialToG4Stub(wrongMat2));
   particles.clear();
   particles = g4mis(particle, wrongMat2, 1. * Acts::units::_m, normal);
+  BOOST_TEST(particles.size() == 0);
+  particles.clear();
+  particles = g4mis(particle, wrongMat2, 1. * Acts::units::_m);
   BOOST_TEST(particles.size() == 0);
 
   Acts::Material wrongMat3(
@@ -202,10 +251,16 @@ BOOST_AUTO_TEST_CASE(Geant4MaterialInteraction_test_, *utf::tolerance(1e-10)) {
   particles.clear();
   particles = g4mis(particle, wrongMat3, 1. * Acts::units::_m, normal);
   BOOST_TEST(particles.size() == 0);
+  particles.clear();
+  particles = g4mis(particle, wrongMat3, 1. * Acts::units::_m);
+  BOOST_TEST(particles.size() == 0);
 
   // Stability test for wrong thickness
   particles.clear();
   particles = g4mis(particle, mat, -1. * Acts::units::_m, normal);
+  BOOST_TEST(particles.size() == 0);
+  particles.clear();
+  particles = g4mis(particle, mat, -1. * Acts::units::_m);
   BOOST_TEST(particles.size() == 0);
 }
 } // namespace Test
