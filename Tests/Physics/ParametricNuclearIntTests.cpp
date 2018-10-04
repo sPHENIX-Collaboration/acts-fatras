@@ -42,19 +42,84 @@
 #include <random>
 #include <chrono>
 
+#include "globals.hh"
+#include "G4VModularPhysicsList.hh"
+
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
 
 namespace Fatras {
 namespace Test {
-	
+
+//~ class QBBC : public G4VModularPhysicsList
+//~ {
+//~ public:
+
+  //~ QBBC(G4int ver = 1, const G4String& type = "QBBC")
+  //~ {
+	  //~ G4cout << "<<< Reference Physics List QBBC " <<G4endl;	
+
+	  //~ defaultCutValue = 0.7*mm;  
+	  //~ SetVerboseLevel(ver);
+	  
+	  //~ RegisterPhysics(new G4BetheBlochModel(ver));
+  //~ }
+
+  //~ virtual ~QBBC(){}
+
+  //~ virtual void SetCuts();
+
+//~ private:
+
+  //~ // copy constructor and hide assignment operator
+  //~ QBBC(QBBC &);
+  //~ QBBC & operator=(const QBBC &right);
+
+//~ QBBC::QBBC( G4int ver, const G4String&)
+//~ {
+  //~ G4DataQuestionaire it(photon, neutronxs);
+  //~ G4cout << "<<< Reference Physics List QBBC "
+	 //~ <<G4endl;	
+
+  //~ defaultCutValue = 0.7*mm;  
+  //~ SetVerboseLevel(ver);
+
+  //~ // EM Physics
+  //~ RegisterPhysics( new G4EmStandardPhysics(ver) );
+
+  //~ // Synchroton Radiation & GN Physics
+  //~ RegisterPhysics( new G4EmExtraPhysics(ver) );
+
+  //~ // Decays
+  //~ RegisterPhysics( new G4DecayPhysics(ver) );
+
+   //~ // Hadron Physics
+  //~ RegisterPhysics( new G4HadronElasticPhysicsXS(ver) );
+
+  //~ RegisterPhysics( new G4StoppingPhysics(ver) );
+
+  //~ RegisterPhysics( new G4IonPhysics(ver) );
+
+  //~ RegisterPhysics( new G4HadronInelasticQBBC(ver));
+
+  //~ // Neutron tracking cut
+  //~ RegisterPhysics( new G4NeutronTrackingCut(ver) );
+//~ }
+
+//~ void QBBC::SetCuts()
+//~ {
+  //~ SetCutsWithDefault();   
+//~ }
+//~ };
+
 std::string material = "G4_Be";
-std::string gunAmmo = "kaon0";
+std::string gunAmmo = "pi+";
 
 G4VModularPhysicsList* physicsList = new QBBC;
 G4UImanager* UImanager = G4UImanager::GetUIpointer();
 G4RunManager* runManager = new G4RunManager;
-  
+
+/**
 std::ofstream ofsResetter;
 std::ofstream ofsRuntime("runtime.txt");
 
@@ -109,7 +174,33 @@ if(index == 0)
 	//~ runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV));
 	runManager->SetUserInitialization(actionInit);
 }
+elsedouble x = 0., y = 0., z = 1.;
+Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
+
+B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
+B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
+
+if(index == 0)
+{
+	G4Random::setTheEngine(new CLHEP::RanecuEngine);
+	physicsList->SetVerboseLevel(0);
+	runManager->SetVerboseLevel(0);
+	runManager->SetUserInitialization(physicsList);
+	//~ runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
+	runManager->SetUserInitialization(detConstr);
+	//~ runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV));
+	runManager->SetUserInitialization(actionInit);
+}
 else
+{
+	runManager->DefineWorldVolume(detConstr->Construct());
+	runManager->SetUserInitialization(actionInit);
+}
+
+	runManager->Initialize();
+	UImanager->ApplyCommand("/tracking/verbose 0");
+	runManager->BeamOn(10000);
+
 {
 	runManager->DefineWorldVolume(detConstr->Construct());
 	runManager->SetUserInitialization(actionInit);
@@ -131,6 +222,41 @@ ofsRuntime << index << "\t" << std::chrono::duration_cast<std::chrono::microseco
 // PDG code will be set for certain particles -> could be performed in a for-loop
 delete(detConstr);
 delete(actionInit);
+}
+**/
+
+BOOST_AUTO_TEST_CASE(step_actor_test)
+{
+// TODO: physicslist
+double detectorThickness = 1. * Acts::units::_m;
+double p = 1. * Acts::units::_GeV;
+	
+double x = 0., y = 0., z = 1.;
+Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
+
+B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
+B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
+
+//~ if(index == 0)
+//~ {
+	G4Random::setTheEngine(new CLHEP::RanecuEngine);
+	physicsList->SetVerboseLevel(0);
+	runManager->SetVerboseLevel(0);
+	runManager->SetUserInitialization(physicsList);
+	runManager->SetUserInitialization(detConstr);
+	runManager->SetUserInitialization(actionInit);
+//~ }
+//~ else
+//~ {
+	//~ runManager->DefineWorldVolume(detConstr->Construct());
+	//~ runManager->SetUserInitialization(actionInit);
+//~ }
+	runManager->Initialize();
+	UImanager->ApplyCommand("/tracking/verbose 0");
+	runManager->BeamOn(10000);
+
+
+
 }
 
 } // namespace Test
