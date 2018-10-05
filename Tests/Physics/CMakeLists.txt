@@ -18,4 +18,11 @@ target_link_libraries(FatrasParametricNuclearIntTests PRIVATE ActsCore ActsLegac
 target_link_libraries(FatrasParametricNuclearIntTests PUBLIC ${Geant4_LIBRARIES})
 add_test (NAME FatrasParametricNuclearIntUnitTest COMMAND FatrasParametricNuclearIntTests)
 
+add_executable (FatrasParametricNuclearIntTests2 ParametricNuclearIntTests2.cpp ${src_files})
+target_include_directories(FatrasParametricNuclearIntTests2 PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(FatrasParametricNuclearIntTests2 PUBLIC ${Geant4_INCLUDE_DIRS})
+target_link_libraries(FatrasParametricNuclearIntTests2 PRIVATE ActsCore ActsLegacy FatrasCore)
+target_link_libraries(FatrasParametricNuclearIntTests2 PUBLIC ${Geant4_LIBRARIES})
+add_test (NAME FatrasParametricNuclearIntUnitTest2 COMMAND FatrasParametricNuclearIntTests2)
+
 
