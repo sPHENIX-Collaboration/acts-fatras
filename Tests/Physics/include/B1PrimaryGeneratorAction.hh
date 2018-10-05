@@ -42,7 +42,7 @@ class G4Event;
 class B1PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    B1PrimaryGeneratorAction();    
+    B1PrimaryGeneratorAction(std::string particleName, double px, double py, double pz);   
     virtual ~B1PrimaryGeneratorAction();
 
     // method from the base class
