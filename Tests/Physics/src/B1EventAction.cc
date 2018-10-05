@@ -56,7 +56,7 @@ void B1EventAction::BeginOfEventAction(const G4Event*)
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {
-	std::ofstream ofs("geant4out.txt", std::ofstream::app);
+	std::ofstream ofs("geant4outNeu.txt", std::ofstream::app);
 	for(auto& p : particles)
 	{
 		ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t"
