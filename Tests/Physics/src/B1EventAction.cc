@@ -56,14 +56,16 @@ void B1EventAction::BeginOfEventAction(const G4Event*)
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {
-	std::ofstream ofs("geant4outNeu.txt", std::ofstream::app);
+	std::ofstream ofs("geant4energyloss.txt", std::ofstream::app);
 	for(auto& p : particles)
 	{
-		ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t"
-			<< p.position[0] << "\t" << p.position[1] << "\t" << p.position[2] << "\t"
-			<< p.momentum[0] << "\t" << p.momentum[1] << "\t" << p.momentum[2] << std::endl;
+		//~ ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t"
+			//~ << p.position[0] << "\t" << p.position[1] << "\t" << p.position[2] << "\t"
+			//~ << p.momentum[0] << "\t" << p.momentum[1] << "\t" << p.momentum[2] << std::endl;
+		if(p.pdg != 211) continue;
+		ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t" << p.position[0] << "\t" << p.position[1] << "\t" << p.position[2] << std::endl;
 	}
-	ofs << "*" << std::endl;
+	//~ ofs << "*" << std::endl;
 	ofs.close();
 }
 	

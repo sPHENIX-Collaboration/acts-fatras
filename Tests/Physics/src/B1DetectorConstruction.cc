@@ -110,7 +110,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
                     checkOverlaps);          //overlaps checking
               
 G4Material* matDetector = nist->FindOrBuildMaterial(material);
-
+std::cout << matDetector->GetRadlen() << " " << matDetector->GetNuclearInterLength() << " " << matDetector->GetA() * mole / g << " " << matDetector->GetZ() << " " << matDetector->GetDensity() * cm3 / kg << std::endl;
 G4ThreeVector posDetector = G4ThreeVector(0., 0., 0.25 * env_sizeZ);
 G4Box* solidDetector = new G4Box("Detector", 0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.25 * env_sizeZ);
 G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, matDetector, "Detector");
