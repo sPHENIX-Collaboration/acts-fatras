@@ -49,6 +49,7 @@
 #include "G4BetheBlochModel.hh"
 #include "G4EmParameters.hh"
 #include "G4MuIonisation.hh"
+#include "G4hIonisation.hh"
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -100,9 +101,11 @@ public:
 	virtual void ConstructParticle()
 	{
 		G4MuonPlus::MuonPlus();
-		  G4Gamma::Gamma();
-		  G4Electron::Electron();
-		  G4Positron::Positron();
+		G4Gamma::Gamma();
+		G4Electron::Electron();
+		G4Positron::Positron();
+		G4PionPlus::PionPlusDefinition();
+		G4PionMinus::PionMinusDefinition();
 	}
   virtual void ConstructProcess()
 {
@@ -120,6 +123,9 @@ public:
     if (particleName == "mu+" ||
                particleName == "mu-"    ) {
       ph->RegisterProcess(new G4MuIonisation(), particle);
+    } else if (particleName == "pi+" ||
+               particleName == "pi-" ) {
+      ph->RegisterProcess(new G4hIonisation(), particle);
     }
   }
 }
@@ -190,122 +196,18 @@ private:
 };
 
 std::string material = "G4_Be";
-std::string gunAmmo = "mu+";
+std::string gunAmmo = "pi+";
 
 G4VModularPhysicsList* physicsList = new MyPhysicsList;
 G4UImanager* UImanager = G4UImanager::GetUIpointer();
 G4RunManager* runManager = new G4RunManager;
 
-/**
-std::ofstream ofsResetter;
-std::ofstream ofsRuntime("runtime.txt");
-
-//~ double l0 = 394.133 / 10.; // Be
-//~ std::vector<double> mass = {0.1395701, 0.1349766, 0.1395701, 939.56563 * 1e-3, 938.27231 * 1e-3}; // pi-, pi0, pi+, n, p
-
-/// Test the scattering implementation
-//~ BOOST_DATA_TEST_CASE(
-    //~ ParamNucularInt_test_,
-        //~ bdata::random((bdata::seed = 21,
-                       //~ bdata::distribution =
-                           //~ std::uniform_real_distribution<>(0.01 * 394.133 / 10., 2. * 394.133 / 10.))) ^
-        //~ bdata::random((bdata::seed = 22,
-                       //~ bdata::distribution =
-                           //~ std::uniform_real_distribution<>(0.5 * 0.1349766, 20. * 0.1349766))) ^
-        //~ bdata::xrange(1000),
-    //~ detectorThickness, p, index) {
-BOOST_DATA_TEST_CASE(
-    ParamNucularInt_test_,
-        bdata::random((bdata::seed = 21,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.01 * 394.133 / 10., 0.5 * 394.133 / 10.))) ^ // 0.01 - 2.
-        bdata::random((bdata::seed = 22,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.5, 4.))) ^ // 0.5 - 20.
-        bdata::xrange(100),
-    detectorThickness, p, index) {
-
-std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-
-if(index == 0)
-	ofsResetter.open("geant4outNeu.txt");
-else
-	ofsResetter.open("geant4outNeu.txt", std::ofstream::app);
-ofsResetter << "run: " << index << "\t" << detectorThickness << "\t" << p << "\t" << material << "\t" << gunAmmo << std::endl;
-ofsResetter.close();
-
-double x = 0., y = 0., z = 1.;
-Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
-
-B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
-B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
-
-if(index == 0)
-{
-	G4Random::setTheEngine(new CLHEP::RanecuEngine);
-	physicsList->SetVerboseLevel(0);
-	runManager->SetVerboseLevel(0);
-	runManager->SetUserInitialization(physicsList);
-	//~ runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
-	runManager->SetUserInitialization(detConstr);
-	//~ runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV));
-	runManager->SetUserInitialization(actionInit);
-}
-elsedouble x = 0., y = 0., z = 1.;
-Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
-
-B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
-B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
-
-if(index == 0)
-{
-	G4Random::setTheEngine(new CLHEP::RanecuEngine);
-	physicsList->SetVerboseLevel(0);
-	runManager->SetVerboseLevel(0);
-	runManager->SetUserInitialization(physicsList);
-	//~ runManager->SetUserInitialization(new B1DetectorConstruction(material, detectorThickness));
-	runManager->SetUserInitialization(detConstr);
-	//~ runManager->SetUserInitialization(new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV));
-	runManager->SetUserInitialization(actionInit);
-}
-else
-{
-	runManager->DefineWorldVolume(detConstr->Construct());
-	runManager->SetUserInitialization(actionInit);
-}
-
-	runManager->Initialize();
-	UImanager->ApplyCommand("/tracking/verbose 0");
-	runManager->BeamOn(10000);
-
-{
-	runManager->DefineWorldVolume(detConstr->Construct());
-	runManager->SetUserInitialization(actionInit);
-}
-
-	runManager->Initialize();
-	UImanager->ApplyCommand("/tracking/verbose 0");
-	runManager->BeamOn(10000);
-
-	
-//~ std::cout << "munni: " << UImanager->GetCurrentValues("/gun/particle") << std::endl;
-
-std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-
-ofsRuntime << index << "\t" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << std::endl;
-//thickness, l0, pdg, p
-// Thicknes & p can be sampled
-// L0 will be used by selecting certain materials
-// PDG code will be set for certain particles -> could be performed in a for-loop
-delete(detConstr);
-delete(actionInit);
-}
-**/
-
 BOOST_AUTO_TEST_CASE(step_actor_test)
 {
-double detectorThickness = 1. * Acts::units::_m;
-double p = 1. * Acts::units::_GeV;
+std::ofstream ofs("geant4energyloss.txt");
+ofs.close();
+double detectorThickness = 100.;
+double p = 5. * Acts::units::_GeV;
 
 double x = 0., y = 0., z = 1.;
 Acts::Vector3D direction = Acts::Vector3D(x, y, z).normalized();
