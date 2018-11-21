@@ -333,7 +333,7 @@ operator()(particle_t &particle, const material_t &material,
 
     return particles;
   }
-  return {};
+  return {particle};
 }
 
 template <typename particle_t, typename material_t>
