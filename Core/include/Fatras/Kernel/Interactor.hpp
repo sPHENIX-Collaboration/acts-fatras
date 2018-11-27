@@ -34,7 +34,6 @@ struct VoidSelector {
 ///
 /// @tparam generator_t Type of the random generator
 /// @tparam particle_t is Type of the particle
-/// @tparam particle_modifier_t is the modifier of the particle
 /// @tparam hit_t Type of the simulated hit
 /// @tparam hit_creator_t Type of the hit creator (does thruth association)
 /// @tparam physics_list_t Type of Extendable physics list that is called
@@ -44,7 +43,7 @@ struct VoidSelector {
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
-template <typename generator_t, typename particle_t, typename particle_modifier_t, typename hit_t,
+template <typename generator_t, typename particle_t, typename hit_t,
           typename hit_creator_t, typename sensitive_selector_t = VoidSelector,
           typename physics_list_t = PhysicsList<>>
 struct Interactor {
@@ -60,9 +59,6 @@ struct Interactor {
 
   /// Simple result struct to be returned
   particle_t initialParticle;
-
-	/// Modifier of the particle
-	particle_modifier_t particleModifier;
 	
   /// The hit creator helper class
   hit_creator_t hitCreator;
@@ -115,7 +111,7 @@ struct Interactor {
       result.initialized = true;
     }
     // set the stepping position to the particle
-    particleModifier.update(result.particle, state.stepping.position(),
+    result.particle.update(state.stepping.position(),
                            state.stepping.momentum());
 
     // Check if the current surrface a senstive one

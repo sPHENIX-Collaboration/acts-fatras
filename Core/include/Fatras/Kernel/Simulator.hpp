@@ -98,16 +98,14 @@ struct Simulator
     typedef Acts::ActionList<charged_interactor_t, DebugOutput>
                                                              ChargedActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> ChargedAbortList;
-    typedef typename charged_propagator_t::
-        template PropagatorOptions<ChargedActionList, ChargedAbortList>
+    typedef Acts::PropagatorOptions<ChargedActionList, ChargedAbortList>
             ChargedOptions;
 
     // Action list, abort list and
     typedef Acts::ActionList<neutral_interactor_t, DebugOutput>
                                                              NeutralActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> NeutralAbortList;
-    typedef typename neutral_propagator_t::
-        template PropagatorOptions<NeutralActionList, NeutralAbortList>
+    typedef Acts::PropagatorOptions<NeutralActionList, NeutralAbortList>
             NeutralOptions;
 
     // loop over the input events
