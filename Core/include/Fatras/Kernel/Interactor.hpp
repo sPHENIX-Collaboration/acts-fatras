@@ -125,12 +125,13 @@ struct Interactor {
         state.navigation.currentSurface->associatedMaterial()) {
       // get the surface material and the corresponding material properties
       auto sMaterial = state.navigation.currentSurface->associatedMaterial();
-      auto mProperties = sMaterial->material(state.stepping.position());
+      const Acts::MaterialProperties& mProperties
+        = sMaterial->materialProperties(state.stepping.position());
 
       bool breakIndicator = false;
       if (mProperties) {
         // run the Fatras physics list - only when there's material
-        breakIndicator = physicsList(*generator, *mProperties, result.particle,
+        breakIndicator = physicsList(*generator, mProperties, result.particle,
                                      result.outgoing);
       }
     }
