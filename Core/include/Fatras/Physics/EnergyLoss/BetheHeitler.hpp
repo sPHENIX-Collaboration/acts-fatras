@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "Acts/Utilities/MaterialInteraction.hpp"
-
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
