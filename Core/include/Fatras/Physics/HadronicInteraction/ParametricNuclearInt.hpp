@@ -97,7 +97,7 @@ unsigned int
 multiplicity(generator_t& generator, const double thickness, particle_t& particle) const;
 
 /// @brief Creates the particle types that leave the detector
-///4
+///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
@@ -469,7 +469,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
-{  
+{
   // Roll if the final state has any hadrons
   if(generator() < hadronSurvives(particle.p(), thickness, particle.pdg()))
   {
