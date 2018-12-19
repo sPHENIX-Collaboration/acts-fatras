@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
-#include "Acts/Utilities/MaterialInteraction.hpp"
 
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
