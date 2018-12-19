@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Propagator/detail/InteractionFormulas.hpp"
+
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
