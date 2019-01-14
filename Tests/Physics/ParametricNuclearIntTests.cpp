@@ -21,7 +21,7 @@
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 
-#include "Fatras/Kernel/Particle.hpp"
+#include "Particle.hpp"
 #include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
 #include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
@@ -97,7 +97,7 @@ ofsResetter << "run: " << index << "\t" << detectorThickness << "\t" << p << "\t
 ofsResetter.close();
 
 double x = 0., y = 0., z = 1.;
-Acts::Vector3D direction = Acts::Vector3D(x, y, z).unit();
+Acts::Vector3D direction = Acts::Vector3D(x, y, z).normalized();
 
 B1DetectorConstruction* detConstr = new B1DetectorConstruction(material, detectorThickness);
 B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThickness, gunAmmo, p * direction.x() * GeV, p * direction.y() * GeV, p * direction.z() * GeV);
@@ -137,7 +137,7 @@ delete(detConstr);
 delete(actionInit);
 }
 
-
+/**
 BOOST_AUTO_TEST_CASE(step_actor_test)
 {
 // TODO: physicslist
@@ -167,11 +167,8 @@ B1ActionInitialization* actionInit = new B1ActionInitialization(detectorThicknes
 	runManager->Initialize();
 	UImanager->ApplyCommand("/tracking/verbose 0");
 	runManager->BeamOn(10000);
-
-
-
 }
-
+**/
 } // namespace Test
 
 } // namespace Fatras

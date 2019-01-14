@@ -138,43 +138,43 @@ public:
   const Acts::Vector3D &momentum() const { return m_momentum; }
 
   /// @brief Access methods: p
-  const double p() const { return m_p; }
+  double p() const { return m_p; }
 
   /// @brief Access methods: pT
-  const double pT() const { return m_pT; }
+  double pT() const { return m_pT; }
 
   /// @brief Access methods: E
-  const double E() const { return m_E; }
+  double E() const { return m_E; }
 
   /// @brief Access methods: m
-  const double m() const { return m_m; }
+  double m() const { return m_m; }
 
   /// @brief Access methods: beta
-  const double beta() const { return m_beta; }
+  double beta() const { return m_beta; }
 
   /// @brief Access methods: gamma
-  const double gamma() const { return m_gamma; }
+  double gamma() const { return m_gamma; }
 
   /// @brief Access methods: charge
-  const double q() const { return m_q; }
+  double q() const { return m_q; }
 
   /// @brief Access methods: pdg code
-  const pdg_type pdg() const { return m_pdg; }
+  pdg_type pdg() const { return m_pdg; }
 
   /// @brief Access methods: barcode
-  const barcode_type barcode() const { return m_barcode; }
+  barcode_type barcode() const { return m_barcode; }
 
   /// @brief Access methods: path/X0
-  const double pathInX0() const { return m_pathInX0; }
+  double pathInX0() const { return m_pathInX0; }
 
   /// @brief Access methods: limit/X0
-  const double limitInX0() const { return m_limitInX0; }
+  double limitInX0() const { return m_limitInX0; }
 
   /// @brief Access methods: pdg code
-  const double pathInL0() const { return m_limitInX0; }
+  double pathInL0() const { return m_limitInX0; }
 
   /// @brief Access methods: barcode
-  const double limitInL0() const { return m_limitInL0; }
+  double limitInL0() const { return m_limitInL0; }
 
   /// @brief boolean operator indicating the particle to be alive
   operator bool() { return m_alive; }

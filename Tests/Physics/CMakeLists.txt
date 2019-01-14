@@ -12,7 +12,7 @@ include(${Geant4_USE_FILE})
 file(GLOB_RECURSE src_files "src/*.cc" "include/*.hh")
 
 add_executable (FatrasParametricNuclearIntTests ParametricNuclearIntTests.cpp ${src_files})
-target_include_directories(FatrasParametricNuclearIntTests PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(FatrasParametricNuclearIntTests PRIVATE ${Boost_INCLUDE_DIRS} ../Common)
 target_include_directories(FatrasParametricNuclearIntTests PUBLIC ${Geant4_INCLUDE_DIRS})
 target_link_libraries(FatrasParametricNuclearIntTests PRIVATE ActsCore ActsLegacy FatrasCore)
 target_link_libraries(FatrasParametricNuclearIntTests PUBLIC ${Geant4_LIBRARIES})
