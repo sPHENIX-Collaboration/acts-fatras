@@ -39,7 +39,7 @@
 class B1ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    B1ActionInitialization(double thickness, std::string particleName, double px, double py, double pz);
+    B1ActionInitialization(double thickness, std::string particleName, double px, double py, double pz, unsigned int index);
     virtual ~B1ActionInitialization();
 
     virtual void BuildForMaster() const;
@@ -49,6 +49,7 @@ class B1ActionInitialization : public G4VUserActionInitialization
 	double m_thickness;
 	std::string m_particleName;
 	double m_px, m_py, m_pz;
+	const unsigned int m_index;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

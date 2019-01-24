@@ -32,12 +32,19 @@
 #include "../include/B1RunAction.hh"
 
 #include <fstream>
+#include <string>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1EventAction::B1EventAction(B1RunAction* runAction)
 : G4UserEventAction(),
   fRunAction(runAction)
+{}
+
+B1EventAction::B1EventAction(B1RunAction* runAction, unsigned int index)
+: G4UserEventAction(),
+  fRunAction(runAction),
+  m_index(index)
 {} 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -50,13 +57,16 @@ B1EventAction::~B1EventAction()
 void B1EventAction::BeginOfEventAction(const G4Event*)
 {
   particles.clear();
+  m_nuclearInteraction = false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B1EventAction::EndOfEventAction(const G4Event*)
 {
-	std::ofstream ofs("geant4outNeu.txt", std::ofstream::app);
+	
+	std::ofstream ofs("geant4out_" + std::to_string(m_index) + ".txt", std::ofstream::app);
+	ofs << "NI " << m_nuclearInteraction << std::endl;
 	for(auto& p : particles)
 	{
 		ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t"

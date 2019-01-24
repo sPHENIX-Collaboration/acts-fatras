@@ -53,6 +53,7 @@ class B1EventAction : public G4UserEventAction
 {
   public:
     B1EventAction(B1RunAction* runAction);
+    B1EventAction(B1RunAction* runAction, unsigned int index);
     virtual ~B1EventAction();
 
     virtual void BeginOfEventAction(const G4Event*);
@@ -62,11 +63,18 @@ class B1EventAction : public G4UserEventAction
     {
 		particles.push_back(p);
 	}
+	
+	void nuclearInteraction()
+	{
+		m_nuclearInteraction = true;
+	}
 
   private:
 	std::vector<B1particle> particles;
 	
     B1RunAction* fRunAction;
+    const unsigned int m_index = 0;
+    bool m_nuclearInteraction = false;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

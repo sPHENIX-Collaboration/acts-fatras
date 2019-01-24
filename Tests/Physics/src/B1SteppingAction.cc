@@ -57,7 +57,9 @@ B1SteppingAction::~B1SteppingAction()
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-//~ std::cout << "dicki hoppenstett: " << m_thickness * cm << std::endl;
+	if(step->GetTrack()->GetParentID() == 0 && step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "pi+Inelastic")
+		fEventAction->nuclearInteraction();
+	
 	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
 		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm
 		|| fabs((step->GetPostStepPoint()->GetPosition().x() - 10. * cm) / (10. * cm)) < 1e-15
