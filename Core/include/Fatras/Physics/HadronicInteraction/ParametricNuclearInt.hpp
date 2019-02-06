@@ -38,19 +38,6 @@ struct ParametricNuclearInt {
                                 
 protected:
 
-/// @brief Calculates and states if a nuclear interaction occurs
-///
-/// @tparam generator_t data type of the random number generator
-/// @tparam particle_t data type of the particle
-/// @param [in] generator is the random number generator
-/// @param [in] thickness Material thickness that is penetrated
-/// @param [in] particle particle that penetrates the material
-///
-/// @return boolean result if a nuclear interaction occurs
-template <typename generator_t, typename particle_t>
-bool 
-nuclearInteraction(generator_t& generator, const double thickness, particle_t& particle) const;
-
 /// @brief Calculates the probability of a nuclear interaction
 ///
 /// @param [in] momentum Particles momentum in GeV
@@ -60,16 +47,6 @@ nuclearInteraction(generator_t& generator, const double thickness, particle_t& p
 /// @return boolean result if a nuclear interaction occurs
 double 
 nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const;
-
-/// @brief Calculates if no hadrons survive
-///
-/// @param [in] momentum Particles momentum in GeV
-/// @param [in] thickness Thickness of the material in terms of L0
-/// @param [in] pdg PDG code of the particle
-///
-/// @return boolean result if a hadron survives
-double
-hadronSurvives(const double momentum, const double thickness, const int pdg) const;
 
 /// @brief Calculates the probability for a certain multiplicity
 ///
@@ -160,13 +137,6 @@ private:
 	const std::array<double, 8> cProbsN = {0.00104396, 0.0950443, 0.0950459, 0.160889, 0.164218, 0.167557, 0.887496, 0.995746};
 
 };
-
-template <typename generator_t, typename particle_t>
-bool 
-ParametricNuclearInt::nuclearInteraction(generator_t& generator, const double thickness, particle_t& particle) const 
-{
-  return generator() < nuclearInteractionProb(particle.p(), thickness, particle.pdg());
-}
 
 template<typename generator_t, typename particle_t>
 unsigned int
@@ -470,20 +440,14 @@ template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
 {
-  // Roll if the final state has any hadrons
-  if(generator() < hadronSurvives(particle.p(), thickness, particle.pdg()))
-  {
-		// Calculate multiplicity
-		const unsigned int Npart = multiplicity(generator, thickness, particle);
-		
-		// Calculate particle types
-		const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
+	// Calculate multiplicity
+	const unsigned int Npart = multiplicity(generator, thickness, particle);
+	
+	// Calculate particle types
+	const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
 
-		// Calculate the kinematics
-		return kinematics(generator, particle, particlePDGs);
-  }
-  else
-	return {};
+	// Calculate the kinematics
+	return kinematics(generator, particle, particlePDGs);
 }
 
 template <typename generator_t, typename detector_t, typename particle_t>
@@ -494,7 +458,7 @@ std::vector<particle_t> ParametricNuclearInt::operator()(generator_t& generator,
 	const double thicknessInL0 = detector.thickness() / detector.averageL0();
 	
 	// If a nuclear interaction occurs ...
-	if (nuclearInteraction(generator, thicknessInL0, particle))
+	if (generator() < nuclearInteractionProb(particle.p(), thicknessInL0, particle.pdg()))
 		// ... calculate the final state hadrons
 		return finalStateHadrons(generator, thicknessInL0, particle);
  
