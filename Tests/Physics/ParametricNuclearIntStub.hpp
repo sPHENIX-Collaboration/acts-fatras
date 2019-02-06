@@ -16,23 +16,10 @@ namespace Test {
 	
 struct ParametricNuclearIntStub : public ParametricNuclearInt {
 
-template <typename generator_t, typename particle_t>
-bool 
-nuclearInteractionStub(generator_t& generator, const double thickness, particle_t& particle) const
-{
-	return nuclearInteraction(generator, thickness, particle);
-}
-
 double 
 nuclearInteractionProbStub(const double momentum, const double thickness, const int pdg) const
 {
 	return nuclearInteractionProb(momentum, thickness, pdg);
-}
-
-double
-hadronSurvivesStub(const double momentum, const double thickness, const int pdg) const
-{
-	return hadronSurvives(momentum, thickness, pdg);
 }
 
 double

@@ -7,17 +7,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
+#include "Fatras/Physics/HadronicInteraction/detail/ParametricNuclearInt.ipp"
 
 double
 Fatras::ParametricNuclearInt::nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const
 {
 	// TODO: move sqrt(2*PI) out
+	// TODO: how to choose the parameters based on pdg?
 	
+	const std::array<double, 6>& pars = detail::probPip;
 	double shapeThickness = exp(thickness * pars[0]);
 	
 	double shapeMomentum = pars[1] + pars[2] * momentum + pars[3] / (sqrt(2. * M_PI) * pars[5]) * exp(-(momentum - pars[4]) * (momentum - pars[4]) / (2. * pars[5]));
 	
-	return (1. - shapeD) * shapeP;
+	return (1. - shapeThickness) * shapeMomentum;
 }
 
 double
