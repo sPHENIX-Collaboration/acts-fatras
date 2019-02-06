@@ -111,31 +111,6 @@ kinematics(generator_t& generator, particle_t& particle, const std::vector<int>&
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle) const;
-
-private:
-	
-	// Look up table for produceable hadrons 
-	const std::array<double, 8> pdgLookUp = {-321, -211, 111, 211, 310, 321, 2112, 2212};
-	
-	// Probabilities for the production of different particles
-	// Order in list: k-, pi-, pi0, pi+, k0, k+, n, p (as the PDG code)
-	const std::array<double, 8> probsKm = {0.131426, 0.108972, 2.15513e-05, 0.0735287, 0.00333459 + 0.0122508, 0.00437491, 0.586811, 0.072719};
-	const std::array<double, 8> probsKp = {0.00193334, 0.0857213, 2.62148e-05, 0.0949544, 0.00502494 + 0.0176528, 0.168827, 0.54008, 0.0818682};
-	const std::array<double, 8> probsK0 = {0.00880667, 0.111725, 3.91104e-05, 0.103377, 0.0368607 + 0.0782085, 0.0132087, 0.56815, 0.0746813};
-	const std::array<double, 8> probsPim = {0.00331695, 0.228171, 3.58508e-06, 0.0750272, 0.00127534 + 0.00512345, 0.00588292, 0.609138, 0.0678355};
-	const std::array<double, 8> probsPip = {0.00317051, 0.0880611, 1.59362e-06, 0.229114, 0.00128486 + 0.00513405, 0.00696432, 0.575764, 0.0862595};
-	const std::array<double, 8> probsP = {0.00102691, 0.0770944, 1.72117e-06, 0.0848894, 0.00051197 + 0.00272571, 0.00363871, 0.630106, 0.195689};
-	const std::array<double, 8> probsN = {0.00104396, 0.0940003, 1.66574e-06, 0.065843, 0.000550299 + 0.00277906, 0.00333905, 0.719939, 0.10825};
-
-	// Cumulative probabilities
-	const std::array<double, 8> cProbsKm = {0.131426, 0.240398, 0.24042, 0.313948, 0.329534, 0.333909, 0.92072, 0.993439};
-	const std::array<double, 8> cProbsKp = {0.00193334, 0.0876546, 0.0876809, 0.182635, 0.205313, 0.37414, 0.91422, 0.996088};
-	const std::array<double, 8> cProbsK0 = {0.00880667, 0.120532, 0.120571, 0.223948, 0.339017, 0.352226, 0.920376, 0.995057};
-	const std::array<double, 8> cProbsPim = {0.00331695, 0.231488, 0.231492, 0.306519, 0.312918, 0.3188, 0.927938, 0.995774};
-	const std::array<double, 8> cProbsPip = {0.00317051, 0.0912316, 0.0912332, 0.320347, 0.326766, 0.33373, 0.909494, 0.995754};
-	const std::array<double, 8> cProbsP = {0.00102691, 0.0781213, 0.078123, 0.163012, 0.16625, 0.169889, 0.799995, 0.995684};
-	const std::array<double, 8> cProbsN = {0.00104396, 0.0950443, 0.0950459, 0.160889, 0.164218, 0.167557, 0.887496, 0.995746};
-
 };
 
 template<typename generator_t, typename particle_t>
@@ -160,143 +135,145 @@ template<typename generator_t>
 std::vector<int>
 ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const
 {    	
-	std::vector<int> result;
-	result.reserve(nParticles);
-	double dice;
-	unsigned int index;
+	//~ std::vector<int> result;
+	//~ result.reserve(nParticles);
+	//~ double dice;
+	//~ unsigned int index;
 	
-	switch(pdg)
-	{
-		//k-
-		case -321:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsKm[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+	//~ switch(pdg)
+	//~ {
+		//~ //k-
+		//~ case -321:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsKm[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//pi-
-		case -211:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsPim[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+		//~ //pi-
+		//~ case -211:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsPim[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//pi+
-		case 211:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsPip[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+		//~ //pi+
+		//~ case 211:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsPip[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//k0
-		case 130:
-		case 310:
-		case 311:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsK0[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+		//~ //k0
+		//~ case 130:
+		//~ case 310:
+		//~ case 311:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsK0[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//k+
-		case 321:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsKp[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+		//~ //k+
+		//~ case 321:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsKp[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//n
-		case 2112:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsN[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-			break;
-		}
+		//~ //n
+		//~ case 2112:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsN[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+			//~ break;
+		//~ }
 		
-		//p
-		case 2212:
-		{
-			while(result.size() < nParticles)
-			{
-				dice = generator();
-				for(index = 0; index < 8; index++) // 8 particles can be produced
-				{
-					if(cProbsP[index] > dice)
-					{
-						result.push_back(pdgLookUp[index]);
-						break;
-					}	
-				}
-			}
-		}
-	}
+		//~ //p
+		//~ case 2212:
+		//~ {
+			//~ while(result.size() < nParticles)
+			//~ {
+				//~ dice = generator();
+				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
+				//~ {
+					//~ if(cProbsP[index] > dice)
+					//~ {
+						//~ result.push_back(pdgLookUp[index]);
+						//~ break;
+					//~ }	
+				//~ }
+			//~ }
+		//~ }
+	//~ }
 
-	return result;
+	//~ return result;
 
+
+	return {};
   //~ // move the incoming particle type forward
   //~ if(particles[0].pdg() != particle.pdg()) 
     //~ for(unsigned int i = 1; i < particles.size(); i++)
@@ -455,13 +432,19 @@ std::vector<particle_t> ParametricNuclearInt::operator()(generator_t& generator,
                                      const detector_t& detector,
                                      particle_t &particle) const
 {
-	const double thicknessInL0 = detector.thickness() / detector.averageL0();
-	
-	// If a nuclear interaction occurs ...
-	if (generator() < nuclearInteractionProb(particle.p(), thicknessInL0, particle.pdg()))
-		// ... calculate the final state hadrons
-		return finalStateHadrons(generator, thicknessInL0, particle);
- 
+	// Test applicable PDG codes
+	for(const auto& pc : pdgCodes)
+		if(particle.pdg() == pc)
+		{
+			const double thicknessInL0 = detector.thickness() / detector.averageL0();
+			
+			// If a nuclear interaction occurs ...
+			if (generator() < nuclearInteractionProb(particle.p(), thicknessInL0, particle.pdg()))
+				// ... calculate the final state hadrons
+				return finalStateHadrons(generator, thicknessInL0, particle);
+		 
+			break;
+		}
 	// No hadronic interactions occured
 	return {particle};
 }

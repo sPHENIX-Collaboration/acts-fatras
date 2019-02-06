@@ -13,14 +13,45 @@ double
 Fatras::ParametricNuclearInt::nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const
 {
 	// TODO: move sqrt(2*PI) out
-	// TODO: how to choose the parameters based on pdg?
+
+	const std::array<double, 6>& pars = detail::probability.at(pdg);
+	//~ switch(pdg)
+	//~ {
+		//~ case 211:
+		//~ {
+			//~ pars = &detail::probPip;
+			//~ break;
+		//~ }
+		//~ case -211:
+		//~ {
+			//~ pars = &detail::probPim;
+			//~ break;
+		//~ }
+		//~ case 111:
+		//~ {
+			//~ pars = &detail::probPi0;
+			//~ break;
+		//~ }
+		//~ case 2212:
+		//~ {
+			//~ pars = &detail::probP;
+			//~ break;
+		//~ }
+		//~ case 2112:
+		//~ {
+			//~ pars = &detail::probN;
+			//~ break;
+		//~ }
+		//~ default:
+			//~ return 0.;
+	//~ }
 	
-	const std::array<double, 6>& pars = detail::probPip;
-	double shapeThickness = exp(thickness * pars[0]);
+	const double shapeThickness = exp(thickness * pars[0]);
 	
-	double shapeMomentum = pars[1] + pars[2] * momentum + pars[3] / (sqrt(2. * M_PI) * pars[5]) * exp(-(momentum - pars[4]) * (momentum - pars[4]) / (2. * pars[5]));
+	const double shapeMomentum = pars[1] + pars[2] * momentum + pars[3] / (sqrt(2. * M_PI) * pars[5]) * exp(-(momentum - pars[4]) * (momentum - pars[4]) / (2. * pars[5]));
 	
 	return (1. - shapeThickness) * shapeMomentum;
+	return 0.;
 }
 
 double
