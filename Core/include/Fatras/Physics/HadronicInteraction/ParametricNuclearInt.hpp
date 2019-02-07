@@ -26,11 +26,11 @@ struct ParametricNuclearInt {
   /// @tparam detector_t is the detector information type
   /// @tparam particle_t is the particle information type
   ///
-  /// @param[in] generator is the random number generator
-  /// @param[in] detector the detector information
-  /// @param[in] particle the particle which is being scattered
+  /// @param [in] generator is the random number generator
+  /// @param [in] detector the detector information
+  /// @param [in] particle the particle which is being scattered
   ///
-  /// @return eventually produced photons
+  /// @return eventually produced hadrons
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
