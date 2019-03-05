@@ -11,8 +11,8 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/GeometryID.hpp"
-#include "Acts/Utilities/Units.hpp"
 #include "Acts/Utilities/Helpers.hpp"
+#include "Acts/Utilities/Units.hpp"
 #include <cmath>
 
 namespace Fatras {
@@ -46,8 +46,8 @@ public:
            double m, double q, pdg_type pdg = 0, barcode_type barcode = 0,
            double startTime = 0.)
       : m_position(position), m_momentum(momentum), m_m(m), m_q(q),
-        m_p(momentum.norm()), m_pT(Acts::VectorHelpers::perp(momentum)), m_pdg(pdg),
-        m_barcode(barcode), m_timeStamp(startTime) {
+        m_p(momentum.norm()), m_pT(Acts::VectorHelpers::perp(momentum)),
+        m_pdg(pdg), m_barcode(barcode), m_timeStamp(startTime) {
     m_E = std::sqrt(m_p * m_p + m_m * m_m);
     m_beta = (m_p / m_E);
     m_gamma = (m_E / m_m);

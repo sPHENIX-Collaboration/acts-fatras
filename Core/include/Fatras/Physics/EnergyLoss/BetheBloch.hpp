@@ -56,7 +56,7 @@ struct BetheBloch {
 
     auto eLoss =
         ionisationLoss.dEds(particle.m(), particle.beta(), particle.gamma(),
-                       detector.material(), detector.thickness(), false);
+                            detector.material(), detector.thickness(), false);
     // the actual energy loss
     double energyLoss = eLoss.first;
     // the uncertainty of the mean energy loss

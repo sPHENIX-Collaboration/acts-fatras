@@ -27,7 +27,7 @@ struct VoidSelector {
   bool operator()(const Acts::Surface &) const { return false; }
 };
 
-/// The Fatras Simulator
+/// The Fatras Interactor
 ///
 /// This is the Fatras plugin to the ACTS Propagator, it replaces
 /// the MaterialInteractor of the reconstruction
@@ -59,7 +59,7 @@ struct Interactor {
 
   /// Simple result struct to be returned
   particle_t initialParticle;
-	
+
   /// The hit creator helper class
   hit_creator_t hitCreator;
 
@@ -91,14 +91,17 @@ struct Interactor {
   /// are stored in the result struct and can thus be retrieved by the caller
   ///
   /// @tparam  propagator_state_t is the type of Propagtor state
+  /// @tparam  stepper_t the type of the Stepper for the access to the state
   ///
   /// @param state is the mutable propagator state object
+  /// @param stepper is the propagation stepper object
   /// @param result is the mutable result cache object
   ///
   /// return value is void as it is a standard actor in the
   /// propagation
-  template <typename propagator_state_t>
-  void operator()(propagator_state_t &state, result_type &result) const {
+  template <typename propagator_state_t, typename stepper_t>
+  void operator()(propagator_state_t &state, stepper_t &stepper,
+                  result_type &result) const {
 
     // If we are on target, everything should have been done
     if (state.navigation.targetReached)
@@ -110,9 +113,13 @@ struct Interactor {
       result.particle = initialParticle;
       result.initialized = true;
     }
+    // get position and momentum presetp
+    auto position = stepper.position(state.stepping);
+    auto direction = stepper.direction(state.stepping);
+    auto p = stepper.momentum(state.stepping);
+
     // set the stepping position to the particle
-    result.particle.update(state.stepping.position(),
-                           state.stepping.momentum());
+    result.particle.update(position, p * direction);
 
     // Check if the current surrface a senstive one
     bool sensitive = state.navigation.currentSurface
@@ -125,8 +132,8 @@ struct Interactor {
         state.navigation.currentSurface->associatedMaterial()) {
       // get the surface material and the corresponding material properties
       auto sMaterial = state.navigation.currentSurface->associatedMaterial();
-      const Acts::MaterialProperties& mProperties
-        = sMaterial->materialProperties(state.stepping.position());
+      const Acts::MaterialProperties &mProperties =
+          sMaterial->materialProperties(position);
 
       bool breakIndicator = false;
       if (mProperties) {
@@ -136,24 +143,25 @@ struct Interactor {
       }
     }
 
-    // update the stepper cache with the current particle parameters
-    state.stepping.update(result.particle.position(),
-                          result.particle.momentum().normalized(),
-                          result.particle.p());
+    // Update the stepper cache with the current particle parameters
+    position = result.particle.position();
+    direction = result.particle.momentum().normalized();
+    stepper.update(state.stepping, position, direction, result.particle.p());
 
     // create the hit on a senstive element
     if (sensitive) {
       // create and fill the hit
       double value = 0.; //!< todo fill from depositedEnergy calculation
       double htime = 0.; //!< todo calculate from delta time
-      hit_t simHit = hitCreator(state, value, htime, result.particle);
+      hit_t simHit = hitCreator(*state.navigation.currentSurface, position,
+                                direction, value, htime, result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }
   }
 
   /// Pure observer interface
   /// This does not apply to the Fatras simulator
-  template <typename propagator_state_t>
-  void operator()(propagator_state_t &) const {}
+  template <typename propagator_state_t, typename stepper_t>
+  void operator()(propagator_state_t &, stepper_t &) const {}
 };
 }

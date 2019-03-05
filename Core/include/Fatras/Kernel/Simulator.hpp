@@ -19,9 +19,7 @@
 
 namespace Fatras {
 
-struct VoidDetector
-{
-};
+struct VoidDetector {};
 
 /// @brief Fatras simulator
 ///
@@ -36,28 +34,22 @@ struct VoidDetector
 /// @tparam neutral_propagator_t Type of the propagator for neutral particles
 /// @tparam neutral_selector_t Type of the slector (list) for neutral particles
 /// @tparam neutral_interactor_t Type of the dresser for neutral particles
-template <typename charged_propagator_t,
-          typename charged_selector_t,
-          typename charged_interactor_t,
-          typename neutral_propagator_t,
-          typename neutral_selector_t,
-          typename neutral_interactor_t>
-struct Simulator
-{
+template <typename charged_propagator_t, typename charged_selector_t,
+          typename charged_interactor_t, typename neutral_propagator_t,
+          typename neutral_selector_t, typename neutral_interactor_t>
+struct Simulator {
 
   Simulator(charged_propagator_t chpropagator, neutral_propagator_t npropagator)
-    : chargedPropagator(std::move(chpropagator))
-    , neutralPropagator(std::move(npropagator))
-    , mlogger(Acts::getDefaultLogger("Simulator", Acts::Logging::INFO))
-  {
-  }
+      : chargedPropagator(std::move(chpropagator)),
+        neutralPropagator(std::move(npropagator)),
+        mlogger(Acts::getDefaultLogger("Simulator", Acts::Logging::INFO)) {}
 
   charged_propagator_t chargedPropagator;
-  charged_selector_t   chargedSelector;
+  charged_selector_t chargedSelector;
   charged_interactor_t chargedInteractor;
 
   neutral_propagator_t neutralPropagator;
-  neutral_selector_t   neutralSelector;
+  neutral_selector_t neutralSelector;
   neutral_interactor_t neutralInteractor;
 
   VoidDetector detector;
@@ -67,11 +59,7 @@ struct Simulator
   bool debug = false;
 
   /// Private access to the logging instance
-  const Acts::Logger&
-  logger() const
-  {
-    return *mlogger;
-  }
+  const Acts::Logger &logger() const { return *mlogger; }
 
   /// @brief call operator to the simulator
   ///
@@ -82,40 +70,35 @@ struct Simulator
   /// @param fatrasGenerator is the event-bound random generator
   /// @param fatrasEvent is the truth event collection
   /// @param fatrasHits is the hit collection
-  template <typename generator_t,
-            typename event_collection_t,
+  template <typename generator_t, typename event_collection_t,
             typename hit_collection_t>
-  void
-  operator()(generator_t&        fatrasGenerator,
-             event_collection_t& fatrasEvent,
-             hit_collection_t&   fatrasHits) const
-  {
+  void operator()(generator_t &fatrasGenerator, event_collection_t &fatrasEvent,
+                  hit_collection_t &fatrasHits) const {
 
     // if screen output is required
     typedef Acts::detail::DebugOutputActor DebugOutput;
 
     // Action list, abort list and options
     typedef Acts::ActionList<charged_interactor_t, DebugOutput>
-                                                             ChargedActionList;
+        ChargedActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> ChargedAbortList;
     typedef Acts::PropagatorOptions<ChargedActionList, ChargedAbortList>
-            ChargedOptions;
+        ChargedOptions;
 
     // Action list, abort list and
     typedef Acts::ActionList<neutral_interactor_t, DebugOutput>
-                                                             NeutralActionList;
+        NeutralActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> NeutralAbortList;
     typedef Acts::PropagatorOptions<NeutralActionList, NeutralAbortList>
-            NeutralOptions;
+        NeutralOptions;
 
     // loop over the input events
     // -> new secondaries will just be attached to that
-    for (auto& vertex : fatrasEvent) {
+    for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
       for (auto particle = vertex.outgoing_begin();
-           particle != vertex.outgoing_end();
-           ++particle) {
+           particle != vertex.outgoing_end(); ++particle) {
         // charged particle detected and selected
         if (chargedSelector(detector, *particle)) {
           // Need to construct them per call to set the particle
@@ -123,8 +106,8 @@ struct Simulator
           ChargedOptions chargedOptions;
           chargedOptions.debug = debug;
           // Get the charged interactor
-          auto& chargedInteractor
-              = chargedOptions.actionList.template get<charged_interactor_t>();
+          auto &chargedInteractor =
+              chargedOptions.actionList.template get<charged_interactor_t>();
           // Result type typedef
           typedef typename charged_interactor_t::result_type ChargedResult;
           // Set the generator to guarantee event consistent entires
@@ -132,26 +115,25 @@ struct Simulator
           // Put all the additional information into the interactor
           chargedInteractor.initialParticle = (*particle);
           // Create the kinematic start parameters
-          Acts::CurvilinearParameters start(nullptr,
-                                            particle->position(),
+          Acts::CurvilinearParameters start(nullptr, particle->position(),
                                             particle->momentum(),
                                             particle->q());
           // Run the simulation
-          const auto& result
-              = chargedPropagator.propagate(start, chargedOptions);
-          auto& fatrasResult = result.template get<ChargedResult>();
+          const auto &result =
+              chargedPropagator.propagate(start, chargedOptions);
+          auto &fatrasResult = result.template get<ChargedResult>();
           // a) Handle the hits
           // hits go to the hit collection, particle go to the particle
           // collection
-          for (auto& fHit : fatrasResult.simulatedHits) {
+          for (auto &fHit : fatrasResult.simulatedHits) {
             fatrasHits.insert(fHit);
           }
           // b) deal with the particles
-          const auto& simparticles = fatrasResult.outgoing;
+          const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
           // c) screen output if requested
           if (debug) {
-            auto& fatrasDebug = result.template get<DebugOutput::result_type>();
+            auto &fatrasDebug = result.template get<DebugOutput::result_type>();
             ACTS_INFO(fatrasDebug.debugString);
           }
         } else if (neutralSelector(detector, *particle)) {
@@ -159,8 +141,8 @@ struct Simulator
           NeutralOptions neutralOptions;
           neutralOptions.debug = debug;
           // Get the charged interactor
-          auto& neutralInteractor
-              = neutralOptions.actionList.template get<neutral_interactor_t>();
+          auto &neutralInteractor =
+              neutralOptions.actionList.template get<neutral_interactor_t>();
           // Result type typedef
           typedef typename neutral_interactor_t::result_type NeutralResult;
           // Set the generator to guarantee event consistent entires
@@ -170,21 +152,21 @@ struct Simulator
           // Create the kinematic start parameters
           Acts::NeutralCurvilinearParameters start(
               nullptr, particle->position(), particle->momentum());
-          const auto& result
-              = neutralPropagator.propagate(start, neutralOptions);
-          auto& fatrasResult = result.template get<NeutralResult>();
+          const auto &result =
+              neutralPropagator.propagate(start, neutralOptions);
+          auto &fatrasResult = result.template get<NeutralResult>();
           // a) deal with the particles
-          const auto& simparticles = fatrasResult.outgoing;
+          const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
           // b) screen output if requested
           if (debug) {
-            auto& fatrasDebug = result.template get<DebugOutput::result_type>();
+            auto &fatrasDebug = result.template get<DebugOutput::result_type>();
             ACTS_INFO(fatrasDebug.debugString);
           }
-        }  // neutral processing
-      }    // loop over particles
-    }      // loop over events
+        } // neutral processing
+      }   // loop over particles
+    }     // loop over events
   }
 };
 
-}  // namespace Fatras
+} // namespace Fatras
