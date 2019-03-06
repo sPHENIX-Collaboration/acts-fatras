@@ -72,25 +72,22 @@ struct Simulator {
   /// @param fatrasHits is the hit collection
   template <typename generator_t, typename event_collection_t,
             typename hit_collection_t>
-  void operator()(generator_t &fatrasGenerator, event_collection_t &fatrasEvent,
+  void operator()(generator_t &fatrasGenerator, 
+                  event_collection_t &fatrasEvent,
                   hit_collection_t &fatrasHits) const {
 
     // if screen output is required
-    typedef Acts::detail::DebugOutputActor DebugOutput;
+    using DebugOutput =  Acts::detail::DebugOutputActor;
 
     // Action list, abort list and options
-    typedef Acts::ActionList<charged_interactor_t, DebugOutput>
-        ChargedActionList;
-    typedef Acts::AbortList<Acts::detail::EndOfWorldReached> ChargedAbortList;
-    typedef Acts::PropagatorOptions<ChargedActionList, ChargedAbortList>
-        ChargedOptions;
+    using ChargedActionList = Acts::ActionList<charged_interactor_t, DebugOutput>;
+    using ChargedAbortList = Acts::AbortList<Acts::detail::EndOfWorldReached>;
+    using ChargedOptions = Acts::PropagatorOptions<ChargedActionList, ChargedAbortList>;
 
     // Action list, abort list and
-    typedef Acts::ActionList<neutral_interactor_t, DebugOutput>
-        NeutralActionList;
-    typedef Acts::AbortList<Acts::detail::EndOfWorldReached> NeutralAbortList;
-    typedef Acts::PropagatorOptions<NeutralActionList, NeutralAbortList>
-        NeutralOptions;
+    using NeutralActionList = Acts::ActionList<neutral_interactor_t, DebugOutput>;
+    using NeutralAbortList = Acts::AbortList<Acts::detail::EndOfWorldReached>;
+    using NeutralOptions = Acts::PropagatorOptions<NeutralActionList, NeutralAbortList>;
 
     // loop over the input events
     // -> new secondaries will just be attached to that
@@ -128,6 +125,7 @@ struct Simulator {
           for (auto &fHit : fatrasResult.simulatedHits) {
             fatrasHits.insert(fHit);
           }
+          
           // b) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
