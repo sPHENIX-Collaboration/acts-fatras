@@ -10,10 +10,6 @@ if(NOT TARGET ActsCore)
   find_package(Acts REQUIRED COMPONENTS Core Legacy)
 endif()
 
-# require C++14 globally
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-
 include(GNUInstallDirs)
 include(CTest)
 
