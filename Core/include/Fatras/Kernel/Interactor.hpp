@@ -36,7 +36,8 @@ struct VoidSelector {
 /// @tparam particle_t is Type of the particle
 /// @tparam hit_t Type of the simulated hit
 /// @tparam hit_creator_t Type of the hit creator (does thruth association)
-/// @tparam sensitive_selector_t The Selector type to identify sensitive surfaces
+/// @tparam sensitive_selector_t The Selector type to identify sensitive
+/// surfaces
 /// @tparam physics_list_t Type of Extendable physics list that is called
 /// @tparam decay_list_t Type of Extendable decay list that is called
 ///
@@ -101,8 +102,7 @@ struct Interactor {
   /// return value is void as it is a standard actor in the
   /// propagation
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t &state, 
-                  stepper_t &stepper,
+  void operator()(propagator_state_t &state, stepper_t &stepper,
                   result_type &result) const {
 
     // If we are on target, everything should have been done
@@ -150,13 +150,13 @@ struct Interactor {
     direction = result.particle.momentum().normalized();
     stepper.update(state.stepping, position, direction, result.particle.p());
 
-
     // create the hit on a senstive element
     if (sensitive) {
       // create and fill the hit
       double htime = 0.; //!< todo calculate from delta time
-      hit_t simHit = hitCreator(*state.navigation.currentSurface, position,
-                                direction, depositedEnergy, htime, result.particle);
+      hit_t simHit =
+          hitCreator(*state.navigation.currentSurface, position, direction,
+                     depositedEnergy, htime, result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }
   }
