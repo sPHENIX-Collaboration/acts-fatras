@@ -8,9 +8,9 @@
 
 #pragma once
 
+#include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
-#include "Acts/Material/SurfaceMaterial.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
@@ -131,9 +131,9 @@ struct Interactor {
 
     // a current surface has been assigned by the navigator
     if (state.navigation.currentSurface &&
-        state.navigation.currentSurface->associatedMaterial()) {
+        state.navigation.currentSurface->surfaceMaterial()) {
       // get the surface material and the corresponding material properties
-      auto sMaterial = state.navigation.currentSurface->associatedMaterial();
+      auto sMaterial = state.navigation.currentSurface->surfaceMaterial();
       const Acts::MaterialProperties &mProperties =
           sMaterial->materialProperties(position);
 
