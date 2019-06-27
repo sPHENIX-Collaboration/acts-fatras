@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Acts/Extrapolator/detail/InteractionFormulas.hpp"
+#include "Acts/Propagator/detail/InteractionFormulas.hpp"
 
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 #include "Fatras/Physics/Scattering/Highland.hpp"
