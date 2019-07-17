@@ -34,17 +34,17 @@ namespace Test {
 // some material
 Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4., 1.848e-3);
 
-double m = 134.9766 * Acts::units::_MeV;
+double m = 134.9766 * Acts::UnitConstants::MeV;
 
 // This tests the implementation of kinematic cast operators
 BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
 
-  Acts::MaterialProperties detector(berilium, 1. * Acts::units::_mm);
+  Acts::MaterialProperties detector(berilium, 1. * Acts::UnitConstants::mm);
 
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
 
-  Acts::Vector3D momentum(1500. * Acts::units::_MeV, 0., 0.);
+  Acts::Vector3D momentum(1500. * Acts::UnitConstants::MeV, 0., 0.);
   Particle pion(position, momentum, m, -1.);
 
   // the limit of the particle
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   BOOST_CHECK(!x0LimitSelector(detector, pion));
   BOOST_CHECK(!l0LimitSelector(detector, pion));
 
-  detector = Acts::MaterialProperties(berilium, 150. * Acts::units::_mm);
+  detector = Acts::MaterialProperties(berilium, 150. * Acts::UnitConstants::mm);
 
   // the limit is now reached
   BOOST_CHECK(x0LimitSelector(detector, pion));
