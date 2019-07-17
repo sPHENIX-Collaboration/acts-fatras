@@ -148,7 +148,7 @@ struct Interactor {
     // Update the stepper cache with the current particle parameters
     position = result.particle.position();
     direction = result.particle.momentum().normalized();
-    stepper.update(state.stepping, position, direction, result.particle.p());
+    stepper.update(state.stepping, position, direction, result.particle.p(), 0);
 
     // create the hit on a senstive element
     if (sensitive) {
