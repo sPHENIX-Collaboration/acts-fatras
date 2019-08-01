@@ -112,5 +112,103 @@ const std::map<int, std::array<double, 10>> energyScaling =
 {1.06923, 2.75259, 5.86034, 13.6034, 42.9559, 58.9314, 69.3068, 78.6077, 87.4014, 95.5143}}
 };
 
-} // namespace detail	
+} // namespace detail
+
+template<typename generator_t>
+std::vector<int>
+ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const
+{
+	// Setup of result container
+	std::vector<int> result;
+	result.reserve(nParticles);
+	double dice;
+	
+	// Find the list of probabilities
+	const std::list<std::pair<double, int>>& particleLookUp = detail::particleTypes.at(pdg);
+	std::list<std::pair<double, int>>::const_iterator cit;
+
+	// Loop and insert PDG codes
+	while(result.size() < nParticles)
+	{
+		dice = generator();
+		// Search for fitting PDG code
+		for(cit = particleLookUp.begin(); cit != particleLookUp.end(); cit++)
+		{
+			// Insert PGD code
+			if(dice < cit->first)
+			{
+				result.push_back(cit->second);
+				break;
+			}
+		}
+	}
+	
+	return result;
+	
+	// TODO: Don't know about the following lines
+  //~ // move the incoming particle type forward
+  //~ if(particles[0].pdg() != particle.pdg()) 
+    //~ for(unsigned int i = 1; i < particles.size(); i++)
+      //~ if(particles[i].pdg() == particle.pdg())
+      //~ {
+        //~ particles[i] = particles[0];
+        //~ particles[0] = particle;
+        //~ break;
+      //~ }
+}
+
+template<typename generator_t>
+std::vector<double>
+ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const
+{
+	// Extract the fit parameters
+	std::array<double, 10>& scalingFactors = detail::energyScaling.at(pdg);
+	
+	// Storage of the resulting energies
+	std::vector<double> result;
+	result.resize(nParticles);
+
+	// Repeat sampling as long as the energies are too big
+	while(true)
+	{
+		double sumFractions = 0.;
+
+		// Sample the energies from distribution and store them
+		for(unsigned int n = 0; n < nParticles; n++)
+		{
+			double eFraction = energyFraction(generator(), scalingFactors[n], n + 1);
+			result[n] = eFraction;
+			sumFractions += eFraction;
+		}
+		
+		// Test if energies are <= the initial energy
+		if(sumFractions <= 1.)
+			break;
+	}
+	
+	return result;
+}
+
+template <typename generator_t, typename detector_t, typename particle_t>
+std::vector<particle_t> 
+ParametricNuclearInt::operator()(generator_t& generator,
+                                     const detector_t& detector,
+                                     particle_t& particle) const
+{
+	// Test applicable PDG codes
+	for(const auto& pc : detail::pdgCodes)
+		if(particle.pdg() == pc)
+		{
+			const double thicknessInL0 = detector.thickness() / detector.averageL0();
+			
+			// If a nuclear interaction occurs ...
+			if (generator() < nuclearInteractionProb(particle.p(), thicknessInL0, particle.pdg()))
+				// ... calculate the final state hadrons
+				return finalStateHadrons(generator, thicknessInL0, particle);
+		 
+			break;
+		}
+	// No hadronic interactions occured
+	return {particle};
+}
 } // namespace Fatras
