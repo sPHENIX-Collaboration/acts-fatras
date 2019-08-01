@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2018 Acts project team
+// Copyright (C) 2018-2019 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -33,5 +33,10 @@ Fatras::ParametricNuclearInt::multiplicityProb(const double momentum, const doub
 	return landau / (pars[4] * detail::sqrt2pi);
 }
 
-
-
+double 
+Fatras::ParametricNuclearInt::energyFraction(const double cProb, const double scaling, const unsigned int n) const
+{
+	double ln = std::log(1 - cProb);
+	
+	return -ln / (scaling * n - ln);
+}

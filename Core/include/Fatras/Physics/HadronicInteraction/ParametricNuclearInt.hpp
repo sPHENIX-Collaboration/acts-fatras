@@ -1,6 +1,6 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2018 Acts project team
+// Copyright (C) 2018-2019 Acts project team
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,6 +13,7 @@
 #include <math.h>
 #include <vector>
 #include <array>
+#include <list>
 
 namespace Fatras {
 
@@ -86,6 +87,30 @@ template<typename generator_t>
 std::vector<int>
 particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const;
 
+/// @brief Evaluates the fraction E_{out} / E_{in} of a single outgoing particle
+/// @note This function is based on the inverse sampling method and therefore requires a uniform distributed random number in [0,1].
+///
+/// @param [in] cProb Uniform random number from cumulative probability distribution
+/// @param [in] scaling Fit parameter to scale the dependency on the multiplicity
+/// @param [in] n Demands the sampling from the distribution of the outgoing particle with the nth highest energy
+///
+/// @return Energy fraction of the outgoing particle
+double
+energyFraction(const double cProb, const double scaling, const unsigned int n) const;
+
+/// @brief Samples the energies of the ougoing particles
+///
+/// @tparam generator_t data type of the random number generator
+/// @tparam particle_t data type of the particle
+/// @param [in] generator random number generator
+/// @param [in] pdg PDG code of the ingoing particle
+/// @param [in] nParticles Number of outgoing particles
+///
+/// @return list of outgoing particle energy fractions E_{out} / E_{in}
+template<typename generator_t>
+const std::vector<double>
+energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const;
+
 /// @brief Creates the kinematics of a list of particles
 ///
 /// @tparam generator_t data type of the random number generator
@@ -118,9 +143,10 @@ unsigned int
 ParametricNuclearInt::multiplicity(generator_t& generator, const double thickness, particle_t& particle) const
 {
 	const double dice = generator();
-	size_t mult = 2;
+	size_t mult = 0;
 	double cumulativeProb = 0.;
 	
+	// TODO: What happens if multiplicity gets too big in order to fulfill while-condition
 	// Adding probabilites of the multiplicities
 	while(dice > cumulativeProb)
 	{
@@ -134,146 +160,35 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 template<typename generator_t>
 std::vector<int>
 ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const
-{    	
-	//~ std::vector<int> result;
-	//~ result.reserve(nParticles);
-	//~ double dice;
-	//~ unsigned int index;
+{
+	// Setup of result container
+	std::vector<int> result;
+	result.reserve(nParticles);
+	double dice;
 	
-	//~ switch(pdg)
-	//~ {
-		//~ //k-
-		//~ case -321:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsKm[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //pi-
-		//~ case -211:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsPim[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //pi+
-		//~ case 211:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsPip[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //k0
-		//~ case 130:
-		//~ case 310:
-		//~ case 311:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsK0[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //k+
-		//~ case 321:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsKp[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //n
-		//~ case 2112:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsN[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-			//~ break;
-		//~ }
-		
-		//~ //p
-		//~ case 2212:
-		//~ {
-			//~ while(result.size() < nParticles)
-			//~ {
-				//~ dice = generator();
-				//~ for(index = 0; index < 8; index++) // 8 particles can be produced
-				//~ {
-					//~ if(cProbsP[index] > dice)
-					//~ {
-						//~ result.push_back(pdgLookUp[index]);
-						//~ break;
-					//~ }	
-				//~ }
-			//~ }
-		//~ }
-	//~ }
+	// Find the list of probabilities
+	const std::list<std::pair<double, int>>& particleLookUp = particleTypes.at(pdg);
+	std::list<std::pair<double, int>>::const_iterator cit;
 
-	//~ return result;
-
-
-	return {};
+	// Loop and insert PDG codes
+	while(result.size() < nParticles)
+	{
+		dice = generator();
+		// Search for fitting PDG code
+		for(cit = particleLookUp.begin(); cit != particleLookUp.end(); cit++)
+		{
+			// Insert PGD code
+			if(dice < cit->first)
+			{
+				result.push_back(cit->second);
+				break;
+			}
+		}
+	}
+	
+	return result;
+	
+	// TODO: Don't know about the following lines
   //~ // move the incoming particle type forward
   //~ if(particles[0].pdg() != particle.pdg()) 
     //~ for(unsigned int i = 1; i < particles.size(); i++)
@@ -286,9 +201,44 @@ ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg,
 }
 
 template<typename generator_t, typename particle_t>
+const std::vector<double>
+energyFractions(generator_t& generator, const unsigned int pdg, const int nParticles) const
+{
+	// Extract the fit parameters
+	std::array<double, 10>& scalingFactors = energyScaling.at(pdg);
+	
+	// Storage of the resulting energies
+	std::vector<double> result;
+	result.resize(nParticles);
+
+	// Repeat sampling as long as the energies are too big
+	while(true)
+	{
+		double sumFractions = 0.;
+
+		// Sample the energies from distribution and store them
+		for(unsigned int n = 0; n < nParticles; n++)
+		{
+			double eFraction = energyFraction(generator(), scalingFactor[n], n + 1);
+			result[n] = eFraction;
+			sumFractions += eFraction;
+		}
+		
+		// Test if energies are <= the initial energy
+		if(sumFractions <= 1.)
+			break;
+	}
+	
+	return result;
+}
+
+template<typename generator_t, typename particle_t>
 std::vector<particle_t>
 ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
 {
+	const std::vector<double> energy = energyFractions(generator, particle.pdg(), particlesPDGs.size());
+	// TODO: energy unit consistency
+	
 	// TODO: whole function
 	// TODO: boost should be a part of this class
 	
@@ -420,6 +370,10 @@ ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thi
 	// Calculate multiplicity
 	const unsigned int Npart = multiplicity(generator, thickness, particle);
 	
+	// Easy exit if nothing gets out
+	if(Npar == 0)
+		return {};
+	
 	// Calculate particle types
 	const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
 
@@ -430,7 +384,7 @@ ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thi
 template <typename generator_t, typename detector_t, typename particle_t>
 std::vector<particle_t> ParametricNuclearInt::operator()(generator_t& generator,
                                      const detector_t& detector,
-                                     particle_t &particle) const
+                                     particle_t& particle) const
 {
 	// Test applicable PDG codes
 	for(const auto& pc : pdgCodes)
