@@ -122,7 +122,7 @@ ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg,
 	std::vector<int> result;
 	result.reserve(nParticles);
 	double dice;
-	
+
 	// Find the list of probabilities
 	const std::list<std::pair<double, int>>& particleLookUp = detail::particleTypes.at(pdg);
 	std::list<std::pair<double, int>>::const_iterator cit;
@@ -161,8 +161,10 @@ template<typename generator_t>
 std::vector<double>
 ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const
 {
+	if(nParticles < 10)
+	{
 	// Extract the fit parameters
-	std::array<double, 10>& scalingFactors = detail::energyScaling.at(pdg);
+	const std::array<double, 10>& scalingFactors = detail::energyScaling.at(pdg);
 	
 	// Storage of the resulting energies
 	std::vector<double> result;
@@ -188,6 +190,9 @@ ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, con
 	
 	return result;
 }
+else // TODO: implement linear functions
+return {};
+}
 
 template <typename generator_t, typename detector_t, typename particle_t>
 std::vector<particle_t> 
@@ -205,7 +210,7 @@ ParametricNuclearInt::operator()(generator_t& generator,
 			if (generator() < nuclearInteractionProb(particle.p(), thicknessInL0, particle.pdg()))
 				// ... calculate the final state hadrons
 				return finalStateHadrons(generator, thicknessInL0, particle);
-		 
+				
 			break;
 		}
 	// No hadronic interactions occured

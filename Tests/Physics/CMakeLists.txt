@@ -18,3 +18,7 @@ add_test (NAME FatrasEnergyLossUnitTest COMMAND FatrasEnergyLossTests)
 #~ target_link_libraries(FatrasParametricNuclearIntTests PUBLIC ${Geant4_LIBRARIES})
 #~ add_test (NAME FatrasParametricNuclearIntUnitTest COMMAND FatrasParametricNuclearIntTests)
 
+add_executable (FatrasParametricNuclearInteractionTests ParametricNuclearInteractionTests.cpp)
+target_include_directories (FatrasParametricNuclearInteractionTests PRIVATE ${Boost_INCLUDE_DIRS} ../Common)
+target_link_libraries (FatrasParametricNuclearInteractionTests PRIVATE ActsCore FatrasCore)
+add_test (NAME FatrasParametricNuclearInteractionUnitTest COMMAND FatrasParametricNuclearInteractionTests)

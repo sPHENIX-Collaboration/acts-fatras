@@ -15,6 +15,11 @@
 #include <array>
 #include <list>
 
+#include <iostream>
+#include <fstream>
+
+std::ofstream ofs;
+
 namespace Fatras {
 
 /// The struct for the physics list
@@ -36,7 +41,7 @@ struct ParametricNuclearInt {
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const;
-                                
+   
 protected:
 
 /// @brief Calculates the probability of a nuclear interaction
@@ -145,13 +150,18 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	const double dice = generator();
 	size_t mult = 0;
 	double cumulativeProb = 0.;
+	double currentProb = 0.;
 	
 	// TODO: What happens if multiplicity gets too big in order to fulfill while-condition
 	// TODO: Prevent mult from underflow
 	// Adding probabilites of the multiplicities
 	while(dice > cumulativeProb)
 	{
-		cumulativeProb += multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
+		currentProb = multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
+		if(currentProb == 0.)
+			return mult;
+		
+		cumulativeProb += currentProb;
 		mult++;
 	}
 	
@@ -163,6 +173,12 @@ std::vector<particle_t>
 ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
 {
 	const std::vector<double> energy = energyFractions(generator, particle.pdg(), particlesPDGs.size());
+
+	ofs.open("FatrasEnergies.txt", std::ofstream::app);
+	for(unsigned int i = 0; i < energy.size(); i++)
+		ofs << i << " " << energy[i] << std::endl;
+	ofs.close();
+	
 	// TODO: energy unit consistency
 	
 	// TODO: whole function
@@ -293,20 +309,19 @@ template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
 {
+
 	// Calculate multiplicity
 	const unsigned int Npart = multiplicity(generator, thickness, particle);
-	
+
 	// Easy exit if nothing gets out
 	if(Npart == 0)
 		return {};
-	
+
 	// Calculate particle types
-	const std::vector<int> particlePDGs = particleComposition(generator, particle, Npart);
+	const std::vector<int> particlePDGs = particleComposition(generator, particle.pdg(), Npart);
 
 	// Calculate the kinematics
 	return kinematics(generator, particle, particlePDGs);
-}
-
-
-	
+}	
 } // namespace Fatras
+#include "Fatras/Physics/HadronicInteraction/detail/ParametricNuclearInt.ipp"

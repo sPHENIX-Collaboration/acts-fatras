@@ -43,7 +43,7 @@ typedef std::mt19937 Generator;
 Generator generator;
 
 // some material
-Acts::Material berilium = Acts::Material(352.8, 407., 9.012, 4.,
+Acts::Material berylium = Acts::Material(352.8, 407., 9.012, 4.,
                                          1.848 / (au::_cm * au::_cm * au::_cm));
 
 /// The selector
@@ -79,7 +79,7 @@ BOOST_DATA_TEST_CASE(
         bdata::xrange(10000),
     x, y, z, p, index) {
 
-  Acts::MaterialProperties detector(berilium, 10. * Acts::units::_mm);
+  Acts::MaterialProperties detector(berylium, 10. * Acts::units::_mm);
 
   // create the particle and set the momentum
   /// position at 0.,0.,0
