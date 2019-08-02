@@ -17,6 +17,8 @@ const double sqrt2pi = std::sqrt(2. * M_PI);
 
 constexpr std::array<int, 5> pdgCodes = {-211, 111, 211, 2112, 2212};
 
+
+
 /// Parameters used to estimate the probability for a nuclear interaction
 const std::map<int, std::array<double, 6>> probability =
 {
@@ -97,19 +99,34 @@ const std::map<int, std::list<std::pair<double, int>>> particleTypes =
 const std::map<int, std::array<double, 10>> energyScaling =
 {
 // pi-
-{-211,
-{1.43911, 3.03515, 6.24957, 13.4978, 35.7948, 53.0301, 63.4815, 72.3156, 80.5419, 88.7695}},
-{111,
-{0., 0., 0., 0., 0., 0., 0., 0., 0., 0.}},
+	{-211,
+	{1.43911, 3.03515, 6.24957, 13.4978, 35.7948, 53.0301, 63.4815, 72.3156, 80.5419, 88.7695}},
+// pi0
+	{111,
+	{0., 0., 0., 0., 0., 0., 0., 0., 0., 0.}},
 // pi+
-{211,
-{1.48089, 3.11388, 6.53058, 14.2392, 38.2195, 54.059, 63.3495, 71.2761, 78.8044, 86.3353}},
+	{211,
+	{1.48089, 3.11388, 6.53058, 14.2392, 38.2195, 54.059, 63.3495, 71.2761, 78.8044, 86.3353}},
 // neutron
-{2112,
-{0.984621, 2.5168, 5.44376, 12.6065, 41.0249, 58.18, 69.3694, 79.4628, 88.9836, 98.8031}},
+	{2112,
+	{0.984621, 2.5168, 5.44376, 12.6065, 41.0249, 58.18, 69.3694, 79.4628, 88.9836, 98.8031}},
 // proton
-{2212, 
-{1.06923, 2.75259, 5.86034, 13.6034, 42.9559, 58.9314, 69.3068, 78.6077, 87.4014, 95.5143}}
+	{2212, 
+	{1.06923, 2.75259, 5.86034, 13.6034, 42.9559, 58.9314, 69.3068, 78.6077, 87.4014, 95.5143}}
+};
+
+const std::map<int, std::pair<double, double>> energyScalingFit =
+{
+// pi-
+	{-211, std::make_pair(4.80037, 8.40903)},
+// pi0
+	{111, std::make_pair(0., 0.)},
+// pi+
+	{211, std::make_pair(9.92848, 7.64857)},
+// neutron
+	{2112, std::make_pair(1.00611, 9.78219)},
+//proton
+	{2212, std::make_pair(8.40378, 8.74162)}
 };
 
 } // namespace detail
@@ -161,14 +178,14 @@ template<typename generator_t>
 std::vector<double>
 ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const
 {
-	if(nParticles < 10)
-	{
-	// Extract the fit parameters
-	const std::array<double, 10>& scalingFactors = detail::energyScaling.at(pdg);
-	
 	// Storage of the resulting energies
 	std::vector<double> result;
 	result.resize(nParticles);
+
+	double eFraction = 0.;
+		
+	// Extract the fit parameters
+	const std::array<double, 10>& scalingFactors = detail::energyScaling.at(pdg);
 
 	// Repeat sampling as long as the energies are too big
 	while(true)
@@ -178,7 +195,17 @@ ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, con
 		// Sample the energies from distribution and store them
 		for(unsigned int n = 0; n < nParticles; n++)
 		{
-			double eFraction = energyFraction(generator(), scalingFactors[n], n + 1);
+			if(nParticles <= 10)
+			{
+				eFraction = energyFraction(generator(), scalingFactors[n], n + 1);
+			}
+			else
+			{
+				// TODO: Might be a performance issue if this is extracted many times
+				// Extract the fit parameters to estimate the fit parameters for sampling
+				const std::pair<double, double>& fitParameters = detail::energyScalingFit.at(pdg);
+				eFraction = energyFraction(generator(), fitParameters.first + (n + 1) * fitParameters.second, n + 1);
+			}
 			result[n] = eFraction;
 			sumFractions += eFraction;
 		}
@@ -189,9 +216,6 @@ ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, con
 	}
 	
 	return result;
-}
-else // TODO: implement linear functions
-return {};
 }
 
 template <typename generator_t, typename detector_t, typename particle_t>

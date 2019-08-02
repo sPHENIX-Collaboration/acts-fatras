@@ -151,21 +151,20 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	size_t mult = 0;
 	double cumulativeProb = 0.;
 	double currentProb = 0.;
-	
-	// TODO: What happens if multiplicity gets too big in order to fulfill while-condition
-	// TODO: Prevent mult from underflow
+
 	// Adding probabilites of the multiplicities
 	while(dice > cumulativeProb)
 	{
 		currentProb = multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
-		if(currentProb == 0.)
+		if(currentProb < 1e-4 || mult > 18) // TODO: are there better cuts?
 			return mult;
 		
 		cumulativeProb += currentProb;
+		
 		mult++;
 	}
 	
-	return --mult;
+	return (mult > 0) ? --mult : 0;
 }
 
 template<typename generator_t, typename particle_t>
@@ -179,6 +178,25 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 		ofs << i << " " << energy[i] << std::endl;
 	ofs.close();
 	
+	std::vector<particle_t> outgoingParticles;
+	outgoingParticles.reserve(particlesPDGs.size());
+	for(unsigned int i = 0; i < particlesPDGs.size(); i++)
+	{
+		Acts::Vector3D momentum = particle.momentum().normalized();
+		double absEnergy = energy[i] * particle.E();
+		double totalEnergy = (absEnergy + particle.m() * particle.m());
+		momentum *= std::sqrt(totalEnergy * totalEnergy - particle.m() * particle.m());
+		// TODO: look-up table for masses and charges
+		// TODO: angles
+		outgoingParticles.push_back(particle_t(particle.position(), 
+											 momentum, 
+											 particle.m(),
+											 0.,
+											 particlesPDGs[i],
+											 0,
+											 particle.time()));
+	}
+
 	// TODO: energy unit consistency
 	
 	// TODO: whole function
@@ -302,7 +320,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
     //~ particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
 	//~ particles[i].boost(bv);
   //~ }
-  return {};
+  return outgoingParticles;
 }
 
 template<typename generator_t, typename particle_t>

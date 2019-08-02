@@ -195,6 +195,9 @@ public:
 
   /// @brief boolean operator indicating the particle to be alive
   operator bool() { return m_alive; }
+  
+  /// @brief Access methods: Time stamp
+  double time() { return m_timeStamp; }
 
 private:
   Acts::Vector3D m_position = Acts::Vector3D(0., 0., 0.); //!< kinematic info

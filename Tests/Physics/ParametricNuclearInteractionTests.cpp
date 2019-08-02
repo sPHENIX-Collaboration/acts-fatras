@@ -76,19 +76,19 @@ BOOST_DATA_TEST_CASE(
          bdata::random((bdata::seed = 24,
                        bdata::distribution =
                            std::uniform_real_distribution<>(0.5, 2.))) ^
-         bdata::xrange(100000),
+         bdata::xrange(10000),
     p, radLengths, index) {
 
 const Acts::MaterialProperties detector(berylium, berylium.L0() * radLengths);
 
 	Acts::Vector3D pos{0., 0., 0.};
 	Acts::Vector3D mom{0., 0., p};
-	//~ double mass = 0.1395701 * Acts::units::_GeV;
-	//~ double charge = -1.;
-	//~ int pdg = -211;
-	double mass = 0.938272 * Acts::units::_GeV;
-	double charge = 1.;
-	int pdg = 2212;
+	double mass = 0.1395701 * Acts::units::_GeV;
+	double charge = -1.;
+	int pdg = -211;
+	//~ double mass = 0.938272 * Acts::units::_GeV;
+	//~ double charge = 1.;
+	//~ int pdg = 2212;
 	int barcode = 0.;
 	double time = 0.;
 	Particle particle(pos, mom, mass, charge, pdg, barcode, time);
@@ -105,7 +105,6 @@ const Acts::MaterialProperties detector(berylium, berylium.L0() * radLengths);
   std::vector<Particle> outgoing;
   physicsList(myGenerator, detector, particle, outgoing);
 
-//~ std::cout << "outgoing: " << outgoing.size() << std::endl;
 }
 } // namespace Test
 
