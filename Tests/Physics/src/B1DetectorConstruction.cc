@@ -59,7 +59,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   
   // Envelope parameters
   //
-  G4double env_sizeXY = 20. * cm, env_sizeZ = 2. * m_thickness * cm;
+  G4double env_sizeYZ = 20. * cm, env_sizeX = 2. * m_thickness * cm;
   G4Material* env_mat = nist->FindOrBuildMaterial("G4_Galactic");	
 
   // Option to switch on/off checking of volumes overlaps
@@ -71,7 +71,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   //
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
-       0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.5 * env_sizeZ);     //its size
+       0.5 * env_sizeX, 0.5 * env_sizeYZ, 0.5 * env_sizeYZ);     //its size
       
   G4LogicalVolume* logicWorld =                         
     new G4LogicalVolume(solidWorld,          //its solid
@@ -93,7 +93,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   //  
   G4Box* solidEnv =    
     new G4Box("Envelope",                    //its name
-        0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.5 * env_sizeZ); //its size
+        0.5 * env_sizeX, 0.5 * env_sizeYZ, 0.5 * env_sizeYZ); //its size
       
   G4LogicalVolume* logicEnv =                         
     new G4LogicalVolume(solidEnv,            //its solid
@@ -114,8 +114,8 @@ G4Material* matDetector = nist->FindOrBuildMaterial(material);
 //std::cout << "DetectorMaterial: " << matDetector->GetNuclearInterLength() << std::endl;
 //std::exit(1);
 
-G4ThreeVector posDetector = G4ThreeVector(0., 0., 0.25 * env_sizeZ);
-G4Box* solidDetector = new G4Box("Detector", 0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.25 * env_sizeZ);
+G4ThreeVector posDetector = G4ThreeVector(0.25 * env_sizeX, 0., 0.);
+G4Box* solidDetector = new G4Box("Detector", 0.25 * env_sizeX, 0.5 * env_sizeYZ, 0.5 * env_sizeYZ);
 G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, matDetector, "Detector");
 new G4PVPlacement(0, posDetector, logicDetector, "Detector", logicEnv, false, 0, checkOverlaps);
 

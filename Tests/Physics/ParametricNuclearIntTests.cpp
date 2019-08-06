@@ -126,7 +126,7 @@ for(unsigned int index = 0; index < 1; index++) // MODIFIED!
 	ofsResetter.close();
 
 	// Initial direction
-	double x = 0., y = 0., z = 1.;
+	double x = 1., y = 0., z = 0.;
 	Acts::Vector3D direction = Acts::Vector3D(x, y, z).normalized();
 
 	// Build detector

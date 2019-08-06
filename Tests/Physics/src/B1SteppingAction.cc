@@ -76,9 +76,9 @@ void B1SteppingAction::UserSteppingAction(const G4Step* step)
 		//fEventAction->AddParticle(p);
 	}
 	
-	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
-		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm
-		|| fabs((step->GetPostStepPoint()->GetPosition().x() - 10. * cm) / (10. * cm)) < 1e-15
+	if(fabs((step->GetPostStepPoint()->GetPosition().x() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
+		|| step->GetPostStepPoint()->GetPosition().x() < 0. * cm
+		|| fabs((step->GetPostStepPoint()->GetPosition().z() - 10. * cm) / (10. * cm)) < 1e-15
 		|| fabs((step->GetPostStepPoint()->GetPosition().y() - 10. * cm) / (10. * cm)) < 1e-15)
 	{
 		B1particle p;
