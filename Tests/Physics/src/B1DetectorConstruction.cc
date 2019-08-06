@@ -111,6 +111,9 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
               
 G4Material* matDetector = nist->FindOrBuildMaterial(material);
 
+//std::cout << "DetectorMaterial: " << matDetector->GetNuclearInterLength() << std::endl;
+//std::exit(1);
+
 G4ThreeVector posDetector = G4ThreeVector(0., 0., 0.25 * env_sizeZ);
 G4Box* solidDetector = new G4Box("Detector", 0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.25 * env_sizeZ);
 G4LogicalVolume* logicDetector = new G4LogicalVolume(solidDetector, matDetector, "Detector");

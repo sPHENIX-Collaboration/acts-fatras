@@ -57,8 +57,24 @@ B1SteppingAction::~B1SteppingAction()
 
 void B1SteppingAction::UserSteppingAction(const G4Step* step)
 {
-	if(step->GetTrack()->GetParentID() == 0 && step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "pi+Inelastic")
+	if(step->GetTrack()->GetParentID() == 0 && step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() == "protonInelastic")
+	{
 		fEventAction->nuclearInteraction();
+		B1particle p;
+		p.position[0] = 0.;
+		p.position[1] = 0.;
+		p.position[2] = 0.;
+		p.momentum[0] = step->GetPreStepPoint()->GetMomentum().x();
+		p.momentum[1] = step->GetPreStepPoint()->GetMomentum().y();
+		p.momentum[2] = step->GetPreStepPoint()->GetMomentum().z();
+		p.pdg = 1234;
+		p.energy = step->GetPreStepPoint()->GetKineticEnergy();
+		p.mass = step->GetPreStepPoint()->GetMass();
+		p.charge = step->GetPreStepPoint()->GetCharge();
+		p.trackid = step->GetTrack()->GetTrackID();
+		p.parentid = step->GetTrack()->GetParentID();
+		//fEventAction->AddParticle(p);
+	}
 	
 	if(fabs((step->GetPostStepPoint()->GetPosition().z() - m_thickness * cm) / (m_thickness * cm)) < 1e-15
 		|| step->GetPostStepPoint()->GetPosition().z() < 0. * cm

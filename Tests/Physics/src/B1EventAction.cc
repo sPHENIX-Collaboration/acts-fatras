@@ -71,7 +71,8 @@ void B1EventAction::EndOfEventAction(const G4Event*)
 	{
 		ofs << p.pdg << "\t" << p.mass << "\t" << p.charge << "\t" << p.energy << "\t"
 			<< p.position[0] << "\t" << p.position[1] << "\t" << p.position[2] << "\t"
-			<< p.momentum[0] << "\t" << p.momentum[1] << "\t" << p.momentum[2] << std::endl;
+			<< p.momentum[0] << "\t" << p.momentum[1] << "\t" << p.momentum[2] << "\t"
+			<< p.trackid << "\t" << p.parentid << std::endl;
 	}
 	ofs << "*" << std::endl;
 	ofs.close();

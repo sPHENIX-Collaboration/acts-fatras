@@ -31,6 +31,20 @@
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleGun.hh"
+
+#include "G4Gamma.hh"
+#include "G4Electron.hh"
+#include "G4Positron.hh"
+#include "G4NeutrinoE.hh"
+#include "G4AntiNeutrinoE.hh"
+#include "G4MuonPlus.hh"
+#include "G4MuonMinus.hh"
+#include "G4NeutrinoMu.hh"
+#include "G4AntiNeutrinoMu.hh"
+#include "G4TauPlus.hh"
+#include "G4TauMinus.hh"
+#include "G4NeutrinoTau.hh"
+#include "G4AntiNeutrinoTau.hh"
     
 #include <fstream>
 #include <random>
@@ -52,7 +66,7 @@ double fRand(double fMin, double fMax)
 
 // Material and particle
 std::string material = "G4_Be";
-std::string gunAmmo = "pi+";
+std::string gunAmmo = "proton";
 
 // List of physics processes
 G4VModularPhysicsList* physicsList = new QBBC;
@@ -63,18 +77,48 @@ G4RunManager* runManager = new G4RunManager;
 // File writer
 std::ofstream ofsResetter;
 
-//~ double l0 = 394.133 / 10.; // L0 of Be in cm
+//~ double l0 = 394.133 / 10. // L0 of Be in cm
+//~ double l0 = 456.603 / 10. // L0 of Si in cm
+
 //~ std::vector<double> mass = {0.1395701, 0.1349766, 0.1395701, 939.56563 * 1e-3, 938.27231 * 1e-3}; // pi-, pi0, pi+, n, p
 
 /// Test the scattering implementation
 BOOST_AUTO_TEST_CASE(step_extension_vacuum_test) {
+/**
+physicsList->RemovePhysics("G4EmStandard");
+physicsList->RemovePhysics("G4GammaLeptoNuclearPhys");
+physicsList->RemovePhysics("Decay");
+physicsList->RemovePhysics("hElasticWEL_CHIPS_XS");
+physicsList->RemovePhysics("stopping");
+physicsList->RemovePhysics("ionInelasticFTFP_BIC");
+physicsList->RemovePhysics("neutronTrackingCut");
+
+G4Gamma::Gamma();
+G4Electron::Electron();
+G4Positron::Positron();
+G4NeutrinoE::NeutrinoE();
+G4AntiNeutrinoE::AntiNeutrinoE();
+
+G4MuonPlus::MuonPlus();
+G4MuonMinus::MuonMinus();
+G4NeutrinoMu::NeutrinoMu();
+G4AntiNeutrinoMu::AntiNeutrinoMu();
+
+G4TauPlus::TauPlus();
+G4TauMinus::TauMinus();
+G4NeutrinoTau::NeutrinoTau();
+G4AntiNeutrinoTau::AntiNeutrinoTau();
+**/
 // Loop over different configurations
-for(unsigned int index = 0; index < 2; index++)
+for(unsigned int index = 0; index < 1; index++) // MODIFIED!
 {
 	// Dice thickness and momentum
 	// L0 will be used by selecting certain materials
-	double detectorThickness = fRand(0.01 * 394.133 / 10., 0.5 * 394.133 / 10.); // 0.01 - 2.
-	double p = fRand(0.5, 4.); // 0.5 - 20.
+//	double detectorThickness = fRand(0.01 * 394.133 / 10., 0.5 * 394.133 / 10.); // 0.01 - 2.
+//	double p = fRand(10., 20.);//0.5, 4.); // 0.5 - 20.
+
+	double detectorThickness = 394.133 / 10.;
+	double p = 50.;
 
 	// Setup of data writing
 	ofsResetter.open("geant4out_" + std::to_string(index) + ".txt");
@@ -94,8 +138,8 @@ for(unsigned int index = 0; index < 2; index++)
 	if(index == 0)
 	{
 		G4Random::setTheEngine(new CLHEP::RanecuEngine);
-		physicsList->SetVerboseLevel(0);
-		runManager->SetVerboseLevel(0);
+		//physicsList->SetVerboseLevel(0);
+		//runManager->SetVerboseLevel(0);
 		runManager->SetUserInitialization(physicsList);
 		runManager->SetUserInitialization(detConstr);
 		runManager->SetUserInitialization(actionInit);
@@ -108,8 +152,8 @@ for(unsigned int index = 0; index < 2; index++)
 	}
 		// Launch
 		runManager->Initialize();
-		UImanager->ApplyCommand("/tracking/verbose 0");
-		runManager->BeamOn(10);
+		//UImanager->ApplyCommand("/tracking/verbose 0");
+		runManager->BeamOn(200000);
 	
 	// Active delete to reduce memory leaks
 	delete(detConstr);
