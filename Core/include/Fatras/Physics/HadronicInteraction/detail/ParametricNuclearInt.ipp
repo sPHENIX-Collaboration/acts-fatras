@@ -271,10 +271,8 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 		ofs << i << " " << energy[i] << std::endl;
 	ofs.close();
 	
-	// TODO: energy unit consistency
 	
 	// TODO: whole function
-	// TODO: boost should be a part of this class
 	
 	//~ unsigned int Npart = particles.size();
   //~ std::vector<double> mom(Npart);
