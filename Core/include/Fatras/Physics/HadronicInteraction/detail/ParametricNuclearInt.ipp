@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "Acts/Utilities/Units.hpp"
 #include <map>
 
 namespace Fatras {
@@ -22,19 +23,19 @@ const double sqrt2pi = std::sqrt(2. * M_PI);
 const std::map<int, std::pair<double, double>> particleData =
 {
 // pi-
-	{-211, std::make_pair(0.1395701 * Acts::units::_GeV, -1.)},
+	{-211, std::make_pair(0.1395701 * Acts::UnitConstants::GeV, -1.)},
 // pi0
-	{111, std::make_pair(0.1349766 * Acts::units::_GeV, 0.)},
+	{111, std::make_pair(0.1349766 * Acts::UnitConstants::GeV, 0.)},
 // K0long
-	{130, std::make_pair(0.497614 * Acts::units::_GeV, 0.)},
+	{130, std::make_pair(0.497614 * Acts::UnitConstants::GeV, 0.)},
 // pi+
-	{211, std::make_pair(0.1395701 * Acts::units::_GeV, 1.)},
+	{211, std::make_pair(0.1395701 * Acts::UnitConstants::GeV, 1.)},
 // K+
-	{321, std::make_pair(0.493677 * Acts::units::_GeV, 1.)},
+	{321, std::make_pair(0.493677 * Acts::UnitConstants::GeV, 1.)},
 // neutron
-	{2112, std::make_pair(939.56563 * Acts::units::_MeV, 0.)},
+	{2112, std::make_pair(939.56563 * Acts::UnitConstants::MeV, 0.)},
 // proton
-	{2212, std::make_pair(938.27231 * Acts::units::_MeV, 1.)}
+	{2212, std::make_pair(938.27231 * Acts::UnitConstants::MeV, 1.)}
 };
 	
 struct Parameters

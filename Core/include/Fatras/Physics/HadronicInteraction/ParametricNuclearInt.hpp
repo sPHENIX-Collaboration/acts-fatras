@@ -9,13 +9,10 @@
 #pragma once
 
 #include "Acts/Utilities/Definitions.hpp"
-#include "Acts/Utilities/Units.hpp"
 #include <math.h>
 #include <vector>
 #include <array>
 #include <list>
-
-#include <iostream>
 
 namespace Fatras {
 
