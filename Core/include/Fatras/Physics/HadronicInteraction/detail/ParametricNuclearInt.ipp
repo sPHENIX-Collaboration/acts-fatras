@@ -134,6 +134,7 @@ const std::map<int, std::array<double, 10>> energyScaling =
 	{1.06923, 2.75259, 5.86034, 13.6034, 42.9559, 58.9314, 69.3068, 78.6077, 87.4014, 95.5143}}
 };
 
+/// Scaling factors of the energy distribution function fitted extrapolation parameters for higher multiplicities
 const std::map<int, std::pair<double, double>> energyScalingFit =
 {
 // pi-
@@ -144,8 +145,22 @@ const std::map<int, std::pair<double, double>> energyScalingFit =
 	{211, std::make_pair(9.92848, 7.64857)},
 // neutron
 	{2112, std::make_pair(1.00611, 9.78219)},
-//proton
+// proton
 	{2212, std::make_pair(8.40378, 8.74162)}
+};
+
+const std::map<int, std::array<double, 6>> thetaParameters =
+{
+// pi-
+	{-211, {0.28118, 0.226549, 0.027127, 0.15234, 0.17351, 0.106461}},
+// pi0
+	{111, {0., 0., 0., 0., 0., 0.}},
+// pi+
+	{211, {0.280964, 0.230181, 0.0207953, 0.134091, 0.18035, 0.122065}},
+// neutron
+	{2112, {0.246799, 0.201138, 0.0291222, 0.142521, 0.204159, 0.141606}},
+// proton
+	{2212, {0.248282, 0.197624, 0.0174567, 0.135244, 0.213525, 0.151874}}
 };
 
 } // namespace detail
@@ -180,17 +195,6 @@ ParametricNuclearInt::particleComposition(generator_t& generator, const int pdg,
 	}
 	
 	return result;
-	
-	// TODO: Don't know about the following lines
-  //~ // move the incoming particle type forward
-  //~ if(particles[0].pdg() != particle.pdg()) 
-    //~ for(unsigned int i = 1; i < particles.size(); i++)
-      //~ if(particles[i].pdg() == particle.pdg())
-      //~ {
-        //~ particles[i] = particles[0];
-        //~ particles[0] = particle;
-        //~ break;
-      //~ }
 }
 
 template<typename generator_t>
@@ -249,10 +253,11 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 	outgoingParticles.reserve(particlesPDGs.size());
 	for(unsigned int i = 0; i < particlesPDGs.size(); i++)
 	{
+		double phi = -M_PI + 2. * M_PI * generator();
 		Acts::Vector3D momentum = particle.momentum().normalized();
-		double absEnergy = energy[i] * particle.E();
-		double totalEnergy = (absEnergy + particle.m() * particle.m());
-		momentum *= std::sqrt(totalEnergy * totalEnergy - particle.m() * particle.m());
+		
+		double kinEnergy = energy[i] * particle.E();
+		momentum *= kinEnergy;
 		
 		const std::pair<double, double>& pData = detail::particleData.at(particlesPDGs[i]);
 		// TODO: angles
@@ -261,7 +266,7 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 											 pData.first,
 											 pData.second,
 											 particlesPDGs[i],
-											 0,
+											 0, // TODO: barcode
 											 particle.time()));
 	}
 
@@ -271,127 +276,6 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 		ofs << i << " " << energy[i] << std::endl;
 	ofs.close();
 	
-	
-	// TODO: whole function
-	
-	//~ unsigned int Npart = particles.size();
-  //~ std::vector<double> mom(Npart);
-  //~ std::vector<double> th(Npart);
-  //~ std::vector<double> ph(Npart);
-
-  //~ // sample first particle energy fraction and random momentum direction
-  //~ double eps = 2. / Npart;
-  //~ double rnd  = generator();
-  //~ mom[0] = 0.5 * pow(eps, rnd);          
-  //~ th[0]  = acos(2 * generator() - 1.);
-  //~ ph[0]  = 2 * M_PI * generator();
-  
-  //~ // toss particles around in a way which preserves the total momentum (0.,0.,0.) at this point
-  //~ // TODO shoot first particle along the impact direction preferentially
-
-  //~ Acts::Vector3D ptemp(mom[0]*sin(th[0])*cos(ph[0]),mom[0]*sin(th[0])*sin(ph[0]),mom[0]*cos(th[0]));
-  //~ double ptot = mom[0];
-  
-  //~ double theta = 0.; double phi = 0.; 
-  //~ for (unsigned int i = 1; i < Npart - 2; i++) 
-  //~ {
-    //~ eps = 1. / (Npart - i); 
-    //~ mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot); 
-    //~ if(ptemp.mag() < 1 - ptot) 
-      //~ while(fabs(ptemp.mag() - mom[i]) > 1 - ptot - mom[i])
-		//~ mom[i] = (eps + generator() * (1 - eps)) * (1 - ptot);
-    
-    //~ // max p remaining
-    //~ double p_rem = 1 - ptot-mom[i];
-    //~ double cthmax = fmin(1.,(-ptemp.mag()*ptemp.mag()-mom[i]*mom[i]+p_rem*p_rem)/2/ptemp.mag()/mom[i]);
-    //~ rnd  = generator();
-    //~ theta = acos( (cthmax+1.)*rnd-1.);          
-    //~ phi = 2 * M_PI * generator();
-    //~ Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-    //~ Acts::RotationMatrix3D rotY, rotZ;
-    //~ rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
-		//~ 0., 1., 0.,
-		//~ -sin(ptemp.theta()), 0., cos(ptemp.theta());
-	//~ rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
-		//~ sin(ptemp.phi()), cos(ptemp.phi()), 0.,
-		//~ 0., 0., 1.;
-    //~ Acts::Vector3D dnewHep = rotZ * rotY * test;
-    //~ Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
-    //~ th[i] = dnew.theta();    
-    //~ ph[i] = dnew.phi();          
-    //~ ptemp += mom[i] * dnew;
-    //~ ptot += mom[i];
-  //~ }
-  
-  //~ eps = 0.5; 
-  //~ mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
-  //~ mom[Npart-1] = 1 - ptot - mom[Npart - 2];
-  
-  //~ if(ptemp.mag() < 1 - ptot) 
-    //~ while(mom[Npart-1]+mom[Npart-2]<ptemp.mag()) 
-    //~ { 
-      //~ mom[Npart-2] = pow(eps, generator()) * (1 - ptot);
-      //~ mom[Npart-1] = 1 - ptot - mom[Npart - 2];
-    //~ }
-    
-  //~ if (ptemp.mag()<fabs(mom[Npart-1]-mom[Npart-2]) ) {
-    //~ double diff = ptemp.mag() * generator();
-    //~ double sum = mom[Npart - 1] - mom[Npart - 2];
-    //~ mom[Npart - 2] = 0.5 * (sum + diff);  
-    //~ mom[Npart - 1] = 0.5 * (sum - diff);  
-  //~ }
-  //~ double cth =(-ptemp.mag()*ptemp.mag()-mom[Npart-2]*mom[Npart-2]+mom[Npart-1]*mom[Npart-1])/2/ptemp.mag()/mom[Npart-2];
-  //~ if (fabs(cth)>1.) cth = (cth>0.) ? 1. : -1.;
-  
-  //~ theta = acos(cth);
-  //~ phi = 2 * M_PI * generator();
-  //~ Acts::Vector3D test(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-    //~ Acts::RotationMatrix3D rotY, rotZ;
-    //~ rotY << cos(ptemp.theta()), 0., sin(ptemp.theta()),
-		 //~ 0., 1., 0.,
-		 //~ -sin(ptemp.theta()), 0., cos(ptemp.theta());
-	//~ rotZ << cos(ptemp.phi()), -sin(ptemp.phi()), 0.,
-		 //~ sin(ptemp.phi()), cos(ptemp.phi()), 0.,
-		 //~ 0., 0., 1.;
-  //~ Acts::Vector3D dnewHep = rotZ * rotY * test;
-  //~ Acts::Vector3D dnew(dnewHep.x(), dnewHep.y(), dnewHep.z());
-  
-  //~ th[Npart - 2]=dnew.theta();    
-  //~ ph[Npart - 2]=dnew.phi();    
-  //~ ptemp += mom[Npart - 2] * dnew;
-  //~ Acts::Vector3D dlast = -ptemp;
-  //~ th[Npart - 1] = dlast.theta(); 
-  //~ ph[Npart - 1] = dlast.phi();
-  
-  
-  //~ // particle sampled, rotate, boost and save final state
-  //~ double etot = 0.;
-  //~ for (unsigned int i = 0; i < Npart; i++) 
-	//~ etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
-  //~ double summ = 0.;
-  //~ for (unsigned int i = 0; i < Npart; i++) 
-	//~ summ += particles[i].m();
-
-  //~ // rescale (roughly) to the expected energy
-  //~ float scale = sqrt(summ*summ+2*summ*particle.p()+particle.m() * particle.m())/etot;
-  //~ etot = 0.;
-  //~ for (unsigned int i = 0; i < Npart; i++) {
-    //~ mom[i] *= scale;
-    //~ etot += sqrt(mom[i] * mom[i] + particles[i].m() * particles[i].m());
-  //~ }
-  
-  //~ // Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boostvector()
-  //~ Acts::Vector3D bv = particle.momentum() / sqrt(etot * etot + particle.p() * particle.p()); // TODO: Why such an energy term?
-  
-  /// New particle structure does not allow setting values in the old way
-  //~ for (unsigned int i = 0; i < Npart; i++) 
-  //~ {
-    //~ Acts::Vector3D dirCms(sin(th[i])*cos(ph[i]),sin(th[i])*sin(ph[i]),cos(th[i])); 
-    //~ particles[i].momentum = mom[i] * dirCms;
-    //~ particles[i].p = particles[i].momentum.mag();
-    //~ particles[i].E = sqrt(mom[i] * mom[i] + particles[i].m * particles[i].m);
-	//~ particles[i].boost(bv);
-  //~ }
   return outgoingParticles;
 }
 
