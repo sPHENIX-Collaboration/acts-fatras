@@ -39,3 +39,10 @@ Fatras::ParametricNuclearInt::energyFraction(const double cProb, const double sc
 	
 	return -ln / (scaling * n - ln);
 }
+
+double
+Fatras::ParametricNuclearInt::cosThetaProbability(double cosTheta, const std::array<double, 6>& fitParameters) const
+{
+	return fitParameters[0] + cosTheta * fitParameters[1] + cosTheta * cosTheta * fitParameters[2] + cosTheta * cosTheta * cosTheta * fitParameters[3] + 
+			cosTheta * cosTheta * cosTheta * cosTheta * fitParameters[4] + cosTheta * cosTheta * cosTheta * cosTheta * cosTheta * fitParameters[5];
+}

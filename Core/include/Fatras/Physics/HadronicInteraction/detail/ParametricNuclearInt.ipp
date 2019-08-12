@@ -241,6 +241,18 @@ ParametricNuclearInt::energyFractions(generator_t& generator, const int pdg, con
 	return result;
 }
 
+template<typename generator_t>
+double
+ParametricNuclearInt::sampleTheta(generator_t& generator, const std::array<double, 6>& fitParameters) const
+{
+	double cosTheta = generator();
+	while(generator() > cosThetaProbability(cosTheta, fitParameters))
+	{
+		cosTheta = generator();
+	}
+	return std::acos(cosTheta);
+}
+
 template<typename generator_t, typename particle_t>
 std::vector<particle_t>
 ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const
@@ -251,16 +263,22 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 	// Produce the particles
 	std::vector<particle_t> outgoingParticles;
 	outgoingParticles.reserve(particlesPDGs.size());
+
+	const std::array<double, 6>& thetaFitParameters = detail::thetaParameters.at(particle.pdg());
+	
 	for(unsigned int i = 0; i < particlesPDGs.size(); i++)
 	{
-		double phi = -M_PI + 2. * M_PI * generator();
-		Acts::Vector3D momentum = particle.momentum().normalized();
+		const double phi = -M_PI + 2. * M_PI * generator();
+		const double theta = sampleTheta(generator, thetaFitParameters);
+		Acts::Vector3D momentum = {std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta)};
 		
-		double kinEnergy = energy[i] * particle.E();
+		//~ Acts::Vector3D momentum = particle.momentum().normalized();
+		
+		const double kinEnergy = energy[i] * particle.E();
 		momentum *= kinEnergy;
 		
 		const std::pair<double, double>& pData = detail::particleData.at(particlesPDGs[i]);
-		// TODO: angles
+
 		outgoingParticles.push_back(particle_t(particle.position(), 
 											 momentum, 
 											 pData.first,
@@ -270,12 +288,6 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 											 particle.time()));
 	}
 
-
-	ofs.open("FatrasEnergies.txt", std::ofstream::app);
-	for(unsigned int i = 0; i < energy.size(); i++)
-		ofs << i << " " << energy[i] << std::endl;
-	ofs.close();
-	
   return outgoingParticles;
 }
 

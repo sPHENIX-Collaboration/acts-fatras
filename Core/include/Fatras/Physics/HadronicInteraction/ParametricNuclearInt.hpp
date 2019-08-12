@@ -116,6 +116,26 @@ template<typename generator_t>
 std::vector<double>
 energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const;
 
+/// @brief Evaluate the probability the receive a certain value for cos(theta)
+///
+/// @param [in] cosTheta The value of cos(theta)
+/// @param [in] fitParameters Fit parameters to evaluate the probability
+///
+/// @return The probability for a certain value of cos(theta)
+double
+cosThetaProbability(double cosTheta, const std::array<double, 6>& fitParameters) const;
+
+/// @brief Sample a theta angle given a set of fit parameters for a certain model
+///
+/// @tparam generator_t data type of the random number generator
+/// @param [in] generator random number generator
+/// @param [in] fitParameters Fit parameters of the underlying model
+///
+/// @return Theta angle
+template<typename generator_t>
+double
+sampleTheta(generator_t& generator, const std::array<double, 6>& fitParameters) const;
+
 /// @brief Creates the kinematics of a list of particles
 ///
 /// @tparam generator_t data type of the random number generator
