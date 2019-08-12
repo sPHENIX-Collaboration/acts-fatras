@@ -16,8 +16,6 @@ namespace detail {
 
 const double sqrt2pi = std::sqrt(2. * M_PI);
 
-//~ constexpr std::array<int, 5> pdgCodes = {-211, 111, 211, 2112, 2212};
-
 /// Look-up table for particles
 /// @note The structure is std::map<PDG id, std::pair<mass, charge>>
 const std::map<int, std::pair<double, double>> particleData = {

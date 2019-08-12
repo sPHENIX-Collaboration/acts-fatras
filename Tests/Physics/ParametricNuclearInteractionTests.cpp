@@ -52,8 +52,8 @@ struct {
 
 // some material
 const Acts::Material berylium = Acts::Material(
-    352.8 * Acts::units::_mm, 421. * Acts::units::_mm, 9.012, 4.,
-    1.848 / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
+    352.8 * Acts::UnitConstants::mm, 421. * Acts::UnitConstants::mm, 9.012, 4.,
+    1.848 / (Acts::UnitConstants::cm * Acts::UnitConstants::cm * Acts::UnitConstants::cm));
 
 /// The selector
 struct Selector {
@@ -70,10 +70,10 @@ BOOST_DATA_TEST_CASE(
     ParametricNuclInt_test_,
     bdata::random((bdata::seed = 23,
                    bdata::distribution = std::uniform_real_distribution<>(
-                       0.1 * Acts::units::_GeV, 4. * Acts::units::_GeV))) ^
+                       0.5 * Acts::units::_GeV, 4. * Acts::units::_GeV))) ^
         bdata::random(
             (bdata::seed = 24,
-             bdata::distribution = std::uniform_real_distribution<>(0.5, 2.))) ^
+             bdata::distribution = std::uniform_real_distribution<>(0.01, 0.5))) ^
         bdata::xrange(10000),
     p, radLengths, index) {
 
