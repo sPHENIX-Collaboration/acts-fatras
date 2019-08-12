@@ -22,12 +22,12 @@
 #include "Acts/Material/MaterialProperties.hpp"
 
 #include "../Common/Particle.hpp"
-#include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
+#include "Fatras/Kernel/Process.hpp"
 #include "Fatras/Physics/HadronicInteraction/ParametricNuclearInt.hpp"
 
-#include <random>
 #include <fstream>
+#include <random>
 
 namespace bdata = boost::unit_test::data;
 namespace tt = boost::test_tools;
@@ -36,26 +36,24 @@ namespace Fatras {
 
 namespace Test {
 
-
 // the generator
 typedef std::mt19937 Generator;
 
-struct
-{
+struct {
 
-double operator()()
-{
-	return (double) m_generator() / (double) (m_generator.max() - m_generator.min());
-}
+  double operator()() {
+    return (double)m_generator() /
+           (double)(m_generator.max() - m_generator.min());
+  }
 
-// standard generator
-Generator m_generator;
+  // standard generator
+  Generator m_generator;
 } myGenerator;
 
 // some material
-const Acts::Material berylium = Acts::Material(352.8 * Acts::units::_mm, 421. * Acts::units::_mm, 9.012, 4.,
-                                         1.848 / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
-
+const Acts::Material berylium = Acts::Material(
+    352.8 * Acts::units::_mm, 421. * Acts::units::_mm, 9.012, 4.,
+    1.848 / (Acts::units::_cm * Acts::units::_cm * Acts::units::_cm));
 
 /// The selector
 struct Selector {
@@ -66,29 +64,29 @@ struct Selector {
     return true;
   }
 };
-       
+
 /// Test the scattering implementation
 BOOST_DATA_TEST_CASE(
     ParametricNuclInt_test_,
-         bdata::random((bdata::seed = 23,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.1 * Acts::units::_GeV, 4. * Acts::units::_GeV))) ^
-         bdata::random((bdata::seed = 24,
-                       bdata::distribution =
-                           std::uniform_real_distribution<>(0.5, 2.))) ^
-         bdata::xrange(10000),
+    bdata::random((bdata::seed = 23,
+                   bdata::distribution = std::uniform_real_distribution<>(
+                       0.1 * Acts::units::_GeV, 4. * Acts::units::_GeV))) ^
+        bdata::random(
+            (bdata::seed = 24,
+             bdata::distribution = std::uniform_real_distribution<>(0.5, 2.))) ^
+        bdata::xrange(10000),
     p, radLengths, index) {
 
-const Acts::MaterialProperties detector(berylium, berylium.L0() * radLengths);
+  const Acts::MaterialProperties detector(berylium, berylium.L0() * radLengths);
 
-	Acts::Vector3D pos{0., 0., 0.};
-	Acts::Vector3D mom{0., 0., p};
-	double mass = 0.1395701 * Acts::units::_GeV;
-	double charge = -1.;
-	int pdg = -211;
-	int barcode = 0.;
-	double time = 0.;
-	Particle particle(pos, mom, mass, charge, pdg, barcode, time);
+  Acts::Vector3D pos{0., 0., 0.};
+  Acts::Vector3D mom{0., 0., p};
+  double mass = 0.1395701 * Acts::units::_GeV;
+  double charge = -1.;
+  int pdg = -211;
+  int barcode = 0.;
+  double time = 0.;
+  Particle particle(pos, mom, mass, charge, pdg, barcode, time);
 
   // Accept everything
   typedef Selector All;
@@ -101,9 +99,7 @@ const Acts::MaterialProperties detector(berylium, berylium.L0() * radLengths);
 
   std::vector<Particle> outgoing;
   physicsList(myGenerator, detector, particle, outgoing);
-
 }
 } // namespace Test
 
 } // namespace Fatras
-

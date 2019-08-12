@@ -120,8 +120,8 @@ struct Simulator {
           chargedInteractor.initialParticle = (*particle);
           // Create the kinematic start parameters
           Acts::CurvilinearParameters start(nullptr, particle->position(),
-                                            particle->momentum(),
-                                            particle->q(), 0);
+                                            particle->momentum(), particle->q(),
+                                            0);
           // Run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions).value();

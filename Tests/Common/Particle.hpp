@@ -8,9 +8,9 @@
 
 #pragma once
 
+#include "Acts/Geometry/GeometryID.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Definitions.hpp"
-#include "Acts/Geometry/GeometryID.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Units.hpp"
 #include <cmath>
@@ -132,21 +132,27 @@ public:
   }
 
   /// @brief Boost the particle
-  /// Source: http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html - boost(double bx, double by, double bz)
+  /// Source:
+  /// http://www.apc.univ-paris7.fr/~franco/g4doxy4.10/html/_lorentz_vector_8cc_source.html
+  /// - boost(double bx, double by, double bz)
   ///
   /// @param boostVector Direction and value of the boost
-  void boost(Acts::Vector3D boostVector)
-  {
-		double b2 = boostVector.squaredNorm();
-		double ggamma = 1.0 / std::sqrt(1.0 - b2);
-		double bp = boostVector.x() * momentum().x() + boostVector.y() * momentum().y() + boostVector.z() * momentum().z();
-		double gamma2 = b2 > 0 ? (ggamma - 1.0) / b2 : 0.0;
-		
-		m_momentum = {momentum().x() + gamma2 * bp * boostVector.x() + ggamma * boostVector.x() * E(),
-					momentum().y() + gamma2 * bp * boostVector.y() + ggamma * boostVector.y() * E(),
-					momentum().z() + gamma2 * bp * boostVector.z() + ggamma * boostVector.z() * E()};
-		m_E = ggamma * (E() + bp);
-	}
+  void boost(Acts::Vector3D boostVector) {
+    double b2 = boostVector.squaredNorm();
+    double ggamma = 1.0 / std::sqrt(1.0 - b2);
+    double bp = boostVector.x() * momentum().x() +
+                boostVector.y() * momentum().y() +
+                boostVector.z() * momentum().z();
+    double gamma2 = b2 > 0 ? (ggamma - 1.0) / b2 : 0.0;
+
+    m_momentum = {momentum().x() + gamma2 * bp * boostVector.x() +
+                      ggamma * boostVector.x() * E(),
+                  momentum().y() + gamma2 * bp * boostVector.y() +
+                      ggamma * boostVector.y() * E(),
+                  momentum().z() + gamma2 * bp * boostVector.z() +
+                      ggamma * boostVector.z() * E()};
+    m_E = ggamma * (E() + bp);
+  }
 
   /// @brief Access methods: position
   const Acts::Vector3D &position() const { return m_position; }
@@ -195,7 +201,7 @@ public:
 
   /// @brief boolean operator indicating the particle to be alive
   operator bool() { return m_alive; }
-  
+
   /// @brief Access methods: Time stamp
   double time() { return m_timeStamp; }
 
