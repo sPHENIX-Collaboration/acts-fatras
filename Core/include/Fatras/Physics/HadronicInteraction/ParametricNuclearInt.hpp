@@ -48,22 +48,22 @@ protected:
 ///
 /// @param [in] momentum Particles momentum in GeV
 /// @param [in] thickness Thickness of the material in terms of L0
-/// @param [in] pdg PDG code of the particle
+/// @param [in] pars Parametrisation 
 ///
 /// @return boolean result if a nuclear interaction occurs
 double 
-nuclearInteractionProb(const double momentum, const double thickness, const int pdg) const;
+nuclearInteractionProb(const double momentum, const double thickness, const std::array<double, 6>& pars) const;
 
 /// @brief Calculates the probability for a certain multiplicity
 ///
 /// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] momentum Particles momentum in GeV
-/// @param [in] pdg PDG code of the particle
+/// @param [in] pars Parametrisation
 /// @param [in] mult Multiplicity of the final state
 ///
 /// @return Probability of the given configuration
 double
-multiplicityProb(const double momentum, const double thickness, const int pdg, const unsigned int mult) const;
+multiplicityProb(const double momentum, const double thickness, const std::array<double, 7>& pars, const unsigned int mult) const;
 
 /// @brief Dices the number of particle candidates that leave the detector
 ///
@@ -73,24 +73,25 @@ multiplicityProb(const double momentum, const double thickness, const int pdg, c
 /// @param [in] generator random number generator
 /// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] particle ingoing particle
+/// @param [in] pars Parametrisation
 ///
 /// @return number of outgoing candidates
 template<typename generator_t, typename particle_t>
 unsigned int
-multiplicity(generator_t& generator, const double thickness, particle_t& particle) const;
+multiplicity(generator_t& generator, const double thickness, particle_t& particle, const std::array<double, 7>& pars) const;
 
 /// @brief Creates the particle types that leave the detector
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
 /// @param [in] generator random number generator
-/// @param [in] pdg PDG code of the ingoing particle
+/// @param [in] particleLookUp Look-up table for PID production probabilities to create
 /// @param [in] nParticles Number of outgoing particles
 ///
 /// @return list of outgoing particle PDGs
 template<typename generator_t>
 std::vector<int>
-particleComposition(generator_t& generator, const int pdg, const unsigned int nParticles) const;
+particleComposition(generator_t& generator, const std::list<std::pair<double, int>>& particleLookUp, const unsigned int nParticles) const;
 
 /// @brief Evaluates the fraction E_{out} / E_{in} of a single outgoing particle
 /// @note This function is based on the inverse sampling method and therefore requires a uniform distributed random number in [0,1].
@@ -107,14 +108,16 @@ energyFraction(const double cProb, const double scaling, const unsigned int n) c
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
+/// @tparam parameters_t Type of the container of parametrizations
 /// @param [in] generator random number generator
 /// @param [in] pdg PDG code of the ingoing particle
 /// @param [in] nParticles Number of outgoing particles
+/// @param [in] params Parametrisations
 ///
 /// @return list of outgoing particle energy fractions E_{out} / E_{in}
-template<typename generator_t>
+template<typename generator_t, typename parameters_t>
 std::vector<double>
-energyFractions(generator_t& generator, const int pdg, const unsigned int nParticles) const;
+energyFractions(generator_t& generator, const parameters_t& params, const unsigned int nParticles) const;
 
 /// @brief Evaluate the probability the receive a certain value for cos(theta)
 ///
@@ -140,32 +143,36 @@ sampleTheta(generator_t& generator, const std::array<double, 6>& fitParameters) 
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
+/// @tparam parameters_t Type of the container of parametrizations
 /// @param [in] generator random number generator
 /// @param [in] particle incoming particle
 /// @param [in] particlePDGs list of created particle PDGs
+/// @param [in] params Parametrisations
 ///
 /// @return vector of outgoing particles
-template<typename generator_t, typename particle_t>
+template<typename generator_t, typename particle_t, typename parameters_t>
 std::vector<particle_t>
-kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs) const;
+kinematics(generator_t& generator, particle_t& particle, const std::vector<int>& particlesPDGs, const parameters_t& params) const;
 
 /// @brief Calculates the hadron interactions of a particle
 ///
 /// @tparam generator_t data type of the random number generator
 /// @tparam particle_t data type of the particle
+/// @tparam parameters_t Type of the container of parametrizations
 /// @param [in] generator random number generator
 /// @param [in] thickness Thickness of the material in terms of L0
 /// @param [in] particle particle that interacts
+/// @param [in] params Parametrisations of the interaction
 ///
 /// @return vector of outgoing particles
-template<typename generator_t, typename particle_t>
+template<typename generator_t, typename particle_t, typename parameters_t>
 std::vector<particle_t> 
-finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle) const;
+finalStateHadrons(generator_t& generator, const double thicknessInL0, particle_t& particle, const parameters_t& params) const;
 };
 
 template<typename generator_t, typename particle_t>
 unsigned int
-ParametricNuclearInt::multiplicity(generator_t& generator, const double thickness, particle_t& particle) const
+ParametricNuclearInt::multiplicity(generator_t& generator, const double thickness, particle_t& particle, const std::array<double, 7>& pars) const
 {
 	const double dice = generator();
 	size_t mult = 0;
@@ -175,7 +182,7 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	// Adding probabilites of the multiplicities
 	while(dice > cumulativeProb)
 	{
-		currentProb = multiplicityProb(particle.p(), thickness, particle.pdg(), mult);
+		currentProb = multiplicityProb(particle.p(), thickness, pars, mult);
 		if(currentProb < 1e-4 || mult > 18) // TODO: are there better cuts?
 			return mult;
 		
@@ -188,34 +195,109 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 }
 
 template<typename generator_t>
+std::vector<int>
+ParametricNuclearInt::particleComposition(generator_t& generator, const std::list<std::pair<double, int>>& particleLookUp, const unsigned int nParticles) const
+{
+	// Setup of result container
+	std::vector<int> result;
+	result.reserve(nParticles);
+	double dice;
+
+	// Find the list of probabilities
+	std::list<std::pair<double, int>>::const_iterator cit;
+
+	// Loop and insert PDG codes
+	while(result.size() < nParticles)
+	{
+		dice = generator();
+		// Search for fitting PDG code
+		for(cit = particleLookUp.begin(); cit != particleLookUp.end(); cit++)
+		{
+			// Insert PGD code
+			if(dice < cit->first)
+			{
+				result.push_back(cit->second);
+				break;
+			}
+		}
+	}
+	
+	return result;
+}
+
+template<typename generator_t, typename parameters_t>
+std::vector<double>
+ParametricNuclearInt::energyFractions(generator_t& generator, const parameters_t& params, const unsigned int nParticles) const
+{
+	// Storage of the resulting energies
+	std::vector<double> result;
+	result.resize(nParticles);
+
+	double eFraction = 0.;
+		
+	// Extract the fit parameters
+	const std::array<double, 10>& scalingFactors = params.energyScaling;
+
+	// Repeat sampling as long as the energies are too big
+	while(true)
+	{
+		double sumFractions = 0.;
+
+		// Sample the energies from distribution and store them
+		for(unsigned int n = 0; n < nParticles; n++)
+		{
+			if(nParticles <= 10)
+			{
+				eFraction = energyFraction(generator(), scalingFactors[n], n + 1);
+			}
+			else
+			{
+				// Extract the fit parameters to estimate the fit parameters for sampling
+				const std::pair<double, double>& fitParameters = params.energyScalingExtrapolation;
+				eFraction = energyFraction(generator(), fitParameters.first + (n + 1) * fitParameters.second, n + 1);
+			}
+			result[n] = eFraction;
+			sumFractions += eFraction;
+		}
+		
+		// Test if energies are <= the initial energy
+		if(sumFractions <= 1.)
+			break;
+	}
+	
+	return result;
+}
+
+template<typename generator_t>
 double
 ParametricNuclearInt::sampleTheta(generator_t& generator, const std::array<double, 6>& fitParameters) const
 {
 	double cosTheta = generator();
+	// Imprtance sampling until condition is fulfilled
 	while(generator() > cosThetaProbability(cosTheta, fitParameters))
 	{
 		cosTheta = generator();
 	}
+	// Return theta
 	return std::acos(cosTheta);
 }
 
-template<typename generator_t, typename particle_t>
+template<typename generator_t, typename particle_t, typename parameters_t>
 std::vector<particle_t> 
-ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
+ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle, const parameters_t& params) const
 {
-
 	// Calculate multiplicity
-	const unsigned int Npart = multiplicity(generator, thickness, particle);
+	const unsigned int Npart = multiplicity(generator, thickness, particle, params.multiplicity);
 
 	// Easy exit if nothing gets out
 	if(Npart == 0)
 		return {};
 
 	// Calculate particle types
-	const std::vector<int> particlePDGs = particleComposition(generator, particle.pdg(), Npart);
+	const std::vector<int> particlePDGs = particleComposition(generator, params.particleTypes, Npart);
 
 	// Calculate the kinematics
-	return kinematics(generator, particle, particlePDGs);
-}	
+	return kinematics(generator, particle, particlePDGs, params);
+}
 } // namespace Fatras
 #include "Fatras/Physics/HadronicInteraction/detail/ParametricNuclearInt.ipp"
