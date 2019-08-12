@@ -16,9 +16,6 @@
 #include <list>
 
 #include <iostream>
-#include <fstream>
-
-std::ofstream ofs;
 
 namespace Fatras {
 
@@ -42,7 +39,7 @@ struct ParametricNuclearInt {
                                      const detector_t &detector,
                                      particle_t &particle) const;
    
-protected:
+private:
 
 /// @brief Calculates the probability of a nuclear interaction
 ///

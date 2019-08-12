@@ -141,18 +141,27 @@ ParametricNuclearInt::kinematics(generator_t& generator, particle_t& particle, c
 	outgoingParticles.reserve(particlesPDGs.size());
 
 	const std::array<double, 6>& thetaFitParameters = params.thetaAngle;
-	
 	for(unsigned int i = 0; i < particlesPDGs.size(); i++)
 	{
+		// Evaluate phi
 		const double phi = -M_PI + 2. * M_PI * generator();
-		const double theta = sampleTheta(generator, thetaFitParameters);
-		Acts::Vector3D momentum = {std::sin(theta) * std::cos(phi), std::sin(theta) * std::sin(phi), std::cos(theta)}; // TODO: rotation is required here
 		
+		// Evaluate theta & add theta(incident particle) to it
+		const double theta = sampleTheta(generator, thetaFitParameters);
+		const double thetaParticle = std::acos(particle.momentum().z() / particle.p());
+		const double thetaSum = (theta + thetaParticle <= M_PI) ? theta + thetaParticle : 2. * M_PI - (theta + thetaParticle);
+		
+		// Build the direction vector
+		Acts::Vector3D momentum = {std::sin(thetaSum) * std::cos(phi), std::sin(thetaSum) * std::sin(phi), std::cos(thetaSum)};
+		
+		// Get the kinetic energy and build the momentum vector
 		const double kinEnergy = energy[i] * particle.E();
 		momentum *= kinEnergy;
 		
+		// Get the mass and the charge
 		const std::pair<double, double>& pData = detail::particleData.at(particlesPDGs[i]);
 
+		// Create the particle
 		outgoingParticles.push_back(particle_t(particle.position(), 
 											 momentum, 
 											 pData.first,
