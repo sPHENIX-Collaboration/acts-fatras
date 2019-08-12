@@ -187,6 +187,18 @@ ParametricNuclearInt::multiplicity(generator_t& generator, const double thicknes
 	return (mult > 0) ? --mult : 0;
 }
 
+template<typename generator_t>
+double
+ParametricNuclearInt::sampleTheta(generator_t& generator, const std::array<double, 6>& fitParameters) const
+{
+	double cosTheta = generator();
+	while(generator() > cosThetaProbability(cosTheta, fitParameters))
+	{
+		cosTheta = generator();
+	}
+	return std::acos(cosTheta);
+}
+
 template<typename generator_t, typename particle_t>
 std::vector<particle_t> 
 ParametricNuclearInt::finalStateHadrons(generator_t& generator, const double thickness, particle_t& particle) const
