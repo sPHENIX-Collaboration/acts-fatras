@@ -65,5 +65,5 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   BOOST_CHECK(l0LimitSelector(detector, pion));
 }
 
-} // end of Test namespace
-} // end of Fatras namespace
+} // namespace Test
+} // namespace Fatras

@@ -62,4 +62,4 @@ template <> struct physics_list_impl<> {
 
 } // namespace detail
 
-} // namespace Acts
+} // namespace Fatras

@@ -111,4 +111,4 @@ template <typename formula_t> struct Scattering {
   }
 };
 
-} // namespace
+} // namespace Fatras

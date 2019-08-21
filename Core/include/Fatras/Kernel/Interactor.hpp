@@ -166,4 +166,4 @@ struct Interactor {
   template <typename propagator_state_t, typename stepper_t>
   void operator()(propagator_state_t &, stepper_t &) const {}
 };
-}
+} // namespace Fatras

@@ -55,4 +55,4 @@ template <typename cast_t> struct Range {
     return (val >= valMin && val <= valMax);
   }
 };
-}
+} // namespace Fatras
