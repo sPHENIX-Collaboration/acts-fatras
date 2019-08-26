@@ -119,9 +119,11 @@ struct Simulator {
           // Put all the additional information into the interactor
           chargedInteractor.initialParticle = (*particle);
           // Create the kinematic start parameters
-          Acts::CurvilinearParameters start(nullptr, particle->position(),
+          Acts::CurvilinearParameters start(std::nullopt,
+                                            particle->position(),
                                             particle->momentum(),
-                                            particle->q(), 0);
+                                            particle->q(),
+                                            0);
           // Run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions).value();
@@ -156,10 +158,10 @@ struct Simulator {
           neutralInteractor.initialParticle = (*particle);
           // Create the kinematic start parameters
           Acts::NeutralCurvilinearParameters start(
-              nullptr, particle->position(), particle->momentum(), 0);
-          const auto &result =
-              neutralPropagator.propagate(start, neutralOptions).value();
-          auto &fatrasResult = result.template get<NeutralResult>();
+              std::nullopt, particle->position(), particle->momentum(), 0);
+          const auto& result
+              = neutralPropagator.propagate(start, neutralOptions).value();
+          auto& fatrasResult = result.template get<NeutralResult>();
           // a) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
