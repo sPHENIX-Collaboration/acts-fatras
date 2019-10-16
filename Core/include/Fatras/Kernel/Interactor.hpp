@@ -121,7 +121,7 @@ struct Interactor {
     auto p = stepper.momentum(state.stepping);
 
     // set the stepping position to the particle
-    result.particle.update(position, p * direction);
+    result.particle.update(position, p * direction, 0., 0., stepper.time(state.stepping));
 
     // Check if the current surrface a senstive one
     bool sensitive = state.navigation.currentSurface
@@ -136,7 +136,6 @@ struct Interactor {
       auto sMaterial = state.navigation.currentSurface->surfaceMaterial();
       const Acts::MaterialProperties &mProperties =
           sMaterial->materialProperties(position);
-
       bool breakIndicator = false;
       if (mProperties) {
         // run the Fatras physics list - only when there's material
@@ -144,16 +143,14 @@ struct Interactor {
                                      result.outgoing);
       }
     }
-
     // Update the stepper cache with the current particle parameters
     position = result.particle.position();
     direction = result.particle.momentum().normalized();
-    stepper.update(state.stepping, position, direction, result.particle.p(), 0);
-
+    stepper.update(state.stepping, position, direction, result.particle.p(), result.particle.time());
     // create the hit on a senstive element
     if (sensitive) {
       // create and fill the hit
-      double htime = 0.; //!< todo calculate from delta time
+      double htime = stepper.time(state.stepping); //!< todo calculate from delta time
       hit_t simHit =
           hitCreator(*state.navigation.currentSurface, position, direction,
                      depositedEnergy, htime, result.particle);

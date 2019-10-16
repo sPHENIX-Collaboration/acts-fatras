@@ -122,7 +122,8 @@ struct Simulator {
           // Create the kinematic start parameters
           Acts::CurvilinearParameters start(std::nullopt, particle->position(),
                                             particle->momentum(), particle->q(),
-                                            0.);
+                                            particle->time());
+
           // Run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions).value();
