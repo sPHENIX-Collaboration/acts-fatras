@@ -101,10 +101,12 @@ struct Simulator {
     for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
-      for (auto particle = vertex.outgoing_begin();
-           particle != vertex.outgoing_end(); ++particle) {
+      for(unsigned int i = 0; i < vertex.outgoing.size(); i++) {
+		  auto particle = vertex.outgoing[i];
+      //~ for (auto particle = vertex.outgoing_begin();
+           //~ particle != vertex.outgoing_end(); ++particle) {
         // charged particle detected and selected
-        if (chargedSelector(detector, *particle)) {
+        if (chargedSelector(detector, particle)) {
           // Need to construct them per call to set the particle
           // Options and configuration
           ChargedOptions chargedOptions(fatrasContext.geoContext,
@@ -118,31 +120,31 @@ struct Simulator {
           // Set the generator to guarantee event consistent entires
           chargedInteractor.generator = &fatrasGenerator;
           // Put all the additional information into the interactor
-          chargedInteractor.initialParticle = (*particle);
+          chargedInteractor.initialParticle = particle;
           // Create the kinematic start parameters
-          Acts::CurvilinearParameters start(std::nullopt, particle->position(),
-                                            particle->momentum(), particle->q(),
-                                            particle->time());
-
+          Acts::CurvilinearParameters start(std::nullopt, particle.position(),
+                                            particle.momentum(), particle.q(),
+                                            particle.time());
           // Run the simulation
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions).value();
-          auto &fatrasResult = result.template get<ChargedResult>();
+          const auto &fatrasResult = result.template get<ChargedResult>();
           // a) Handle the hits
           // hits go to the hit collection, particle go to the particle
           // collection
-          for (auto &fHit : fatrasResult.simulatedHits) {
+          for (const auto &fHit : fatrasResult.simulatedHits) {
             fatrasHits.insert(fHit);
           }
           // b) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
+particle = fatrasResult.particle;
           // c) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
             ACTS_INFO(fatrasDebug.debugString);
           }
-        } else if (neutralSelector(detector, *particle)) {
+        } else if (neutralSelector(detector, particle)) {
           // Options and configuration
           NeutralOptions neutralOptions(fatrasContext.geoContext,
                                         fatrasContext.magFieldContext);
@@ -155,16 +157,17 @@ struct Simulator {
           // Set the generator to guarantee event consistent entires
           neutralInteractor.generator = &fatrasGenerator;
           // Put all the additional information into the interactor
-          neutralInteractor.initialParticle = (*particle);
+          neutralInteractor.initialParticle = particle;
           // Create the kinematic start parameters
           Acts::NeutralCurvilinearParameters start(
-              std::nullopt, particle->position(), particle->momentum(), 0.);
+              std::nullopt, particle.position(), particle.momentum(), 0.);
           const auto &result =
               neutralPropagator.propagate(start, neutralOptions).value();
           auto &fatrasResult = result.template get<NeutralResult>();
           // a) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
+particle = fatrasResult.particle;
           // b) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
