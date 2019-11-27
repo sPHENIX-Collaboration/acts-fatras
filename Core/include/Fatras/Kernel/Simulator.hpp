@@ -102,7 +102,8 @@ struct Simulator {
       // take care here, the simulation can change the
       // particle collection
       for(unsigned int i = 0; i < vertex.outgoing.size(); i++) {
-		  auto& particle = vertex.outgoing[i];
+        // create a local copy since the collection can reallocate and invalidate any reference.
+        auto particle = vertex.outgoing[i];
         // charged particle detected and selected
         if (chargedSelector(detector, particle)) {
           // Need to construct them per call to set the particle
