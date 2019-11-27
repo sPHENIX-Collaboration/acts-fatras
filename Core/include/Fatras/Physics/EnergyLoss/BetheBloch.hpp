@@ -66,7 +66,7 @@ struct BetheBloch {
     double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
                     scaleFactorSigma * energyLossSigma * landau;
     // apply the energy loss
-    particle.energyLoss(energyLoss);
+    particle.energyLoss(deltaE);
 
     // return empty children
     return {};
