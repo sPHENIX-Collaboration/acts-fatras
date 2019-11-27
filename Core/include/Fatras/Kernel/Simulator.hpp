@@ -103,8 +103,6 @@ struct Simulator {
       // particle collection
       for(unsigned int i = 0; i < vertex.outgoing.size(); i++) {
 		  auto particle = vertex.outgoing[i];
-      //~ for (auto particle = vertex.outgoing_begin();
-           //~ particle != vertex.outgoing_end(); ++particle) {
         // charged particle detected and selected
         if (chargedSelector(detector, particle)) {
           // Need to construct them per call to set the particle
@@ -138,7 +136,6 @@ struct Simulator {
           // b) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
-particle = fatrasResult.particle;
           // c) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
@@ -167,7 +164,6 @@ particle = fatrasResult.particle;
           // a) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
-particle = fatrasResult.particle;
           // b) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
