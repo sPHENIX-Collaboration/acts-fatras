@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Acts/Propagator/detail/InteractionFormulas.hpp"
+#include "Acts/Material/Interactions.hpp"
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -24,9 +24,6 @@ struct GeneralMixture {
 
   //- Scale the mixture level
   double genMixtureScalor = 1.;
-
-  /// The Highland formula as a fallback for electrons
-  Acts::detail::HighlandScattering highlandForumla;
 
   /// @brief Call operator to perform this scattering
   ///
@@ -94,8 +91,9 @@ struct GeneralMixture {
 
       // for electrons we fall back to the Highland (extension)
       // return projection factor times sigma times gauss random
-      theta = highlandForumla(particle.p(), particle.beta(), tInX0, true) *
-              gaussDist(generator);
+      double qop = particle.q() / particle.p();
+      double theta = Acts::computeMultipleScatteringTheta0(
+          detector, particle.pdg(), particle.m(), qop);
     }
     // return scaled by sqare root of two
     return M_SQRT2 * theta;

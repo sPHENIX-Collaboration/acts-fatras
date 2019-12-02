@@ -8,8 +8,7 @@
 
 #pragma once
 
-#include "Acts/Propagator/detail/InteractionFormulas.hpp"
-
+#include "Acts/Material/Interactions.hpp"
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -31,9 +30,6 @@ struct BetheBloch {
   /// Scaling for Sigma
   double scaleFactorSigma = 1.;
 
-  /// Bethe-Bloch Ionisation loss formula
-  Acts::detail::IonisationLoss ionisationLoss;
-
   /// @brief Call operator for the Bethe Bloch energy loss
   ///
   /// @tparam generator_t is a random number generator type
@@ -53,20 +49,20 @@ struct BetheBloch {
     // Create a random landau distribution between in the intervall [0,1]
     LandauDist landauDist = LandauDist(0., 1.);
     double landau = landauDist(generator);
+    double qop = particle.q() / particle.p();
 
-    auto eLoss =
-        ionisationLoss.dEds(particle.m(), particle.beta(), particle.gamma(),
-                            detector.material(), detector.thickness(), false);
-    // the actual energy loss
-    double energyLoss = eLoss.first;
-    // the uncertainty of the mean energy loss
-    double energyLossSigma = eLoss.second;
+    // @TODO Double investigate if we could do one call
+    double energyLoss = Acts::computeEnergyLossLandau(detector, particle.pdg(),
+                                                      particle.m(), qop);
+    double energyLossSigma = Acts::computeEnergyLossLandauSigma(
+        detector, particle.pdg(), particle.m(), qop);
 
     // Simulate the energy loss
-    double deltaE = scaleFactorMPV * std::fabs(energyLoss) +
-                    scaleFactorSigma * energyLossSigma * landau;
-    // apply the energy loss
-    particle.energyLoss(deltaE);
+    double sampledEnergyLoss = scaleFactorMPV * std::fabs(energyLoss) +
+                               scaleFactorSigma * energyLossSigma * landau;
+
+    // Apply the energy loss
+    particle.energyLoss(sampledEnergyLoss);
 
     // return empty children
     return {};

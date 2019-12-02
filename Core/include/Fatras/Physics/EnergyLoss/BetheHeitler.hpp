@@ -48,12 +48,12 @@ struct BetheHeitler {
 
     double u = gDist(generator);
     double z = std::exp(-1. * u);
-    double deltaE = std::abs(scaleFactor * particle.E() * (z - 1.));
+    double sampledEnergyLoss = std::abs(scaleFactor * particle.E() * (z - 1.));
 
     // apply the energy loss
-    particle.energyLoss(deltaE);
+    particle.energyLoss(sampledEnergyLoss);
 
-    // todo return photons, needs particle_creator_t
+    // @TODO return photons, needs particle_creator_t
     return {};
   }
 };

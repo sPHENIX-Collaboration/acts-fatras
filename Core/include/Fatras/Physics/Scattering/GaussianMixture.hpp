@@ -8,10 +8,8 @@
 
 #pragma once
 
-#include "Acts/Propagator/detail/InteractionFormulas.hpp"
-
+#include "Acts/Material/Interactions.hpp"
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
-#include "Fatras/Physics/Scattering/Highland.hpp"
 
 namespace Fatras {
 
@@ -34,9 +32,6 @@ struct GaussianMixture {
 
   bool optGaussianMixtureG4 = false;
 
-  /// The Highland formula
-  Acts::detail::HighlandScattering highlandForumla;
-
   /// @brief Call operator to perform this scattering
   ///
   /// @tparam generator_t is a random number generator type
@@ -54,11 +49,12 @@ struct GaussianMixture {
 
     // thickness in X0
     double dInX0 = detector.thickness() / detector.material().X0();
-    bool electron = std::abs(particle.pdg()) == 11;
 
     /// Calculate the highland formula first
-    double sigma =
-        highlandForumla(particle.p(), particle.beta(), dInX0, electron);
+    double qop = particle.q() / particle.p();
+    double sigma = Acts::computeMultipleScatteringTheta0(
+        detector, particle.pdg(), particle.m(), qop);
+
     double sigma2 = sigma * sigma;
 
     // Gauss distribution, will be sampled with generator
@@ -89,12 +85,13 @@ struct GaussianMixture {
                           gausMixSigma1_a2 * log_dprime * log_dprime;
 
     // G4 optimised / native double Gaussian model
-    if (optGaussianMixtureG4)
+    if (optGaussianMixtureG4) {
       sigma2 = 225. * dprime / (particle.p() * particle.p());
+    }
     // throw the random number core/tail
-    if (uniformDist(generator) < epsilon)
+    if (uniformDist(generator) < epsilon) {
       sigma2 *= (1. - (1. - epsilon) * sigma1square) / epsilon;
-
+    }
     // return back to the
     return M_SQRT2 * std::sqrt(sigma2) * gaussDist(generator);
   }

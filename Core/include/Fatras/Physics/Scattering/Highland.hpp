@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Acts/Propagator/detail/InteractionFormulas.hpp"
+#include "Acts/Material/Interactions.hpp"
 #include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
@@ -18,9 +18,6 @@ namespace Fatras {
 /// This will scatter particles with a single gaussian distribution
 /// according to the highland formula.
 struct Highland {
-
-  /// The highland formula
-  Acts::detail::HighlandScattering highlandForumla;
 
   /// @brief Call operator to perform this scattering
   ///
@@ -40,14 +37,11 @@ struct Highland {
     // Gauss distribution, will be sampled sampled with generator
     GaussDist gaussDist = GaussDist(0., 1.);
 
-    /// thickness in X0
-    double dInX0 = detector.thickness() / detector.material().X0();
-    bool electron = std::abs(particle.pdg()) == 11;
-
-    // return projection factor times sigma times grauss radnom
-    return M_SQRT2 *
-           highlandForumla(particle.p(), particle.beta(), dInX0, electron) *
-           gaussDist(generator);
+    double qop = particle.q() / particle.p();
+    double theta0 = Acts::computeMultipleScatteringTheta0(
+        detector, particle.pdg(), particle.m(), qop);
+    // Return projection factor times sigma times grauss random
+    return M_SQRT2 * theta0 * gaussDist(generator);
   }
 };
 
