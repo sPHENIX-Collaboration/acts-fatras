@@ -24,8 +24,7 @@ add_subdirectory(Tests)
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   cmake/ActsFatrasConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
+  "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake")
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
   DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
