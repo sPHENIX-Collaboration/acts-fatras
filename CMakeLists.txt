@@ -23,11 +23,11 @@ add_subdirectory(Tests)
 # CMake package configuration files
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  cmake/FatrasConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/FatrasConfig.cmake"
+  cmake/ActsFatrasConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/FatrasConfig.cmake"
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/ActsFatrasConfig.cmake"
   DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/cmake")
 install(
   EXPORT ActsFatrasTargets
