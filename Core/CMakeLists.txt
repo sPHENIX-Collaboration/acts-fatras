@@ -1,20 +1,24 @@
-add_library(FatrasCore SHARED src/RandomNumberDistributions.cpp)
+add_library(
+  ActsFatras SHARED
+  src/RandomNumberDistributions.cpp)
+# set per-target c++17 requirement that will be propagated to linked targets
+target_compile_features(
+  ActsFatras
+  PUBLIC cxx_std_17)
+target_include_directories(
+  ActsFatras
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+target_link_libraries(
+  ActsFatras
+  PUBLIC ActsCore)
 
-# prefix output library file name with Acts
-set_target_properties(FatrasCore PROPERTIES OUTPUT_NAME "FatrasCore")
-
-# main library
-target_include_directories(FatrasCore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:include>)
-target_link_libraries(FatrasCore PUBLIC ActsCore)
-set_target_properties(FatrasCore PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE)
-
-# install library and include files to default directories
 install(
-  TARGETS FatrasCore
-  EXPORT FatrasTargets
+  TARGETS ActsFatras
+  EXPORT ActsFatrasTargets
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
   DIRECTORY include/Fatras
-DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Fatras)
-target_include_directories(FatrasCore PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Fatras)
