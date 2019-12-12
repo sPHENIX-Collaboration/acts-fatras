@@ -12,12 +12,6 @@
 
 namespace Fatras {
 
-/// The following standard random number distributions are supported:
-///
-using GaussDist   = std::normal_distribution<double>;        ///< Normal
-using UniformDist = std::uniform_real_distribution<double>;  ///< Uniform
-using GammaDist   = std::gamma_distribution<double>;         ///< Gamma
-using PoissonDist = std::poisson_distribution<int>;          ///< Poisson
 ///
 /// In addition, the Landau distribution is provided
 ///
