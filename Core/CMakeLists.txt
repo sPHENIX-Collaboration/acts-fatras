@@ -1,6 +1,6 @@
 add_library(
   ActsFatras SHARED
-  src/RandomNumberDistributions.cpp)
+  src/LandauDistribution.cpp)
 # set per-target c++17 requirement that will be propagated to linked targets
 target_compile_features(
   ActsFatras

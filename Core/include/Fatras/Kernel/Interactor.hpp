@@ -8,23 +8,27 @@
 
 #pragma once
 
+#include <climits>
+#include <cmath>
+#include <sstream>
+#include <utility>
+
 #include "Acts/Material/ISurfaceMaterial.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialProperties.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Fatras/Kernel/PhysicsList.hpp"
-#include "detail/RandomNumberDistributions.hpp"
-#include <climits>
-#include <cmath>
-#include <sstream>
-#include <utility>
 
 namespace Fatras {
 
-struct VoidSelector {
-
-  bool operator()(const Acts::Surface &) const { return false; }
+struct VoidSelector
+{
+  bool
+  operator()(const Acts::Surface&) const
+  {
+    return false;
+  }
 };
 
 /// The Fatras Interactor
@@ -45,14 +49,16 @@ struct VoidSelector {
 /// it is called on each process that is defined at compile time
 /// if a process triggers an abort, this will be forwarded to
 /// the propagation cache.
-template <typename generator_t, typename particle_t, typename hit_t,
-          typename hit_creator_t, typename sensitive_selector_t = VoidSelector,
-          typename physics_list_t = PhysicsList<>>
-struct Interactor {
-  using PhysicsList_t = physics_list_t;
-
+template <typename generator_t,
+          typename particle_t,
+          typename hit_t,
+          typename hit_creator_t,
+          typename sensitive_selector_t = VoidSelector,
+          typename physics_list_t       = PhysicsList<>>
+struct Interactor
+{
   /// The random generator to be spawnper event
-  generator_t *generator = nullptr;
+  generator_t* generator = nullptr;
 
   /// The slector for sensitive surfaces
   sensitive_selector_t sensitiveSelector;
@@ -68,8 +74,8 @@ struct Interactor {
 
   /// It mainly acts as an internal state cache which is
   /// created for every propagation/extrapolation step
-  struct this_result {
-
+  struct this_result
+  {
     /// result initialization
     bool initialized = false;
 
@@ -103,61 +109,68 @@ struct Interactor {
   /// return value is void as it is a standard actor in the
   /// propagation
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t &state, stepper_t &stepper,
-                  result_type &result) const {
-
+  void
+  operator()(propagator_state_t& state,
+             stepper_t&          stepper,
+             result_type&        result) const
+  {
     // If we are on target, everything should have been done
-    if (state.navigation.targetReached)
-      return;
+    if (state.navigation.targetReached) return;
 
     // Initialize the result, the state is thread local
     if (!result.initialized) {
       // set the initial particle parameters
-      result.particle = initialParticle;
+      result.particle    = initialParticle;
       result.initialized = true;
     }
     // get position and momentum presetp
-    auto position = stepper.position(state.stepping);
+    auto position  = stepper.position(state.stepping);
     auto direction = stepper.direction(state.stepping);
-    auto p = stepper.momentum(state.stepping);
+    auto p         = stepper.momentum(state.stepping);
 
     // set the stepping position to the particle
-    result.particle.update(position, p * direction, 0., 0.,
-                           stepper.time(state.stepping));
+    result.particle.update(
+        position, p * direction, 0., 0., stepper.time(state.stepping));
 
     // Check if the current surrface a senstive one
     bool sensitive = state.navigation.currentSurface
-                         ? sensitiveSelector(*state.navigation.currentSurface)
-                         : false;
+        ? sensitiveSelector(*state.navigation.currentSurface)
+        : false;
     double depositedEnergy = 0.;
 
     // a current surface has been assigned by the navigator
-    if (state.navigation.currentSurface &&
-        state.navigation.currentSurface->surfaceMaterial()) {
+    if (state.navigation.currentSurface
+        && state.navigation.currentSurface->surfaceMaterial()) {
       // get the surface material and the corresponding material properties
       auto sMaterial = state.navigation.currentSurface->surfaceMaterial();
-      const Acts::MaterialProperties &mProperties =
-          sMaterial->materialProperties(position);
+      const Acts::MaterialProperties& mProperties
+          = sMaterial->materialProperties(position);
       bool breakIndicator = false;
       if (mProperties) {
         // run the Fatras physics list - only when there's material
-        breakIndicator = physicsList(*generator, mProperties, result.particle,
-                                     result.outgoing);
+        breakIndicator = physicsList(
+            *generator, mProperties, result.particle, result.outgoing);
       }
     }
     // Update the stepper cache with the current particle parameters
-    position = result.particle.position();
+    position  = result.particle.position();
     direction = result.particle.momentum().normalized();
-    stepper.update(state.stepping, position, direction, result.particle.p(),
+    stepper.update(state.stepping,
+                   position,
+                   direction,
+                   result.particle.p(),
                    result.particle.time());
     // create the hit on a senstive element
     if (sensitive) {
       // create and fill the hit
-      double htime =
-          stepper.time(state.stepping); //!< todo calculate from delta time
-      hit_t simHit =
-          hitCreator(*state.navigation.currentSurface, position, direction,
-                     depositedEnergy, htime, result.particle);
+      double htime
+          = stepper.time(state.stepping);  //!< todo calculate from delta time
+      hit_t simHit = hitCreator(*state.navigation.currentSurface,
+                                position,
+                                direction,
+                                depositedEnergy,
+                                htime,
+                                result.particle);
       result.simulatedHits.push_back(std::move(simHit));
     }
   }
@@ -165,6 +178,9 @@ struct Interactor {
   /// Pure observer interface
   /// This does not apply to the Fatras simulator
   template <typename propagator_state_t, typename stepper_t>
-  void operator()(propagator_state_t &, stepper_t &) const {}
+  void
+  operator()(propagator_state_t&, stepper_t&) const
+  {
+  }
 };
-} // namespace Fatras
+}  // namespace Fatras

@@ -9,7 +9,8 @@
 #pragma once
 
 #include "Acts/Material/Interactions.hpp"
-#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
+
+#include "Fatras/Kernel/detail/LandauDistribution.hpp"
 
 namespace Fatras {
 
