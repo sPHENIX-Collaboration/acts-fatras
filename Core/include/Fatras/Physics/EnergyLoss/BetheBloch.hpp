@@ -22,7 +22,8 @@ namespace Fatras {
 /// that could return radiated photons for further processing,
 /// however, for the Bethe-Bloch application the return vector
 /// is always 0.
-struct BetheBloch {
+struct BetheBloch
+{
 
   /// The flag to include BetheBloch process or not
   bool betheBloch = true;
@@ -45,19 +46,19 @@ struct BetheBloch {
   ///
   /// @return empty vector for BetheBloch - no secondaries created
   template <typename generator_t, typename detector_t, typename particle_t>
-  std::vector<particle_t> operator()(generator_t &generator,
-                                     const detector_t &detector,
-                                     particle_t &particle) const {
+  std::vector<particle_t>
+  operator()(generator_t&      generator,
+             const detector_t& detector,
+             particle_t&       particle) const
+  {
 
     // Do nothing if the flag is set to false
-    if (not betheBloch) {
-      return {};
-    }
+    if (not betheBloch) { return {}; }
 
     // Create a random landau distribution between in the intervall [0,1]
-    LandauDist landauDist = LandauDist(0., 1.);
-    double landau = landauDist(generator);
-    double qop = particle.q() / particle.p();
+    LandauDist landauDist(0., 1.);
+    double     landau = landauDist(generator);
+    double     qop    = particle.q() / particle.p();
 
     // @TODO Double investigate if we could do one call
     double energyLoss = Acts::computeEnergyLossLandau(
@@ -66,8 +67,8 @@ struct BetheBloch {
         detector, particle.pdg(), particle.m(), qop, particle.q());
 
     // Simulate the energy loss
-    double sampledEnergyLoss = scaleFactorMPV * std::fabs(energyLoss) +
-                               scaleFactorSigma * energyLossSigma * landau;
+    double sampledEnergyLoss = scaleFactorMPV * std::fabs(energyLoss)
+        + scaleFactorSigma * energyLossSigma * landau;
 
     // Apply the energy loss
     particle.energyLoss(sampledEnergyLoss);
@@ -77,4 +78,4 @@ struct BetheBloch {
   }
 };
 
-} // namespace Fatras
+}  // namespace Fatras

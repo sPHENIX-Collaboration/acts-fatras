@@ -8,11 +8,10 @@
 
 #pragma once
 
-#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
+#include <cmath>
+#include <random>
 
 namespace Fatras {
-
-const double log_2 = std::log(2.);
 
 /// The struct for the EnergyLoss physics list
 ///
@@ -20,7 +19,8 @@ const double log_2 = std::log(2.);
 /// "A Gaussian-mixture approximation of the Bethe–Heitler model of electron
 /// energy loss by bremsstrahlung" R. Frühwirth
 ///
-struct BetheHeitler {
+struct BetheHeitler
+{
 
   /// The flag to include BetheHeitler process or not
   bool betheHeitler = true;
@@ -40,22 +40,21 @@ struct BetheHeitler {
   ///
   /// @return eventually produced photons
   template <typename generator_t, typename detector_t, typename particle_t>
-  std::vector<particle_t> operator()(generator_t &generator,
-                                     const detector_t &detector,
-                                     particle_t &particle) const {
-
+  std::vector<particle_t>
+  operator()(generator_t&      generator,
+             const detector_t& detector,
+             particle_t&       particle) const
+  {
     // Do nothing if the flag is set to false
-    if (not betheHeitler) {
-      return {};
-    }
+    if (not betheHeitler) { return {}; }
 
     double tInX0 = detector.thickness() / detector.material().X0();
 
     // Take a random gamma-distributed value - depending on t/X0
-    GammaDist gDist = GammaDist(tInX0 / log_2, 1.);
+    std::gamma_distribution<double> gDist(tInX0 / std::log(2.), 1.);
 
-    double u = gDist(generator);
-    double z = std::exp(-1. * u);
+    double u                 = gDist(generator);
+    double z                 = std::exp(-1. * u);
     double sampledEnergyLoss = std::abs(scaleFactor * particle.E() * (z - 1.));
 
     // apply the energy loss
@@ -66,4 +65,4 @@ struct BetheHeitler {
   }
 };
 
-} // namespace Fatras
+}  // namespace Fatras

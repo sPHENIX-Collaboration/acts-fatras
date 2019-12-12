@@ -8,21 +8,24 @@
 
 #pragma once
 
+#include <cmath>
+#include <random>
+
 #include "Acts/Material/Interactions.hpp"
-#include "Fatras/Kernel/detail/RandomNumberDistributions.hpp"
 
 namespace Fatras {
 
 /// @brief The struct to be provided to the Scatterer action
 /// This is the gaussian mixture
-struct GaussianMixture {
+struct GaussianMixture
+{
 
   /// Steering parameter
   bool log_include = true;
 
-  double gausMixSigma1_a0 = 8.471e-1;
-  double gausMixSigma1_a1 = 3.347e-2;
-  double gausMixSigma1_a2 = -1.843e-3;
+  double gausMixSigma1_a0  = 8.471e-1;
+  double gausMixSigma1_a1  = 3.347e-2;
+  double gausMixSigma1_a2  = -1.843e-3;
   double gausMixEpsilon_a0 = 4.841e-2;
   double gausMixEpsilon_a1 = 6.348e-3;
   double gausMixEpsilon_a2 = 6.096e-4;
@@ -44,45 +47,46 @@ struct GaussianMixture {
   ///
   /// @return a scattering angle in 3D
   template <typename generator_t, typename detector_t, typename particle_t>
-  double operator()(generator_t &generator, const detector_t &detector,
-                    particle_t &particle) const {
+  double
+  operator()(generator_t&      generator,
+             const detector_t& detector,
+             particle_t&       particle) const
+  {
 
     // thickness in X0
     double dInX0 = detector.thickness() / detector.material().X0();
 
     /// Calculate the highland formula first
-    double qop = particle.q() / particle.p();
+    double qop   = particle.q() / particle.p();
     double sigma = Acts::computeMultipleScatteringTheta0(
         detector, particle.pdg(), particle.m(), qop);
 
     double sigma2 = sigma * sigma;
 
     // Gauss distribution, will be sampled with generator
-    GaussDist gaussDist = GaussDist(0., 1.);
-
+    std::normal_distribution<double> gaussDist(0., 1.);
     // Uniform distribution, will be sampled with generator
-    UniformDist uniformDist = UniformDist(0., 1.);
+    std::uniform_real_distribution<double> uniformDist(0., 1.);
 
     // Now correct for the tail fraction
     // d_0'
-    double beta2 = particle.beta() * particle.beta();
+    double beta2  = particle.beta() * particle.beta();
     double dprime = detector.thickness() / (detector.material().X0() * beta2);
     double log_dprime = std::log(dprime);
     // d_0''
-    double log_dprimeprime =
-        std::log(std::pow(detector.material().Z(), 2.0 / 3.0) * dprime);
+    double log_dprimeprime
+        = std::log(std::pow(detector.material().Z(), 2.0 / 3.0) * dprime);
 
     // get epsilon
-    double epsilon =
-        log_dprimeprime < 0.5
-            ? gausMixEpsilon_a0 + gausMixEpsilon_a1 * log_dprimeprime +
-                  gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
-            : gausMixEpsilon_b0 + gausMixEpsilon_b1 * log_dprimeprime +
-                  gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
+    double epsilon = log_dprimeprime < 0.5
+        ? gausMixEpsilon_a0 + gausMixEpsilon_a1 * log_dprimeprime
+            + gausMixEpsilon_a2 * log_dprimeprime * log_dprimeprime
+        : gausMixEpsilon_b0 + gausMixEpsilon_b1 * log_dprimeprime
+            + gausMixEpsilon_b2 * log_dprimeprime * log_dprimeprime;
 
     // the standard sigma
-    double sigma1square = gausMixSigma1_a0 + gausMixSigma1_a1 * log_dprime +
-                          gausMixSigma1_a2 * log_dprime * log_dprime;
+    double sigma1square = gausMixSigma1_a0 + gausMixSigma1_a1 * log_dprime
+        + gausMixSigma1_a2 * log_dprime * log_dprime;
 
     // G4 optimised / native double Gaussian model
     if (optGaussianMixtureG4) {
@@ -97,4 +101,4 @@ struct GaussianMixture {
   }
 };
 
-} // namespace Fatras
+}  // namespace Fatras
