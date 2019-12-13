@@ -13,6 +13,7 @@
 #include "Acts/Propagator/AbortList.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/SurfaceCollector.hpp"
 #include "Acts/Propagator/detail/DebugOutputActor.hpp"
 #include "Acts/Propagator/detail/StandardAborters.hpp"
 #include "Acts/Utilities/Logger.hpp"
@@ -74,23 +75,26 @@ struct Simulator {
   /// @param fatrasEvent is the truth event collection
   /// @param fatrasHits is the hit collection
   template <typename context_t, typename generator_t,
-            typename event_collection_t, typename hit_collection_t>
+            typename event_collection_t, typename hit_collection_t,
+            typename surface_collection_t>
   void operator()(context_t &fatrasContext, generator_t &fatrasGenerator,
-                  event_collection_t &fatrasEvent,
-                  hit_collection_t &fatrasHits) const {
+                  event_collection_t &fatrasEvent, hit_collection_t &fatrasHits,
+                  surface_collection_t &fatrasSurfaces) const {
 
     // if screen output is required
     typedef Acts::detail::DebugOutputActor DebugOutput;
 
     // Action list, abort list and options
-    typedef Acts::ActionList<charged_interactor_t, DebugOutput>
+    typedef Acts::ActionList<Acts::SurfaceCollector<>, charged_interactor_t,
+                             DebugOutput>
         ChargedActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> ChargedAbortList;
     typedef Acts::PropagatorOptions<ChargedActionList, ChargedAbortList>
         ChargedOptions;
 
     // Action list, abort list and
-    typedef Acts::ActionList<neutral_interactor_t, DebugOutput>
+    typedef Acts::ActionList<Acts::SurfaceCollector<>, neutral_interactor_t,
+                             DebugOutput>
         NeutralActionList;
     typedef Acts::AbortList<Acts::detail::EndOfWorldReached> NeutralAbortList;
     typedef Acts::PropagatorOptions<NeutralActionList, NeutralAbortList>
@@ -101,8 +105,9 @@ struct Simulator {
     for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
-      for(std::size_t i = 0; i < vertex.outgoing.size(); i++) {
-        // create a local copy since the collection can reallocate and invalidate any reference.
+      for (std::size_t i = 0; i < vertex.outgoing.size(); i++) {
+        // create a local copy since the collection can reallocate and
+        // invalidate any reference.
         auto particle = vertex.outgoing[i];
         // charged particle detected and selected
         if (chargedSelector(detector, particle)) {
@@ -120,6 +125,12 @@ struct Simulator {
           chargedInteractor.generator = &fatrasGenerator;
           // Put all the additional information into the interactor
           chargedInteractor.initialParticle = particle;
+          // Surface collector configuration
+          auto &sCollector = chargedOptions.actionList
+                                 .template get<Acts::SurfaceCollector<>>();
+          sCollector.selector.selectSensitive = true;
+          sCollector.selector.selectMaterial = true;
+
           // Create the kinematic start parameters
           Acts::CurvilinearParameters start(std::nullopt, particle.position(),
                                             particle.momentum(), particle.q(),
@@ -128,20 +139,35 @@ struct Simulator {
           const auto &result =
               chargedPropagator.propagate(start, chargedOptions).value();
           const auto &fatrasResult = result.template get<ChargedResult>();
+          // Collect the surfaces
+          const auto &cSurfaces =
+              result.template get<Acts::SurfaceCollector<>::result_type>();
+
           // a) Handle the hits
           // hits go to the hit collection, particle go to the particle
           // collection
           for (const auto &fHit : fatrasResult.simulatedHits) {
             fatrasHits.insert(fHit);
           }
+
           // b) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
-          // c) screen output if requested
+
+          // c) deal with the surface sequence
+          std::vector<const Acts::Surface *> sSequence;
+          sSequence.reserve(cSurfaces.collected.size());
+          for (const auto &cs : cSurfaces.collected) {
+            sSequence.push_back(cs.surface);
+          }
+          fatrasSurfaces.insert_or_assign(particle.barcode(), sSequence);
+
+          // d) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
             ACTS_INFO(fatrasDebug.debugString);
           }
+
         } else if (neutralSelector(detector, particle)) {
           // Options and configuration
           NeutralOptions neutralOptions(fatrasContext.geoContext,
@@ -156,16 +182,37 @@ struct Simulator {
           neutralInteractor.generator = &fatrasGenerator;
           // Put all the additional information into the interactor
           neutralInteractor.initialParticle = particle;
+          // Surface collector configuration
+          auto &sCollector = neutralOptions.actionList
+                                 .template get<Acts::SurfaceCollector<>>();
+          sCollector.selector.selectSensitive = true;
+          sCollector.selector.selectMaterial = true;
+
           // Create the kinematic start parameters
           Acts::NeutralCurvilinearParameters start(
               std::nullopt, particle.position(), particle.momentum(), 0.);
+
+          // Run the simulation
           const auto &result =
               neutralPropagator.propagate(start, neutralOptions).value();
-          auto &fatrasResult = result.template get<NeutralResult>();
+          const auto &fatrasResult = result.template get<NeutralResult>();
+          // Collect the surfaces
+          const auto &cSurfaces =
+              result.template get<Acts::SurfaceCollector<>::result_type>();
+
           // a) deal with the particles
           const auto &simparticles = fatrasResult.outgoing;
           vertex.outgoing_insert(simparticles);
-          // b) screen output if requested
+
+          // b) deal with the surface sequence
+          std::vector<const Acts::Surface *> sSequence;
+          sSequence.reserve(cSurfaces.collected.size());
+          for (const auto &cs : cSurfaces.collected) {
+            sSequence.push_back(cs.surface);
+          }
+          fatrasSurfaces.insert_or_assign(particle.barcode(), sSequence);
+
+          // c) screen output if requested
           if (debug) {
             auto &fatrasDebug = result.template get<DebugOutput::result_type>();
             ACTS_INFO(fatrasDebug.debugString);
