@@ -60,10 +60,10 @@ struct BetheBloch {
     double qop = particle.q() / particle.p();
 
     // @TODO Double investigate if we could do one call
-    double energyLoss = Acts::computeEnergyLossLandau(detector, particle.pdg(),
-                                                      particle.m(), qop);
+    double energyLoss = Acts::computeEnergyLossLandau(
+        detector, particle.pdg(), particle.m(), qop, particle.q());
     double energyLossSigma = Acts::computeEnergyLossLandauSigma(
-        detector, particle.pdg(), particle.m(), qop);
+        detector, particle.pdg(), particle.m(), qop, particle.q());
 
     // Simulate the energy loss
     double sampledEnergyLoss = scaleFactorMPV * std::fabs(energyLoss) +

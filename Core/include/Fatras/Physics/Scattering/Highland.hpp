@@ -39,7 +39,7 @@ struct Highland {
 
     double qop = particle.q() / particle.p();
     double theta0 = Acts::computeMultipleScatteringTheta0(
-        detector, particle.pdg(), particle.m(), qop);
+        detector, particle.pdg(), particle.m(), qop, particle.q());
     // Return projection factor times sigma times grauss random
     return M_SQRT2 * theta0 * gaussDist(generator);
   }
