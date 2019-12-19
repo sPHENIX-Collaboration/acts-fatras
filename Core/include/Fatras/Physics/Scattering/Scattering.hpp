@@ -28,6 +28,9 @@ namespace Fatras {
 /// - an actuall out of direction scattering applying two random numbers
 template <typename formula_t> struct Scattering {
 
+  /// The flag to include scattering or not
+  bool scattering = true;
+
   /// Include the log term
   bool parametric = false;
   double projectionFactor = 1. / std::sqrt(2.);
@@ -39,6 +42,11 @@ template <typename formula_t> struct Scattering {
   template <typename generator_t, typename detector_t, typename particle_t>
   std::vector<particle_t> operator()(generator_t &gen, const detector_t &det,
                                      particle_t &in) const {
+
+    // Do nothing if the flag is set to false
+    if (not scattering) {
+      return {};
+    }
 
     // 3D scattering angle
     double angle3D = angle(gen, det, in);

@@ -24,6 +24,9 @@ namespace Fatras {
 /// is always 0.
 struct BetheBloch {
 
+  /// The flag to include BetheBloch process or not
+  bool betheBloch = true;
+
   /// Scaling for most probable value
   double scaleFactorMPV = 1.;
 
@@ -45,6 +48,11 @@ struct BetheBloch {
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
+
+    // Do nothing if the flag is set to false
+    if (not betheBloch) {
+      return {};
+    }
 
     // Create a random landau distribution between in the intervall [0,1]
     LandauDist landauDist = LandauDist(0., 1.);

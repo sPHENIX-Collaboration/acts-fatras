@@ -45,13 +45,13 @@ struct Simulator {
         neutralPropagator(std::move(npropagator)),
         mlogger(Acts::getDefaultLogger("Simulator", Acts::Logging::INFO)) {}
 
+  using PhysicsList_t = typename charged_interactor_t::PhysicsList_t;
   charged_propagator_t chargedPropagator;
   charged_selector_t chargedSelector;
-  charged_interactor_t chargedInteractor;
+  PhysicsList_t physicsList;
 
   neutral_propagator_t neutralPropagator;
   neutral_selector_t neutralSelector;
-  neutral_interactor_t neutralInteractor;
 
   VoidDetector detector;
 
@@ -101,8 +101,9 @@ struct Simulator {
     for (auto &vertex : fatrasEvent) {
       // take care here, the simulation can change the
       // particle collection
-      for(std::size_t i = 0; i < vertex.outgoing.size(); i++) {
-        // create a local copy since the collection can reallocate and invalidate any reference.
+      for (std::size_t i = 0; i < vertex.outgoing.size(); i++) {
+        // create a local copy since the collection can reallocate and
+        // invalidate any reference.
         auto particle = vertex.outgoing[i];
         // charged particle detected and selected
         if (chargedSelector(detector, particle)) {
@@ -120,6 +121,8 @@ struct Simulator {
           chargedInteractor.generator = &fatrasGenerator;
           // Put all the additional information into the interactor
           chargedInteractor.initialParticle = particle;
+          // Set the physics list
+          chargedInteractor.physicsList = physicsList;
           // Create the kinematic start parameters
           Acts::CurvilinearParameters start(std::nullopt, particle.position(),
                                             particle.momentum(), particle.q(),

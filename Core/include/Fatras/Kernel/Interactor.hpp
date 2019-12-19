@@ -49,6 +49,7 @@ template <typename generator_t, typename particle_t, typename hit_t,
           typename hit_creator_t, typename sensitive_selector_t = VoidSelector,
           typename physics_list_t = PhysicsList<>>
 struct Interactor {
+  using PhysicsList_t = physics_list_t;
 
   /// The random generator to be spawnper event
   generator_t *generator = nullptr;

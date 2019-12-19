@@ -22,6 +22,9 @@ const double log_2 = std::log(2.);
 ///
 struct BetheHeitler {
 
+  /// The flag to include BetheHeitler process or not
+  bool betheHeitler = true;
+
   /// A scaling factor to
   double scaleFactor = 1.;
 
@@ -40,6 +43,11 @@ struct BetheHeitler {
   std::vector<particle_t> operator()(generator_t &generator,
                                      const detector_t &detector,
                                      particle_t &particle) const {
+
+    // Do nothing if the flag is set to false
+    if (not betheHeitler) {
+      return {};
+    }
 
     double tInX0 = detector.thickness() / detector.material().X0();
 
