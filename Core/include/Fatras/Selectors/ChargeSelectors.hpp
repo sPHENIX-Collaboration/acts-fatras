@@ -8,38 +8,52 @@
 
 #pragma once
 
+#include "Fatras/EventData/Particle.hpp"
+
 namespace Fatras {
 
-struct ChargedSelector {
+struct ChargedSelector
+{
   /// Return true for all particles with charge != 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() * particle.q() > 0.);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.charge() != 0);
   }
 };
 
-struct NeutralSelector {
+struct NeutralSelector
+{
   /// Return true for all particles with charge == 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() == 0.);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.charge() == 0);
   }
 };
 
-struct PositiveSelector {
+struct PositiveChargeSelector
+{
   /// Return true for all particles with charge > 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() > 0.);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (0 < particle.charge());
   }
 };
 
-struct NegativeSelector {
-  /// Return true for all particles with charge<> 0.
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.q() * particle.q() > 0.);
+struct NegativeChargeSelector
+{
+  /// Return true for all particles with charge < 0.
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.charge() < 0);
   }
 };
 
-} // namespace Fatras
+}  // namespace Fatras

@@ -10,49 +10,55 @@
 
 #include <climits>
 
+#include "Fatras/EventData/Particle.hpp"
+
 namespace Fatras {
 
-// static selectors
-template <typename cast_t> struct Min {
-
-  cast_t cast;
-  double valMin = 0.;
+template <typename cast_t>
+struct Min
+{
+  double valMin = std::numeric_limits<double>::lowest();
 
   /// Return true for all particles with transverse momentum
   /// bigger than the specified minimum value
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    double val = cast(particle);
-    return (val >= valMin);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (valMin <= cast_t()(particle));
   }
 };
 
-template <typename cast_t> struct Max {
-
-  cast_t cast;
+template <typename cast_t>
+struct Max
+{
   double valMax = std::numeric_limits<double>::max();
 
   /// Return true for all particles with transverse momentum
   /// bigger than the specified minimum value
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    double val = cast(particle);
-    return (val <= valMax);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (val < cast_t()(particle));
   }
 };
 
-template <typename cast_t> struct Range {
-
-  cast_t cast;
-  double valMin = 0.;
+template <typename cast_t>
+struct Range
+{
+  double valMin = std::numeric_limits<double>::lowest();
   double valMax = std::numeric_limits<double>::max();
 
   /// Return true for all particles with transverse momentum
   /// within the specified range
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    double val = cast(particle);
-    return (val >= valMin && val <= valMax);
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    const auto val = cast_t()(particle);
+    return ((valMin <= val) and (val < valMax));
   }
 };
-} // namespace Fatras
+
+}  // namespace Fatras

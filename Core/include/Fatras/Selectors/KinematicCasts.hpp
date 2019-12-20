@@ -8,82 +8,94 @@
 
 #pragma once
 
-#include "Acts/Utilities/Helpers.hpp"
 #include <cmath>
 
+#include "Acts/Utilities/Helpers.hpp"
+#include "Fatras/EventData/Particle.hpp"
+
 namespace Fatras {
+namespace Casts {
 
-namespace casts {
+  struct eta
+  {
+    /// Extract the particle pseudo-rapidity.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return Acts::VectorHelpers::eta(particle.direction());
+    }
+  };
 
-/// The Eta cast operator
-struct eta {
+  struct absEta
+  {
+    /// Extract the absolute particle pseudo-rapidity.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return std::abs(Acts::VectorHelpers::eta(particle.direction()));
+    }
+  };
 
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return Acts::VectorHelpers::eta(particle.momentum());
-  }
-};
+  struct pT
+  {
+    /// Extract the particle transverse momentum.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return Acts::VectorHelpers::perp(particle.direction())
+          * particle.momentum();
+    }
+  };
 
-/// The Eta cast operator
-struct absEta {
+  struct p
+  {
+    /// Extract the particle total momentum.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return particle.momentum();)
+    }
+  };
 
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return std::abs(Acts::VectorHelpers::eta(particle.momentum()));
-  }
-};
+  struct E
+  {
+    /// Extract the particle energy.
+    constexpr double
+    operator()(const Particle& particle) const
+    {
+      return particle.energy();
+    }
+  };
 
-/// The Pt cast operator
-struct pT {
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return Acts::VectorHelpers::perp(particle.momentum());
-  }
-};
+  struct vRho
+  {
+    /// Extract the distance to the origin in the transverse plane.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return Acts::VectorHelpers::perp(particle.position());
+    }
+  };
 
-/// The P cast operator
-struct p {
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return particle.momentum().norm();
-  }
-};
+  struct vZ
+  {
+    /// Extract the z-distance to the origin.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return particle.position().z();
+    }
+  };
 
-/// The E cast operator
-struct E {
+  struct AbsVz
+  {
+    /// Extract the absolute z-distance to the origin.
+    constexpr auto
+    operator()(const Particle& particle) const
+    {
+      return std::abs(particle.position().z());
+    }
+  };
 
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return particle.E();
-  }
-};
-
-/// The E cast operator
-struct vR {
-
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return Acts::VectorHelpers::perp(particle.position());
-  }
-};
-
-/// The E cast operator
-struct vZ {
-
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return particle.position().z();
-  }
-};
-
-/// The E cast operator
-struct AbsVz {
-
-  template <typename particle_t>
-  double operator()(const particle_t &particle) const {
-    return std::abs(particle.position().z());
-  }
-};
-
-} // namespace casts
-} // namespace Fatras
+}  // namespace Casts
+}  // namespace Fatras

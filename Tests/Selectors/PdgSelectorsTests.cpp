@@ -6,37 +6,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///  Boost include(s)
-#define BOOST_TEST_MODULE PdgSelectors Tests
-
-#include <boost/test/included/unit_test.hpp>
-// leave blank line
-
 #include <boost/test/data/test_case.hpp>
-// leave blank line
-
 #include <boost/test/output_test_stream.hpp>
-// leave blank line
+#include <boost/test/unit_test.hpp>
 
 #include "Fatras/Kernel/SelectorList.hpp"
 #include "Fatras/Selectors/PdgSelectors.hpp"
 #include "Particle.hpp"
 
 namespace bdata = boost::unit_test::data;
-namespace tt = boost::test_tools;
+namespace tt    = boost::test_tools;
 
-namespace Fatras {
+double m_muon = 0.51099891 * Acts::units::_MeV;  // electron mass
+double m_e    = 105.658367 * Acts::units::_MeV;  // muon mass
+double m_pion = 134.9766 * Acts::units::_MeV;    // pi0 rest mass
 
-namespace Test {
-
-double m_muon = 0.51099891 * Acts::units::_MeV; // electron mass
-double m_e = 105.658367 * Acts::units::_MeV;    // muon mass
-double m_pion = 134.9766 * Acts::units::_MeV;   // pi0 rest mass
-
-struct Detector {};
+struct Detector
+{
+};
 
 // This tests the implementation of the pdg selcetors
-BOOST_AUTO_TEST_CASE(PdgSelectors_test) {
+BOOST_AUTO_TEST_CASE(PdgSelectors_test)
+{
 
   Detector detector;
 
@@ -83,7 +74,3 @@ BOOST_AUTO_TEST_CASE(PdgSelectors_test) {
   BOOST_CHECK(!emuSelection(detector, positron));
   BOOST_CHECK(!emuSelection(detector, antimuon));
 }
-
-} // namespace Test
-
-} // namespace Fatras

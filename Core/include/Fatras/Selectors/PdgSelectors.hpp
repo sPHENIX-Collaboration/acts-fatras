@@ -8,58 +8,56 @@
 
 #pragma once
 
+#include <cmath>
+
 namespace Fatras {
 
-template <int pdg_t> struct AbsPdgSelector {
-
-  // absolute Pdg selection
-  const int saPDG = pdg_t;
-
-  /// Return true for all particles with | pdg | matching
-  /// the selection criteria
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.pdg() * particle.pdg() == saPDG * saPDG);
+template <int Pdg>
+struct AbsPdgSelector
+{
+  /// Return true for particles matching the absolute pdg number.
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.pdg() == std::abs(Pdg));
   }
 };
 
-template <int pdg_t> struct PdgSelector {
-
-  // Pdg selection
-  const int saPDG = pdg_t;
-
-  /// Return true for all particles with pdg matching
-  /// the selection criteria
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return (particle.pdg() == saPDG);
+template <int Pdg>
+struct PdgSelector
+{
+  /// Return true for particles matching the pdg number.
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.pdg() == Pdg);
   }
 };
 
-template <int pdg_t> struct AbsPdgExcluder {
-
-  // absolute Pdg selection
-  const int saPDG = pdg_t;
-
-  /// Return true for all particles with | pdg | matching
-  /// the selection criteria
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return !(particle.pdg() * particle.pdg() == saPDG * saPDG);
+template <int Pdg>
+struct AbsPdgExcluder
+{
+  /// Return true for particles not maching the absolute pdg number.
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.pdg() != std::abs(Pdg));
   }
 };
 
-template <int pdg_t> struct PdgExcluder {
-
-  // Pdg selection
-  const int saPDG = pdg_t;
-
-  /// Return true for all particles with pdg matching
-  /// the selection criteria
-  template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &particle) const {
-    return !(particle.pdg() == saPDG);
+template <int Pdg>
+struct PdgExcluder
+{
+  /// Return true for particles not matching the pdg number.
+  template <typename detector_t>
+  constexpr bool
+  operator()(const detector_t&, const Particle& particle) const
+  {
+    return (particle.pdg() != Pdg);
   }
 };
 
-} // namespace Fatras
+}  // namespace Fatras

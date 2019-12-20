@@ -6,36 +6,22 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///  Boost include(s)
-#define BOOST_TEST_MODULE KinemtaicCast Tests
-
-#include <boost/test/included/unit_test.hpp>
-// leave blank line
-
-#include <boost/test/data/test_case.hpp>
-// leave blank line
-
-#include <boost/test/output_test_stream.hpp>
-// leave blank line
+#include <boost/test/unit_test.hpp>
 
 #include "Acts/Utilities/Units.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
 #include "Fatras/Selectors/SelectorHelpers.hpp"
 #include "Particle.hpp"
 
-namespace bdata = boost::unit_test::data;
-namespace tt = boost::test_tools;
+struct Detector
+{
+};
 
-namespace Fatras {
-
-namespace Test {
-
-struct Detector {};
-
-double m_pion = 134.9766 * Acts::units::_MeV; // pi0 rest mass
+double m_pion = 134.9766 * Acts::units::_MeV;  // pi0 rest mass
 
 // This tests the implementation of kinematic cast operators
-BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
+BOOST_AUTO_TEST_CASE(SelectorHelper_tests)
+{
 
   Detector detector;
 
@@ -43,7 +29,7 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   Acts::Vector3D momentumCast(1500. * Acts::units::_MeV, 0., 0.);
 
   // e central electron
-  Particle pionCast(position, momentumCast, m_pion, -1.);
+  Particle       pionCast(position, momentumCast, m_pion, -1.);
   Acts::Vector3D positionForward(0., 0., 100. * Acts::units::_mm);
   Acts::Vector3D momentumForward(10. * Acts::units::_MeV,
                                  10. * Acts::units::_MeV,
@@ -59,7 +45,7 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   Particle pionBackward(positionBackward, momentumBackward, m_pion, -1.);
 
   // the list of possible casts
-  casts::eta etaCast;
+  casts::eta    etaCast;
   casts::absEta etaAbsCast;
 
   // A minimum of 0.5 Eta is required
@@ -110,6 +96,3 @@ BOOST_AUTO_TEST_CASE(SelectorHelper_tests) {
   BOOST_CHECK(rangeEtaM0(detector, pionBackward));
   BOOST_CHECK(!rangeEtaM1(detector, pionBackward));
 }
-
-} // namespace Test
-} // namespace Fatras

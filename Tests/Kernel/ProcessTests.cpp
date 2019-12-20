@@ -6,58 +6,55 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///  Boost include(s)
-#define BOOST_TEST_MODULE AbortList Tests
-
-#include <boost/test/included/unit_test.hpp>
-// leave blank line
-
 #include <boost/test/data/test_case.hpp>
-// leave blank line
-
 #include <boost/test/output_test_stream.hpp>
-// leave blank line
+#include <boost/test/unit_test.hpp>
 
-#include "Acts/Utilities/Definitions.hpp"
-#include "Fatras/Kernel/PhysicsList.hpp"
-#include "Fatras/Kernel/Process.hpp"
-#include "Fatras/Kernel/SelectorList.hpp"
-#include "Particle.hpp"
 #include <algorithm>
 #include <random>
 
+#include <Acts/Utilities/Definitions.hpp>
+
+#include "Fatras/EventData/Particle.hpp"
+#include "Fatras/Kernel/PhysicsList.hpp"
+#include "Fatras/Kernel/Process.hpp"
+#include "Fatras/Kernel/SelectorList.hpp"
+
 namespace bdata = boost::unit_test::data;
-namespace tt = boost::test_tools;
-
-namespace Fatras {
-
-namespace Test {
+using namespace Fatras;
 
 /// the generator
 typedef std::mt19937 Generator;
 
 /// The detector
-struct Detector {};
+struct Detector
+{
+};
 
 /// The selector
-struct Selector {
+struct Selector
+{
 
   /// call operator
   template <typename detector_t, typename particle_t>
-  bool operator()(const detector_t &, const particle_t &) const {
+  bool
+  operator()(const detector_t&, const particle_t&) const
+  {
     return true;
   }
 };
 
 /// The scattering formula
-struct EnergyDecreaser {
+struct EnergyDecreaser
+{
 
   // constant 10 percent of enery loss
   double cvalue = 0.90;
 
   template <typename generator_t, typename detector_t, typename particle_t>
-  std::vector<particle_t> operator()(generator_t &, const detector_t &,
-                                     particle_t &in) const {
+  std::vector<particle_t>
+  operator()(generator_t&, const detector_t&, particle_t& in) const
+  {
 
     in.energyLoss((1. - cvalue) * in.E());
     return {};
@@ -67,20 +64,25 @@ struct EnergyDecreaser {
 /// Test the scattering implementation
 BOOST_DATA_TEST_CASE(
     Process_test_,
-    bdata::random(
-        (bdata::seed = 20,
-         bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random(
-            (bdata::seed = 21,
-             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random(
-            (bdata::seed = 22,
-             bdata::distribution = std::uniform_real_distribution<>(0., 1.))) ^
-        bdata::random((
-            bdata::seed = 23,
-            bdata::distribution = std::uniform_real_distribution<>(1., 100.))) ^
-        bdata::xrange(100),
-    x, y, z, p, index) {
+    bdata::random((bdata::seed = 20,
+                   bdata::distribution
+                   = std::uniform_real_distribution<>(0., 1.)))
+        ^ bdata::random((bdata::seed = 21,
+                         bdata::distribution
+                         = std::uniform_real_distribution<>(0., 1.)))
+        ^ bdata::random((bdata::seed = 22,
+                         bdata::distribution
+                         = std::uniform_real_distribution<>(0., 1.)))
+        ^ bdata::random((bdata::seed = 23,
+                         bdata::distribution
+                         = std::uniform_real_distribution<>(1., 100.)))
+        ^ bdata::xrange(100),
+    x,
+    y,
+    z,
+    p,
+    index)
+{
   // standard generator
   Generator generator;
 
@@ -91,11 +93,11 @@ BOOST_DATA_TEST_CASE(
   /// position at 0.,0.,0
   Acts::Vector3D position{0., 0., 0.};
   // pT of 1 GeV
-  Acts::Vector3D momentum =
-      p * Acts::units::_GeV * Acts::Vector3D(x, y, z).normalized();
+  Acts::Vector3D momentum
+      = p * Acts::units::_GeV * Acts::Vector3D(x, y, z).normalized();
   // positively charged
   double q = 1.;
-  double m = 105.658367 * Acts::units::_MeV; // muon mass
+  double m = 105.658367 * Acts::units::_MeV;  // muon mass
 
   // create the particle
   Particle particle(position, momentum, m, q, 13, 1);
@@ -104,9 +106,9 @@ BOOST_DATA_TEST_CASE(
   std::vector<Particle> outgoing;
 
   // T"{he select all list
-  typedef SelectorListAND<Selector> All;
+  typedef SelectorListAND<Selector>               All;
   typedef Process<EnergyDecreaser, All, All, All> EnergyLoss;
-  EnergyLoss cEnergyLoss;
+  EnergyLoss                                      cEnergyLoss;
 
   // energy loss is not allowed to throw abort command
   BOOST_CHECK(!cEnergyLoss(generator, detector, particle, outgoing));
@@ -120,6 +122,3 @@ BOOST_DATA_TEST_CASE(
   // scattering is not allowed to throw abort command
   BOOST_CHECK(!energyLossPhysics(generator, detector, particle, outgoing));
 }
-
-} // namespace Test
-} // namespace Fatras

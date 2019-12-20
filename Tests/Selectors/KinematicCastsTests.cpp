@@ -6,53 +6,39 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-///  Boost include(s)
-#define BOOST_TEST_MODULE KinemtaicCast Tests
-
-#include <boost/test/included/unit_test.hpp>
-// leave blank line
-
 #include <boost/test/data/test_case.hpp>
-// leave blank line
-
 #include <boost/test/output_test_stream.hpp>
-// leave blank line
+#include <boost/test/unit_test.hpp>
 
 #include "Acts/Utilities/Units.hpp"
+#include "Fatras/EventData/Particle.hpp"
 #include "Fatras/Selectors/KinematicCasts.hpp"
-#include "Particle.hpp"
-
-namespace bdata = boost::unit_test::data;
-namespace tt = boost::test_tools;
-
-namespace Fatras {
-
-namespace Test {
 
 double m = 134.9766 * Acts::units::_MeV;
 
 // This tests the implementation of kinematic cast operators
-BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
-
+BOOST_AUTO_TEST_CASE(Kinematic_cast_tests)
+{
   // a central pion
   Acts::Vector3D position(0., 0., 0.);
   Acts::Vector3D momentumCentral(1500. * Acts::units::_MeV, 0., 0.);
-  Particle pionCentral(position, momentumCentral, m, -1.);
+  Particle       pionCentral(position, momentumCentral, m, -1.);
 
   // a forward pion
   Acts::Vector3D positionFwd(0., 0., 100.);
-  Acts::Vector3D momentumFwd(10. * Acts::units::_MeV, 10. * Acts::units::_MeV,
+  Acts::Vector3D momentumFwd(10. * Acts::units::_MeV,
+                             10. * Acts::units::_MeV,
                              1500. * Acts::units::_MeV);
-  Particle pionFwd(positionFwd, momentumFwd, m, -1.);
+  Particle       pionFwd(positionFwd, momentumFwd, m, -1.);
 
   // the list of possible casts
-  casts::eta eta_c;
-  casts::absEta absEta_c;
-  casts::pT pT_c;
-  casts::p p_c;
-  casts::E E_c;
-  casts::vR vR_c;
-  casts::vZ vZ_c;
+  Casts::eta    eta_c;
+  Casts::absEta absEta_c;
+  Casts::pT     pT_c;
+  Casts::p      p_c;
+  Casts::E      E_c;
+  Casts::vR     vR_c;
+  Casts::vZ     vZ_c;
 
   // test the central
   BOOST_TEST(eta_c(pionCentral) == 0., tt::tolerance(1e-10));
@@ -68,6 +54,3 @@ BOOST_AUTO_TEST_CASE(Kinematic_cast_tests) {
   BOOST_CHECK(eta_c(pionFwd) > eta_c(pionCentral));
   BOOST_TEST(vZ_c(pionFwd), 100. * Acts::units::_MeV);
 }
-
-} // namespace Test
-} // namespace Fatras
