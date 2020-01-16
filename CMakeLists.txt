@@ -7,7 +7,7 @@ project(Fatras LANGUAGES CXX)
 # explicitely add it here.
 
 if(NOT TARGET ActsCore)
-  find_package(Acts REQUIRED COMPONENTS Core Legacy)
+  find_package(Acts REQUIRED COMPONENTS Core)
 endif()
 
 include(GNUInstallDirs)
